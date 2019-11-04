@@ -506,3 +506,9 @@ $$IDF=log(D/Dw)$$
 由此我们可以得知，取对数可以将数据在整个值域中因不同区间而带来的差异降到最小。而且可以改变变量的尺度，使得数据更加平稳。
 
 ### 混合线性模型
+R语言中使用混合线性模型可以使用lme4包或lmerTest包，这里以lmerTest包为例，其基本表达式为：
+```r
+fit = lmer(data = , formula = DV ~ Fixed_Factor + (Random_intercept + Random_Slope | Random_Factor))
+```
+其中data为我们要处理的数据集，formula为表达式，DV是因变量，Fixed_Factor是固定因子（自变量），Random_intercept是随机截距（可以理解为因变量分布的不同？），Random_Slope是随机截距，即认为不同群体受固定因子的影响不同，Random_Factor是随机因子。
+我们以politeness数据为例进行计算：
