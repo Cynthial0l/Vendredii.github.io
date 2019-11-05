@@ -506,9 +506,215 @@ $$IDF=log(D/Dw)$$
 由此我们可以得知，取对数可以将数据在整个值域中因不同区间而带来的差异降到最小。而且可以改变变量的尺度，使得数据更加平稳。
 
 ### 混合线性模型
-R语言中使用混合线性模型可以使用lme4包或lmerTest包，这里以lmerTest包为例，其基本表达式为：
+#### 固定因子与随机因子
+混合线性模型考察既有随机因子，又有固定因子的模型的线性回归问题。而关于固定因子和随机因子，可参考csdn上的一篇博文：[固定效应模型与随机效应模型](https://blog.csdn.net/fjsd155/article/details/94313748)
+固定效应和随机效应的选择是大家做面板数据常常要遇到的问题，一个常见的方法是做huasman检验，即先估计一个随机效应，然后做检验，如果拒绝零假设，则可以使用固定效应，反之如果接受零假设，则使用随机效应。但这种方法往往得到事与愿违的结果。另一个想法是在建立模型前根据数据性质确定使用那种模型，比如数据是从总体中抽样得到的，则可以使用随机效应，比如从N个家庭中抽出了M个样本，则由于存在随机抽样，则建议使用随机效应，反之如果数据是总体数据，比如31个省市的Gdp，则不存在随机抽样问题，可以使用固定效应。同时，从估计自由度角度看，由于固定效应模型要估计每个截面的参数，因此随机效应比固定效应有较大的自由度.
+***
+R语言中实现混合线性模型可以使用lme4包或lmerTest包，这里以lmerTest包为例，其基本表达式为：
 ```r
 fit = lmer(data = , formula = DV ~ Fixed_Factor + (Random_intercept + Random_Slope | Random_Factor))
 ```
-其中data为我们要处理的数据集，formula为表达式，DV是因变量，Fixed_Factor是固定因子（自变量），Random_intercept是随机截距（可以理解为因变量分布的不同？），Random_Slope是随机截距，即认为不同群体受固定因子的影响不同，Random_Factor是随机因子。
+其中data为我们要处理的数据集，formula为表达式，DV是因变量，Fixed_Factor是固定因子（自变量），Random_intercept是随机截距（可以理解为因变量分布的不同？），Random_Slope是随机斜率，即认为不同群体受固定因子的影响不同，Random_Factor是随机因子。
 我们以politeness数据为例进行计算：
+politeness数据可以在github：<https://github.com/usplos/Eye-movement-related/blob/master/politeness_data.csv>中获得，本篇关于混合线性的模型的计算也源自该项目。该数据收集了若干被试（subject）的性别（gender），以及用不同的态度（attitude）在不同场合（scenario）下说话的音高（frequency）。 这是一个典型的被试内设计（7 * 2设计）。
+先打开数据并加载相关r包：
+```r
+politeness = readr::read_csv('/Users/desktop/r/politeness_data.csv')
+library(lme4)
+library(Matrix)
+library(lmerTest)
+#将scenairo变为因子型变量（离散型，原来是字符型）
+politeness$scenario = factor(politeness$scenario)
+politeness
+```
+进行混合线性计算：
+```r
+#音高与固定因子态度和场合的关系，随机因子是性别与被试，它们基于的设计矩阵是态度，即为我们认为性别和被试对回归的影响的随机的
+fit1 = lmer(frequency ~ scenario * attitude + attitude|subject + attitude|gender, data = politeness)
+```
+这时候系统提示：`boundary (singular) fit: see ?isSingular`这表明有些效应是彼此的线性组合或者某个地方的方差是0。当p>>n(比样本更多的参数)时也会发生这种情况。这也意味着模型可能被过度拟合和/或遭受数值稳定性问题。
+```r
+summary(fit1)
+```
+得到结果：
+```r
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: frequency ~ scenario * attitude + (1 + attitude | subject) +  
+    (1 + attitude | gender)
+   Data: politeness
+
+REML criterion at convergence: 680.1
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-1.65342 -0.68640 -0.03677  0.50256  2.85422 
+#这里是随机效应的结果，variance为方差，Std.Dev为标准差，可以看出确实对不同的被试组合性别组而言，态度的影响是不同的
+Random effects:
+ Groups   Name        Variance  Std.Dev. Corr 
+ subject  (Intercept) 6.037e+02 24.5696       
+          attitudepol 1.076e-02  0.1037  1.00 
+ gender   (Intercept) 6.467e+03 80.4167       
+          attitudepol 1.118e+02 10.5749  -1.00
+ Residual             6.101e+02 24.7001       
+Number of obs: 83, groups:  subject, 6; gender, 2
+#固定效应的结果如下，我们发现场合3和4的音高是较显著的
+Fixed effects:
+                      Estimate Std. Error      df t value Pr(>|t|)   
+(Intercept)            180.767     58.615   1.065   3.084  0.18720   
+scenario2               17.450     14.261  63.998   1.224  0.22557   
+scenario3               46.667     14.261  63.998   3.272  0.00172 **
+scenario4               44.833     14.261  63.998   3.144  0.00253 **
+scenario5               16.800     14.261  63.998   1.178  0.24313   
+scenario6                8.867     14.261  63.998   0.622  0.53631   
+scenario7               18.133     14.261  63.998   1.272  0.20813   
+attitudepol             -9.717     16.102   9.583  -0.603  0.56023   
+scenario2:attitudepol   15.133     20.168  63.998   0.750  0.45578   
+scenario3:attitudepol  -31.283     20.168  63.998  -1.551  0.12579   
+scenario4:attitudepol   -4.650     20.168  63.998  -0.231  0.81839   
+scenario5:attitudepol   -4.783     20.168  63.998  -0.237  0.81327   
+scenario6:attitudepol  -14.703     20.701  64.030  -0.710  0.48011   
+scenario7:attitudepol  -30.033     20.168  63.998  -1.489  0.14135   
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Correlation matrix not shown by default, as p = 14 > 12.
+Use print(x, correlation=TRUE)  or
+    vcov(x)        if you need it
+
+convergence code: 0
+boundary (singular) fit: see ?isSingular
+```
+但是这里的固定效应不是主效应和交互作用，要查看主效应和交互作用需要用anova()函数`anova(fit1)`得到；
+```r
+Type III Analysis of Variance Table with Satterthwaite's method
+                   Sum Sq Mean Sq NumDF  DenDF F value   Pr(>F)    
+scenario          19400.1  3233.4     6 64.006  5.2998 0.000173 ***
+attitude           2789.7  2789.7     1  1.143  4.5725 0.253068    
+scenario:attitude  4985.4   830.9     6 64.006  1.3619 0.243577    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+可见只有场景的主效应显著，态度的主效应和交互作用都不显著。在上面建立的模型中，包含随机斜率和随机截距，但是注意到，有两个固定效应，是把两个固定效应及其交互作用全都作为随机效应，还是选其中部分作为随机效应呢？这里我们课题组的标准是：首先考虑全模型，即如下命令：
+```r
+fitAll = lmer(frequency ~ scenario * attitude + (attitude * scenario|subject) + (attitude * scenario|gender), data = politeness)
+```
+然后报错，观测量的个数少于随机因子的个数，因此移除交互作用：
+```r
+fitAll2 = lmer(frequency ~ scenario * attitude + (attitude + scenario|subject) + (attitude + scenario|gender), data = politeness)
+```
+结果模型似乎炸了，变成金字塔了，于是我们尝试移除一些随机因子：同时设立一个只有随机截距的零模型：
+```r
+fitAll3_1 = lmer(frequency ~ scenario * attitude + (attitude|subject) + (attitude + scenario|gender), data = politeness);
+fitAll3_2 = lmer(frequency ~ scenario * attitude + (scenario|subject) + (attitude + scenario|gender), data = politeness);
+fitAll3_3 = lmer(frequency ~ scenario * attitude + (attitude+ scenario|subject) + (attitude|gender), data = politeness);
+fitAll3_4 = lmer(frequency ~ scenario * attitude + (attitude + scenario|subject) + (scenario|gender), data = politeness)
+fitZero = lmer(frequency ~ scenario * attitude + (1|subject) + (1|gender), data = politeness)
+```
+使用`anova()`分别比较各个模型和零模型的P值，发现都不显著，这时选取P值最小的作为实际在论文中使用的模型，即选取fitAll3_3。
+### 广义线性模型
+在R语言中可以通过`glm()`函数解决广义线性模型，此处我们运用logistic模型进行广义线性回归：
+```r
+glm(formula,family = gaussian,data,...)
+```
+其中formula为要拟合的模型，而family为分布族，包括正态分布、泊松分布、二项分布等...分布族可以通过link=来选择连接函数，data为数据框。
+首先导入数据，数据来源于[我的github](https://github.com/Vendredii/Rstats)，最初源于教材《多元线性回归与R》：
+```r
+data = readr::read_csv('/Users/desktop/r/result.csv')
+#其中x1为视力状况，1是好0是不好；x2为年龄；x3为驾车教育，1是有0是没有；y为是否出过事故，1是有0是没有
+data
+```
+在这里y是因变量，只有两个值，因此我们可以把它看作是成功概率为$p$的Bernoulli试验的结果（这种方法在进行二分类问题时很有用！），现在用Logistic回归模型进行分析：
+假定模型为：
+$$\textup{ln}(\frac{p}{1-p})=\beta _0+\beta _1x_1+\beta _2x_2+\beta _3x_3$$
+有：
+```r
+logit.glm <- glm(y ~ X1 + X2 + X3, family = binomial,data = data)
+summary(logit.glm)
+```
+```r
+glm(formula = y ~ X1 + X2 + X3, family = binomial, data = data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.5636  -0.9131  -0.7892   0.9637   1.6000  
+
+Coefficients:
+             Estimate Std. Error z value Pr(>|z|)  
+(Intercept)  0.597610   0.894831   0.668   0.5042  
+X1          -1.496084   0.704861  -2.123   0.0338 *
+X2          -0.001595   0.016758  -0.095   0.9242  
+X3           0.315865   0.701093   0.451   0.6523  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 62.183  on 44  degrees of freedom
+Residual deviance: 57.026  on 41  degrees of freedom
+AIC: 65.026
+
+Number of Fisher Scoring iterations: 4
+```
+由此得到初步的Logistic回归模型：
+$$p=\frac{\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}{1+\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}$$
+即为：
+$$\textup{Logit}(p)=0.598-1.496x_1-0.002x_2+0.316x_3$$
+由于参数$\beta _2$和$\beta _3$没有通过P值检验，可通过`step()`作变量筛选：
+```r
+logit.step <- step(logit.glm, direction = "both")
+```
+```r
+Start:  AIC=65.03
+y ~ X1 + X2 + X3
+
+       Df Deviance    AIC
+- X2    1   57.035 63.035
+- X3    1   57.232 63.232
+<none>      57.026 65.026
+- X1    1   61.936 67.936
+
+Step:  AIC=63.03
+y ~ X1 + X3
+
+       Df Deviance    AIC
+- X3    1   57.241 61.241
+<none>      57.035 63.035
++ X2    1   57.026 65.026
+- X1    1   61.991 65.991
+
+Step:  AIC=61.24
+y ~ X1
+
+       Df Deviance    AIC
+<none>      57.241 61.241
++ X3    1   57.035 63.035
++ X2    1   57.232 63.232
+- X1    1   62.183 64.183
+```
+```r
+summary(logit.step)
+```
+```r
+glm(formula = y ~ X1, family = binomial, data = data)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.4490  -0.8782  -0.8782   0.9282   1.5096  
+
+Coefficients:
+            Estimate Std. Error z value Pr(>|z|)  
+(Intercept)   0.6190     0.4688   1.320   0.1867  
+X1           -1.3728     0.6353  -2.161   0.0307 *
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 62.183  on 44  degrees of freedom
+Residual deviance: 57.241  on 43  degrees of freedom
+AIC: 61.241
+
+Number of Fisher Scoring iterations: 4
+```
+可以得到新的回归方程为：
+$$p=\frac{\textup{exp}(0.619-1.373x_1)}{1+\textup{exp}(0.619-1.373x_1)}$$
+可见$p_1=0.32,p_2=0.65$，即实力有问题的司机发生交通事故的概率是正常司机的两倍！
