@@ -661,36 +661,6 @@ $$\textup{Logit}(p)=0.598-1.496x_1-0.002x_2+0.316x_3$$
 由于参数$\beta _2$和$\beta _3$没有通过P值检验，可通过`step()`作变量筛选：
 ```r
 logit.step <- step(logit.glm, direction = "both")
-```
-```r
-Start:  AIC=65.03
-y ~ X1 + X2 + X3
-
-       Df Deviance    AIC
-- X2    1   57.035 63.035
-- X3    1   57.232 63.232
-<none>      57.026 65.026
-- X1    1   61.936 67.936
-
-Step:  AIC=63.03
-y ~ X1 + X3
-
-       Df Deviance    AIC
-- X3    1   57.241 61.241
-<none>      57.035 63.035
-+ X2    1   57.026 65.026
-- X1    1   61.991 65.991
-
-Step:  AIC=61.24
-y ~ X1
-
-       Df Deviance    AIC
-<none>      57.241 61.241
-+ X3    1   57.035 63.035
-+ X2    1   57.232 63.232
-- X1    1   62.183 64.183
-```
-```r
 summary(logit.step)
 ```
 ```r
