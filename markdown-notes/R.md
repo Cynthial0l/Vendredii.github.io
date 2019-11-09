@@ -505,11 +505,118 @@ $$IDF=log(D/Dw)$$
 假定现在有D=10亿个网页，且“的”在所有网页中都出现，那么IDF(的)=log(10亿/1o亿)=0。而“薛定谔”只在200万个网页中出现，那么IDF(薛定谔)=6.2，而我们假设猫在其中1亿个网页都出现了，所以IDF(猫)=2.3，那么我们可以认为在“薛定谔的猫”中，“薛定谔”贡献最大，“猫”也有贡献，而“的”其实没用，这也是符合我们现实逻辑的。
 由此我们可以得知，取对数可以将数据在整个值域中因不同区间而带来的差异降到最小。而且可以改变变量的尺度，使得数据更加平稳。
 
-### 混合线性模型
+### 混合线性模型lmm
 #### 固定因子与随机因子
 混合线性模型考察既有随机因子，又有固定因子的模型的线性回归问题。而关于固定因子和随机因子，可参考csdn上的一篇博文：[固定效应模型与随机效应模型](https://blog.csdn.net/fjsd155/article/details/94313748)
 固定效应和随机效应的选择是大家做面板数据常常要遇到的问题，一个常见的方法是做huasman检验，即先估计一个随机效应，然后做检验，如果拒绝零假设，则可以使用固定效应，反之如果接受零假设，则使用随机效应。但这种方法往往得到事与愿违的结果。另一个想法是在建立模型前根据数据性质确定使用那种模型，比如数据是从总体中抽样得到的，则可以使用随机效应，比如从N个家庭中抽出了M个样本，则由于存在随机抽样，则建议使用随机效应，反之如果数据是总体数据，比如31个省市的Gdp，则不存在随机抽样问题，可以使用固定效应。同时，从估计自由度角度看，由于固定效应模型要估计每个截面的参数，因此随机效应比固定效应有较大的自由度.
 ***
+#### 混合线性回归-lme4
+我们还是使用之前的[加拉帕戈斯地雀模型](http://bioquest.org/birdd/morph.php)作为练习数据，对此进行预处理：
+```r{class=line-numbers}
+library(tidyverse)
+morph <- read.csv("data/raw/Morph_for_Sato.csv", stringsAsFactors = FALSE, strip.white = TRUE)
+#使用tolower函数改成小写
+names(morph) <- tolower(names(morph))
+morph <- morph %>%
+  dplyr::select(islandid, taxonorig, genusl69, speciesl69, sex, wingl, beakh, ubeakl) %>%
+  dplyr::rename(taxon = taxonorig, genus = genusl69, species = speciesl69)
+morph <- data.frame(na.omit(morph))
+morph <- dplyr::filter(morph, genus == "Geospiza") %>% as_data_frame()
+d <- morph
+#把数据保存为RDS格式
+saveRDS(d, file = "data/generated/morph-geospiza.rds")
+```
+我们希望看一看喙长和翅膀长度有什么关系没有：
+```r
+#取对数缩小范围，并直接在图里进行线性回归，geom_smooth是添加平滑曲线
+ggplot(d, aes(log(wingl), log(beakh))) +
+  geom_point(aes(colour = taxon)) +
+  geom_smooth(method = "lm")
+```
+![简单的回归](R/Rplot16.jpeg)
+但如果我们把`aes(colour = taxon)`移到上面会把我们默认的回归对象变成每个种
+```r
+ggplot(d, aes(log(wingl), log(beakh), colour = taxon)) +
+  geom_point() +
+#se指置信区间
+  geom_smooth(method = "lm", se = FALSE)
+```
+![简单的回归2](R/Rplot17.jpeg)
+接下来使用R包“lme4”来对数据进行混合线性回归，我们要建立一个混合效应模型，让每个分类单元都有自己的随机截距：
+```r
+library(tidyr)
+library(Matrix)
+library(lme4)
+#先普通地线性回归看一看
+m_lm <- lm(log(beakh) ~ log(wingl), data = d)
+summary(m_lm)
+#进行混合线性模型，1表示截距而taxon为随机因子
+m_lmer <-  lmer(log(beakh) ~ log(wingl) + (1 | taxon), data = d)
+#利用这个混合模型进行预测，再拿预测值画回归线
+d$predict_lmer <- predict(m_lmer)
+ggplot(d, aes(log(wingl), log(beakh), colour = taxon)) +
+  geom_point(alpha = 0.1) + 
+  geom_line(aes(y = predict_lmer))
+```
+![混合线性回归](R/Rplot18.jpeg)
+我们可以将这些线条合并，从群落结构去考察：
+```r
+#使用re.form = NA函数来合并taxon数据
+d$predict_lmer_population <- predict(m_lmer, re.form = NA)
+ggplot(d, aes(log(wingl), log(beakh), colour = taxon)) +
+  geom_point(alpha = 0.1) +
+  geom_line(aes(y = predict_lmer)) +
+  geom_line(aes(y = predict_lmer_population), colour = "black", size = 1)
+```
+![混合线性回归2](R/Rplot19.jpeg)
+最后我们可以查看回归效果：
+```r
+summary(m_lmer)
+```
+关于数据的查看上文已经提及，不再赘述：
+```r
+Linear mixed model fit by REML ['lmerMod']
+Formula: log(beakh) ~ log(wingl) + (1 | taxon)
+   Data: d
+
+REML criterion at convergence: -3656.1
+
+Scaled residuals: 
+    Min      1Q  Median      3Q     Max 
+-6.2724 -0.6086 -0.0306  0.6211  3.6835 
+
+Random effects:
+ Groups   Name        Variance Std.Dev.
+ taxon    (Intercept) 0.050586 0.22491 
+ Residual             0.004278 0.06541 
+Number of obs: 1434, groups:  taxon, 15
+
+Fixed effects:
+            Estimate Std. Error t value
+(Intercept) -2.60848    0.18819  -13.86
+log(wingl)   1.18318    0.04232   27.96
+
+Correlation of Fixed Effects:
+           (Intr)
+log(wingl) -0.951
+```
+一个小技巧，可以通过`arm::display(m_lmer)`(这里使用了arm包）命令来让我们的结果更加直观：
+```r
+lmer(formula = log(beakh) ~ log(wingl) + (1 | taxon), data = d)
+            coef.est coef.se
+(Intercept) -2.61     0.19  
+log(wingl)   1.18     0.04  
+
+Error terms:
+ Groups   Name        Std.Dev.
+ taxon    (Intercept) 0.22    
+ Residual             0.07    
+---
+number of obs: 1434, groups: taxon, 15
+AIC = -3648.1, DIC = -3672.8
+deviance = -3664.4 
+```
+#### 混合线性回归-lmerTest
 R语言中实现混合线性模型可以使用lme4包或lmerTest包，这里以lmerTest包为例，其基本表达式为：
 ```r
 fit = lmer(data = , formula = DV ~ Fixed_Factor + (Random_intercept + Random_Slope | Random_Factor))
@@ -610,7 +717,7 @@ fitAll3_4 = lmer(frequency ~ scenario * attitude + (attitude + scenario|subject)
 fitZero = lmer(frequency ~ scenario * attitude + (1|subject) + (1|gender), data = politeness)
 ```
 使用`anova()`分别比较各个模型和零模型的P值，发现都不显著，这时选取P值最小的作为实际在论文中使用的模型，即选取fitAll3_3。
-### 广义线性模型
+### 广义线性模型glm
 在R语言中可以通过`glm()`函数解决广义线性模型，此处我们运用logistic模型进行广义线性回归：
 ```r
 glm(formula,family = gaussian,data,...)
@@ -658,7 +765,7 @@ Number of Fisher Scoring iterations: 4
 $$p=\frac{\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}{1+\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}$$
 即为：
 $$\textup{Logit}(p)=0.598-1.496x_1-0.002x_2+0.316x_3$$
-由于参数$\beta _2$和$\beta _3$没有通过P值检验，可通过`step()`作变量筛选：
+由于参数$\beta _2$和$\beta _3$没有通过P值检验，可通过`step()`作变量筛选，不断筛选出AIC值最小的结果：
 ```r
 logit.step <- step(logit.glm, direction = "both")
 summary(logit.step)
@@ -688,3 +795,20 @@ Number of Fisher Scoring iterations: 4
 可以得到新的回归方程为：
 $$p=\frac{\textup{exp}(0.619-1.373x_1)}{1+\textup{exp}(0.619-1.373x_1)}$$
 可见$p_1=0.32,p_2=0.65$，即实力有问题的司机发生交通事故的概率是正常司机的两倍！
+#### 函数的拟合优度：从熵到AIC
+信息熵反映了一个系统的有序化程度，一个系统越是有序，那么它的信息熵就越低，反之就越高，以下为熵的定义：
+如果一个随机变量$X$的可能取值为$X=\left \{x_1,x_2,...,x_n\right \}$，对应的概率为$p(X=x_i)(i=1,2,...,n)$，则随机变量X的熵为：
+$$H(x)=-\sum_{i=1}^{n}p(x_i)\textup{log}p(x_i)$$
+那么相对熵又称交叉熵，Kullback-Leible散度（KL散度），设$p(x)$和$q(x)$式X取值的两个概率分布，则$p$对$q$的相对熵为：
+$$D(p||q)=\sum_{i=1}^{n}p(x)\textup{log}\frac{p(x)}{q(x)}$$
+在一定程度上，熵可以度量两个随机变量的距离，KL散度是衡量两个概率分布$p$和$q$的非对称性度量。
+该相对熵有以下两个性质：
+1.KL散度并非两者的距离函数，因为它是非对称的：$D(p||q)\neq D(q||p)$
+2.相对熵的值非负（可通过吉布斯不等式证明）
+Akaike发现K-L距离的估计在实际情况中存在着过估计，且过估计的量近似等于需要估计的模型的参数个数K+1。于是他进行了优化，并定义了最小信息化准则AIC作为模型挑选的准则(L为模型的极大似然函数)：
+$$AIC=2k-2ln(L)$$
+当模型的误差服从独立正态分布时：
+$$AIC=nlog(\hat{\sigma}^2)+2(k+1)$$
+其中$\hat{\sigma}^2=\frac{RSS}{n}$，k为参数个数，$\hat{\sigma}^2$是$\sigma^2$的极大似然估计，$n$为样本大小，$RSS$为残差平方和。
+AIC为模型选择提供了有效的规则，但也有不足之处。当样本容量很大时，在AIC准则中拟合误差提供的信息就要受到样本容量的放大，而参数个数的惩罚因子却和样本容量没关系，因此当样本容量很大时，使用AIC准则选择的模型不收敛与真实模型，它通常比真实模型所含的未知参数个数要多。BIC（Bayesian InformationCriterion）贝叶斯信息准则是Schwartz在1978年根据Bayes理论提出的判别准则，称为SBC准则(也称BIC)，弥补了AIC的不足。SBC的定义为： 
+$$BIC = ln(k) - 2ln(L)$$
