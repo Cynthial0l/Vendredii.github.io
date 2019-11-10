@@ -808,11 +808,48 @@ ggplot<span class="token punctuation">(</span>d<span class="token punctuation">,
   geom_line<span class="token punctuation">(</span>aes<span class="token punctuation">(</span>y <span class="token operator">=</span> predict_lmer<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token operator">+</span>
   geom_line<span class="token punctuation">(</span>aes<span class="token punctuation">(</span>y <span class="token operator">=</span> predict_lmer_population<span class="token punctuation">)</span><span class="token punctuation">,</span> colour <span class="token operator">=</span> <span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span> size <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span>
 </pre><p><img src="R/Rplot19.jpeg" alt="&#x6DF7;&#x5408;&#x7EBF;&#x6027;&#x56DE;&#x5F52;2"><br>
-&#x53EF;&#x4EE5;&#x63D0;&#x53D6;&#x5404;&#x4E2A;&#x968F;&#x673A;&#x6548;&#x5E94;&#x7684;BLUP&#x503C;&#xFF1A;</p>
-<pre data-role="codeBlock" data-info class="language-"><code>ranef(m_lmer)
-#&#x67E5;&#x770B;&#x8FD9;&#x4E9B;&#x968F;&#x673A;&#x622A;&#x8DDD;&#x7684;&#x5E73;&#x5747;&#x503C;&#x5E76;&#x56DB;&#x820D;&#x4E94;&#x5165;&#x4FDD;&#x7559;&#x4E24;&#x4F4D;&#x5C0F;&#x6570;
-round(mean(ranef(m_lmer)$taxon[, 1]), 2)
-</code></pre><h4 class="mume-header" id="%E6%B7%B7%E5%90%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92-lmertest">&#x6DF7;&#x5408;&#x7EBF;&#x6027;&#x56DE;&#x5F52;-lmerTest</h4>
+&#x6700;&#x540E;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x67E5;&#x770B;&#x56DE;&#x5F52;&#x6548;&#x679C;&#xFF1A;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">summary<span class="token punctuation">(</span>m_lmer<span class="token punctuation">)</span>
+</pre><p>&#x5173;&#x4E8E;&#x6570;&#x636E;&#x7684;&#x67E5;&#x770B;&#x4E0A;&#x6587;&#x5DF2;&#x7ECF;&#x63D0;&#x53CA;&#xFF0C;&#x4E0D;&#x518D;&#x8D58;&#x8FF0;&#xFF1A;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">Linear mixed model fit by REML <span class="token punctuation">[</span><span class="token string">&apos;lmerMod&apos;</span><span class="token punctuation">]</span>
+Formula<span class="token operator">:</span> log<span class="token punctuation">(</span>beakh<span class="token punctuation">)</span> <span class="token operator">~</span> log<span class="token punctuation">(</span>wingl<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">|</span> taxon<span class="token punctuation">)</span>
+   Data<span class="token operator">:</span> d
+
+REML criterion at convergence<span class="token operator">:</span> <span class="token operator">-</span><span class="token number">3656.1</span>
+
+Scaled residuals<span class="token operator">:</span> 
+    Min      <span class="token number">1</span>Q  Median      <span class="token number">3</span>Q     Max 
+<span class="token operator">-</span><span class="token number">6.2724</span> <span class="token operator">-</span><span class="token number">0.6086</span> <span class="token operator">-</span><span class="token number">0.0306</span>  <span class="token number">0.6211</span>  <span class="token number">3.6835</span> 
+
+Random effects<span class="token operator">:</span>
+ Groups   Name        Variance Std.Dev.
+ taxon    <span class="token punctuation">(</span>Intercept<span class="token punctuation">)</span> <span class="token number">0.050586</span> <span class="token number">0.22491</span> 
+ Residual             <span class="token number">0.004278</span> <span class="token number">0.06541</span> 
+Number of obs<span class="token operator">:</span> <span class="token number">1434</span><span class="token punctuation">,</span> groups<span class="token operator">:</span>  taxon<span class="token punctuation">,</span> <span class="token number">15</span>
+
+Fixed effects<span class="token operator">:</span>
+            Estimate Std. Error t value
+<span class="token punctuation">(</span>Intercept<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token number">2.60848</span>    <span class="token number">0.18819</span>  <span class="token operator">-</span><span class="token number">13.86</span>
+log<span class="token punctuation">(</span>wingl<span class="token punctuation">)</span>   <span class="token number">1.18318</span>    <span class="token number">0.04232</span>   <span class="token number">27.96</span>
+
+Correlation of Fixed Effects<span class="token operator">:</span>
+           <span class="token punctuation">(</span>Intr<span class="token punctuation">)</span>
+log<span class="token punctuation">(</span>wingl<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token number">0.951</span>
+</pre><p>&#x4E00;&#x4E2A;&#x5C0F;&#x6280;&#x5DE7;&#xFF0C;&#x53EF;&#x4EE5;&#x901A;&#x8FC7;<code>arm::display(m_lmer)</code>(&#x8FD9;&#x91CC;&#x4F7F;&#x7528;&#x4E86;arm&#x5305;&#xFF09;&#x547D;&#x4EE4;&#x6765;&#x8BA9;&#x6211;&#x4EEC;&#x7684;&#x7ED3;&#x679C;&#x66F4;&#x52A0;&#x76F4;&#x89C2;&#xFF1A;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">lmer<span class="token punctuation">(</span>formula <span class="token operator">=</span> log<span class="token punctuation">(</span>beakh<span class="token punctuation">)</span> <span class="token operator">~</span> log<span class="token punctuation">(</span>wingl<span class="token punctuation">)</span> <span class="token operator">+</span> <span class="token punctuation">(</span><span class="token number">1</span> <span class="token operator">|</span> taxon<span class="token punctuation">)</span><span class="token punctuation">,</span> data <span class="token operator">=</span> d<span class="token punctuation">)</span>
+            coef.est coef.se
+<span class="token punctuation">(</span>Intercept<span class="token punctuation">)</span> <span class="token operator">-</span><span class="token number">2.61</span>     <span class="token number">0.19</span>  
+log<span class="token punctuation">(</span>wingl<span class="token punctuation">)</span>   <span class="token number">1.18</span>     <span class="token number">0.04</span>  
+
+Error terms<span class="token operator">:</span>
+ Groups   Name        Std.Dev.
+ taxon    <span class="token punctuation">(</span>Intercept<span class="token punctuation">)</span> <span class="token number">0.22</span>    
+ Residual             <span class="token number">0.07</span>    
+<span class="token operator">-</span><span class="token operator">-</span><span class="token operator">-</span>
+number of obs<span class="token operator">:</span> <span class="token number">1434</span><span class="token punctuation">,</span> groups<span class="token operator">:</span> taxon<span class="token punctuation">,</span> <span class="token number">15</span>
+AIC <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">3648.1</span><span class="token punctuation">,</span> DIC <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">3672.8</span>
+deviance <span class="token operator">=</span> <span class="token operator">-</span><span class="token number">3664.4</span> 
+</pre><h4 class="mume-header" id="%E6%B7%B7%E5%90%88%E7%BA%BF%E6%80%A7%E5%9B%9E%E5%BD%92-lmertest">&#x6DF7;&#x5408;&#x7EBF;&#x6027;&#x56DE;&#x5F52;-lmerTest</h4>
 
 <p>R&#x8BED;&#x8A00;&#x4E2D;&#x5B9E;&#x73B0;&#x6DF7;&#x5408;&#x7EBF;&#x6027;&#x6A21;&#x578B;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;lme4&#x5305;&#x6216;lmerTest&#x5305;&#xFF0C;&#x8FD9;&#x91CC;&#x4EE5;lmerTest&#x5305;&#x4E3A;&#x4F8B;&#xFF0C;&#x5176;&#x57FA;&#x672C;&#x8868;&#x8FBE;&#x5F0F;&#x4E3A;&#xFF1A;</p>
 <pre data-role="codeBlock" data-info="r" class="language-r">fit <span class="token operator">=</span> lmer<span class="token punctuation">(</span>data <span class="token operator">=</span> <span class="token punctuation">,</span> formula <span class="token operator">=</span> DV <span class="token operator">~</span> Fixed_Factor <span class="token operator">+</span> <span class="token punctuation">(</span>Random_intercept <span class="token operator">+</span> Random_Slope <span class="token operator">|</span> Random_Factor<span class="token punctuation">)</span><span class="token punctuation">)</span>

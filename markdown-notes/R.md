@@ -377,6 +377,47 @@ p + stat_compare_means(method = "anova",label.y = 1) +
   stat_compare_means(label = "p.signif", method = "t.test", ref.group = ".all.")
 ```
 ![anova图](R/Rplot15.jpeg)
+## 聚类分析
+### 系统聚类
+将分类的对象按照数据本身的特征的不同进行分类的方法称为聚类分析法。其中对样品进行聚类称为Q型聚类，而对变量进行聚类称为R型聚类。
+在聚类分析中我们通过举例与相似系数来对各种数据进行聚类，与距离有关的参数为“马氏距离”，“欧氏距离”，“兰氏距离”，而与相似度有关的参数为“相关系数”和“余弦夹角”，在确定了数据间的这些系数后，我们可以根据最短距离法、最长距离法、中间距离法、离差平方和（ward）法、重心法和类平均法来进行分类。
+可以使用一个非发布的R包“mvstats”进行各类聚类计算，数据与包在[我的github](https://github.com/Vendredii/Rstats)中：
+```r
+#X为数据矩阵/数据框，d为各类计算方法，m为系统聚类方法，proc为是否输出聚类过程，plot为是否绘图
+H.clust <- function(X, d = "euc", m = "comp", proc = F, plot = T)
+```
+我们使用相关数据进行练习：
+```r
+#导入数据
+d1<-read.csv("/Users/desktop/r/comdata.csv", header = T)
+#如果这样做的话似乎表头就会自动附带一列行号而且删不掉，不知道为什么，因此我们用其他方式导入数据
+#使用openxlsx包
+library(openxlsx)
+d1 <- read.xlsx("/Users/desktop/r/comdata.xlsx",rowNames = TRUE)
+#基于最短距离法画图
+H.clust(d1,"euclidean","single",plot = T)
+#此时尴尬的发现“极为先进”的osx原生不支持UTF-8中文输出，因此画图出来全是乱码
+#用plot函数画图，使用family="STKaiti"来支持中文
+plot(H.clust(d1,"euclidean","single"),ylab="euclidean",main="single",family="STKaiti")
+```
+结果如下：
+![聚类分析1](R/Rplot20.jpeg)
+加下来分别使用其他方法再试试：
+```r
+#最长距离法
+plot(H.clust(d1,"euclidean","complete"),ylab="euclidean",main="single",family="STKaiti")
+#中间距离法
+plot(H.clust(d1,"euclidean","median"),ylab="euclidean",main="single",family="STKaiti")
+#类平均法
+plot(H.clust(d1,"euclidean","average"),ylab="euclidean",main="single",family="STKaiti")
+#重心法
+plot(H.clust(d1,"euclidean","centroid"),ylab="euclidean",main="single",family="STKaiti")
+#ward法
+plot(H.clust(d1,"euclidean","ward"),ylab="euclidean",main="single",family="STKaiti")
+```
+比较一番我们即可发现北京、上海、浙江、江苏、广东、天津、福建处在消费能力的第一梯队。
+### kmeans聚类
+使用系统聚类的方法时一旦样本量数据较大，可能会死机，因此可以使用K均值法进行快速且准确的聚类，该方法是将数据随机分成k个聚类然后不断迭代来实现的。但是kmeans只能产生我们制定数量的聚类结果，而系统聚类法则可以自动产生一系列的聚类结果。
 ## 各种各样的回归
 ### 从lm()开始进行简单一元线性回归
 首先需要从gapminder上获得一些练习数据，gapminder是一个有着全球各种数据的公益网站，我们可以通过R包“gapminder”去下载(http://github.com/jennybc/gapminder)。
