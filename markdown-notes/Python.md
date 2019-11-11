@@ -80,7 +80,7 @@ $$ c = \sqrt{a^{2}+b_{xy}^{2}+e^{x}}$$
 github pages是GitHub提供的一个个人静态主页网站托管服务，**开源**高效免费实时，而且可用空间高达1G，无敌。我们可以在github上创建一个域名为“你的名字.github.io”并选择相应的Jekyll主题就可以去美滋滋的拥有了一个个人博客了。
 我原本打算照搬CSDN用HEXO＋Node.js通过nvm（Node Version Manager）去搭建我的博客，后来嫌烦就咕咕咕了。原生的就足够好了。
 我们可以提交一个index.html作为博客的主页，也作为每个人开始github的第一段代码：
-```html{class=line-numbers}
+```html {class=line-numbers}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -141,3 +141,107 @@ output_file = codecs.open("name.html", mode="w", encoding="utf-8")
 output_file.write(html)
 ```
 当然，我们使用极为先进的VScode的Markdown All in One和Markdown Preview Enhanced等极为先进的extensions来预览我们的markdown文档，通过f1(OSX里是反人类的command+shift+P）打开命令窗口并输入“mark”，我们可以将其转为html，也可以直接在预览界面右键选择html，并进而转为喜闻乐见的**pdf**！
+## Python
+Python不多介绍，牛逼
+为了更好地利用python，我们需要利用虚拟空间来运行我们的python项目，以免各个项目与程序包之间发生干扰。
+我们通过在Terminal里创建虚拟环境来完成这些工作：
+```
+#在当前目录下新建一个叫venv的文件，以后的所有操作都在那里
+python3 -m venv venv
+#激活虚拟环境
+source venv/bin/activate
+#退出虚拟环境
+deactivate
+#打开现有的虚拟环境，首先需要cd到相关文件夹
+source bin/activate
+```
+### 图像处理
+#### 基于OpenCV的图像拼接
+原理是基于OpenCV提供的SIFT算法去寻找两张图片的相似点并对一张图片进行矩阵变换后进行拼接：
+```python {class=line-numbers}
+import numpy as np
+import cv2 as cv
+from matplotlib import pyplot as plt
+
+if __name__ == '__main__':
+#重叠部分的边界像素值：
+    top, bot, left, right = 100, 100, 0, 500
+    img1 = cv.imread('test1.jpg')
+    img2 = cv.imread('test2.jpg')
+    srcImg = cv.copyMakeBorder(img1, top, bot, left, right, cv.BORDER_CONSTANT, value=(0, 0, 0))
+    testImg = cv.copyMakeBorder(img2, top, bot, left, right, cv.BORDER_CONSTANT, value=(0, 0, 0))
+    img1gray = cv.cvtColor(srcImg, cv.COLOR_BGR2GRAY)
+    img2gray = cv.cvtColor(testImg, cv.COLOR_BGR2GRAY)
+    sift = cv.xfeatures2d_SIFT().create()
+    # find the keypoints and descriptors with SIFT
+    kp1, des1 = sift.detectAndCompute(img1gray, None)
+    kp2, des2 = sift.detectAndCompute(img2gray, None)
+    # FLANN parameters
+    FLANN_INDEX_KDTREE = 1
+    index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+    search_params = dict(checks=50)
+    flann = cv.FlannBasedMatcher(index_params, search_params)
+    matches = flann.knnMatch(des1, des2, k=2)
+
+    # Need to draw only good matches, so create a mask
+    matchesMask = [[0, 0] for i in range(len(matches))]
+
+    good = []
+    pts1 = []
+    pts2 = []
+    # ratio test as per Lowe's paper
+    for i, (m, n) in enumerate(matches):
+        if m.distance < 0.7*n.distance:
+            good.append(m)
+            pts2.append(kp2[m.trainIdx].pt)
+            pts1.append(kp1[m.queryIdx].pt)
+            matchesMask[i] = [1, 0]
+
+    draw_params = dict(matchColor=(0, 255, 0),
+                       singlePointColor=(255, 0, 0),
+                       matchesMask=matchesMask,
+                       flags=0)
+    img3 = cv.drawMatchesKnn(img1gray, kp1, img2gray, kp2, matches, None, **draw_params)
+    plt.imshow(img3, ), plt.show()
+
+    rows, cols = srcImg.shape[:2]
+    MIN_MATCH_COUNT = 10
+    if len(good) > MIN_MATCH_COUNT:
+        src_pts = np.float32([kp1[m.queryIdx].pt for m in good]).reshape(-1, 1, 2)
+        dst_pts = np.float32([kp2[m.trainIdx].pt for m in good]).reshape(-1, 1, 2)
+        M, mask = cv.findHomography(src_pts, dst_pts, cv.RANSAC, 5.0)
+        warpImg = cv.warpPerspective(testImg, np.array(M), (testImg.shape[1], testImg.shape[0]), flags=cv.WARP_INVERSE_MAP)
+
+        for col in range(0, cols):
+            if srcImg[:, col].any() and warpImg[:, col].any():
+                left = col
+                break
+        for col in range(cols-1, 0, -1):
+            if srcImg[:, col].any() and warpImg[:, col].any():
+                right = col
+                break
+
+        res = np.zeros([rows, cols, 3], np.uint8)
+        for row in range(0, rows):
+            for col in range(0, cols):
+                if not srcImg[row, col].any():
+                    res[row, col] = warpImg[row, col]
+                elif not warpImg[row, col].any():
+                    res[row, col] = srcImg[row, col]
+                else:
+                    srcImgLen = float(abs(col - left))
+                    testImgLen = float(abs(col - right))
+                    alpha = srcImgLen / (srcImgLen + testImgLen)
+                    res[row, col] = np.clip(srcImg[row, col] * (1-alpha) + warpImg[row, col] * alpha, 0, 255)
+
+        # opencv is bgr, matplotlib is rgb
+        res = cv.cvtColor(res, cv.COLOR_BGR2RGB)
+        # show the result
+        plt.figure()
+        plt.imshow(res)
+        plt.show()
+    else:
+        print("Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT))
+        matchesMask = None
+```
+更精确的拼接也许需要OpenPano算法，以后再说
