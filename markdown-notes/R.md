@@ -464,6 +464,7 @@ princomp.rank <- function(PCA, m = 2, plot = F)
 library(mvstats)
 library(openxlsx)
 #在这里导入csv会报错，好像原因和上面一样...
+#一个想法，会不会是我数据以字符串储存而不是以数字储存所以除了问题，可以用data_m$d1 <- as.numeric(data_m$d1)来变换
 d1 <- read.xlsx("/Users/calice/desktop/r/comdata.xlsx",rowNames = TRUE)
 #计算相关系数
 cor(d1)
@@ -625,6 +626,74 @@ $$IDF=log(D/Dw)$$
 假定现在有D=10亿个网页，且“的”在所有网页中都出现，那么IDF(的)=log(10亿/1o亿)=0。而“薛定谔”只在200万个网页中出现，那么IDF(薛定谔)=6.2，而我们假设猫在其中1亿个网页都出现了，所以IDF(猫)=2.3，那么我们可以认为在“薛定谔的猫”中，“薛定谔”贡献最大，“猫”也有贡献，而“的”其实没用，这也是符合我们现实逻辑的。
 由此我们可以得知，取对数可以将数据在整个值域中因不同区间而带来的差异降到最小。而且可以改变变量的尺度，使得数据更加平稳。
 
+### 分位数回归
+分位数回归可以用R包quantreg实现：
+```r
+library(SparseM)
+library(quantreg)
+data("engel")
+#engel是quantreg中的自由数据，有235条，2个变量，一个是income收入，一个是foodexp食品支出，我们可以借此考察收入与食品支出的关系
+#建立一个0.5分位数回归，rq函数就是quantreg里进行分位数回归的函数，tau即为分位数值
+#是不是可以这么理解：所谓的α分位数回归，就是希望回归曲线之下能够包含α（一个百分数）的数据点？
+fit1 <- rq(foodexp ~ income, tau = .5, data = engel)
+fit1
+summary(fit1)
+```
+可得到：
+```r
+Call: rq(formula = foodexp ~ income, tau = 0.5, data = engel)
+
+tau: [1] 0.5
+#coefficient列给出了估计的截距和斜率
+#lower bd和upper bd则是估计的置信区间
+Coefficients:
+            coefficients lower bd  upper bd 
+(Intercept)  81.48225     53.25915 114.01156
+income        0.56018      0.48702   0.60199
+```
+```r {class=line-numbers}
+#接着使用其内置的函数计算模型拟合残差，并绘制残差图
+r1 <- resid(fit1)
+plot(r1)
+#得到结果表明残差均匀分布在(-200,200)区间内，说明拟合效果还不错
+#绘制income和foodexp的散点图，并绘制不同分位数的分位数回归曲线：
+#attach命令可以避免通过$来每次调用数据框中的变量
+attach(engel)
+#绘制散点图
+plot(income, foodexp, cex = 0.25, type = "n", xlab ="Household Income", ylab ="Food Expenditure")
+points(income,foodexp , cex = 0.25, col = "blue")
+#通过abline绘制直线，这里绘制0.5分位回归线
+abline(rq(foodexp ~income , tau = 0.5), col = "blue")
+#绘制线性回归线
+abline(lm(foodexp ~income  ), lty = 2, col = "red")
+#给定下列分位数
+taus <- c(0.05, 0.1, 0.25, 0.75, 0.9, 0.95)
+#分别分位数回归
+for (i in 1:length(taus)) {
+  abline(rq(foodexp ~income  , tau = taus[i]), col = "gray")
+}
+#接触attach()的绑定
+detach(engel)
+```
+![分位数回归1](R/Rplot26.jpeg)
+接下来探讨分位数回归与恩格尔系数的关系：
+```r
+#使用within函数添加一列xx变量，xx为不同人群不同收入的占比
+engel<-within(engel,xx <- income - mean(income))
+fit1 <- summary(rq(foodexp~xx,tau=2:98/100,data = engel))
+#通过mfrow功能实现1页放2幅图
+plot(fit1,mfrow = c(1:2))
+```
+![分位数回归2](R/Rplot27.jpeg)
+上图绘制了0.02到0.98这个区间中，每隔0.01做一次分位回归，其中黑色实心点代表回归曲线的截距值，阴影部分代表95%置信区间，红色实线和虚线分别代表的是，线性回归曲线的截距值和置信区间。从图中可以看出，收入对于0.02分位的foodexp的影响在0.35左右，对于0.98分位的影响在0.7左右。即为不同的分位数回归对应着不同的置信区间。
+不同分位数的分位回归的截距值是否是由于抽样误差造成的，我们同样需要假设检验进行验证，那么我们使用Wald检验进行验证。得到如下结果，P值小于0.05可以认为不同分位数回归的截距之间值是有差异的。
+```r
+fit1 <- rq(foodexp ~ income, tau = .25, data = engel)
+fit2 <- rq(foodexp ~ income, tau = .5, data = engel)
+fit3 <- rq(foodexp ~ income, tau = .75, data = engel)
+anova(fit1, fit2, fit3)
+```
+结果有显著差异。
 ### 混合线性模型lmm
 #### 固定因子与随机因子
 混合线性模型考察既有随机因子，又有固定因子的模型的线性回归问题。而关于固定因子和随机因子，可参考csdn上的一篇博文：[固定效应模型与随机效应模型](https://blog.csdn.net/fjsd155/article/details/94313748)
