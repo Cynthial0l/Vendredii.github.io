@@ -110,30 +110,27 @@ morph <- morph[base::sample(seq_len(nrow(morph)), 200), ]
 morph
 #使用glimpse功能转置数据以便更好地研究变量
 glimpse(morph)
-```
-效果如图：
-```
-#这是原效果
- taxon                   sex   wingl beakh ubeakl
-   <chr>                   <chr> <dbl> <dbl>  <dbl>
- 1 Geospiza scandens       M        66   9.2   18.7
- 2 Camarhynchus pauper     M        67   8.5   14  
- 3 Geospiza fuliginosa     M        59   8.1   13  
- 4 Geospiza fuliginosa     M        66   8.4   13  
- 5 Geospiza fortis         M        71  13.3   18  
- 6 Geospiza fortis         M        70  12.3   15.8
- 7 Camarhynchus psittacula M        70  11.1   14.2
- 8 Geospiza fortis         M        75  15.4   19.4
- 9 Geospiza fuliginosa     F        64   8     11.9
-10 Geospiza fortis         M        72  12.6   16.2
-#这是glimpse后的效果：
-Observations: 200
-Variables: 5
-$ taxon  <chr> "Geospiza scandens", "Camarhynchus pauper", "Geospiza …
-$ sex    <chr> "M", "M", "M", "M", "M", "M", "M", "M", "F", "M", "M",…
-$ wingl  <dbl> 66, 67, 59, 66, 71, 70, 70, 75, 64, 72, 61, 70, 62, 64…
-$ beakh  <dbl> 9.2, 8.5, 8.1, 8.4, 13.3, 12.3, 11.1, 15.4, 8.0, 12.6,…
-$ ubeakl <dbl> 18.7, 14.0, 13.0, 13.0, 18.0, 15.8, 14.2, 19.4, 11.9, …
+##这是原效果
+# taxon                   sex   wingl beakh ubeakl
+#   <chr>                   <chr> <dbl> <dbl>  <dbl>
+# 1 Geospiza scandens       M        66   9.2   18.7
+# 2 Camarhynchus pauper     M        67   8.5   14  
+# 3 Geospiza fuliginosa     M        59   8.1   13  
+# 4 Geospiza fuliginosa     M        66   8.4   13  
+# 5 Geospiza fortis         M        71  13.3   18  
+# 6 Geospiza fortis         M        70  12.3   15.8
+# 7 Camarhynchus psittacula M        70  11.1   14.2
+# 8 Geospiza fortis         M        75  15.4   19.4
+# 9 Geospiza fuliginosa     F        64   8     11.9
+#10 Geospiza fortis         M        72  12.6   16.2
+##这是glimpse后的效果：
+#Observations: 200
+#Variables: 5
+#$ taxon  <chr> "Geospiza scandens", "Camarhynchus #pauper", "Geospiza …
+#$ sex    <chr> "M", "M", "M", "M", "M", "M", "M", "M", #"F", "M", "M",…
+#$ wingl  <dbl> 66, 67, 59, 66, 71, 70, 70, 75, 64, 72, #61, 70, 62, 64…
+#$ beakh  <dbl> 9.2, 8.5, 8.1, 8.4, 13.3, 12.3, 11.1, #15.4, 8.0, 12.6,…
+#$ ubeakl <dbl> 18.7, 14.0, 13.0, 13.0, 18.0, 15.8, 14.2,# 19.4, 11.9, …
 ```
 #### 几何对象(geom)
 几何对象就是图标中的点线面，geom有以下这些功能：
@@ -281,16 +278,14 @@ mammals
 接下来横过来看看数据：
 ```r
 glimpse(mammals)
-```
-```
-Observations: 5,416
-Variables: 6
-$ order                  <chr> "Artiodactyla", "Carnivora", "Carnivora", "Carnivora", "Carnivora", "Artioda…
-$ species                <chr> "Camelus dromedarius", "Canis adustus", "Canis aureus", "Canis latrans", "Ca…
-$ adult_body_mass_g      <dbl> 492714.47, 10392.49, 9658.70, 11989.10, 31756.51, 800143.05, 500000.00, 6359…
-$ adult_head_body_len_mm <dbl> NA, 745.32, 827.53, 872.39, 1055.00, 2700.00, NA, 2075.00, 354.99, NA, NA, N…
-$ home_range_km2         <dbl> 1.963200e+02, 1.010000e+00, 2.950000e+00, 1.888000e+01, 1.598600e+02, NA, NA…
-$ litter_size            <dbl> 0.98, 4.50, 3.74, 5.72, 4.98, 1.22, 1.00, 1.22, 1.01, NA, 1.02, 1.02, 1.02, …
+#Observations: 5,416
+#Variables: 6
+#$ order                  <chr> "Artiodactyla", "Carnivora", "Carnivora", "Carnivora", "Carnivora", "Artioda…
+#$ species                <chr> "Camelus dromedarius", "Canis adustus", "Canis aureus", "Canis latrans", "Ca…
+#$ adult_body_mass_g      <dbl> 492714.47, 10392.49, 9658.70, 11989.10, 31756.51, 800143.05, 500000.00, 6359…
+#$ adult_head_body_len_mm <dbl> NA, 745.32, 827.53, 872.39, 1055.00, 2700.00, NA, 2075.00, 354.99, NA, NA, N…
+#$ home_range_km2         <dbl> 1.963200e+02, 1.010000e+00, 2.950000e+00, 1.888000e+01, 1.598600e+02, NA, NA…
+#$ litter_size            <dbl> 0.98, 4.50, 3.74, 5.72, 4.98, 1.22, 1.00, 1.22, 1.01, NA, 1.02, 1.02, 1.02, …
 ```
 使用select函数可以选取我们需要的数据：
 ```r
@@ -529,23 +524,21 @@ lm1 <- lm(lifeExp ~ year, data = d)
 summary(lm1)
 coef(lm1)
 tidy(lm1)
-```
-得到结果如下
-```
-Residuals:
-    Min      1Q  Median      3Q     Max 
--39.949  -9.651   1.697  10.335  22.158 
-
-Coefficients:
-              Estimate Std. Error t value Pr(>|t|)    
-(Intercept) -585.65219   32.31396  -18.12   <2e-16 ***
-year           0.32590    0.01632   19.96   <2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 11.63 on 1702 degrees of freedom
-Multiple R-squared:  0.1898,	Adjusted R-squared:  0.1893 
-F-statistic: 398.6 on 1 and 1702 DF,  p-value: < 2.2e-16
+##得到结果如下
+#Residuals:
+#    Min      1Q  Median      3Q     Max 
+#-39.949  -9.651   1.697  10.335  22.158 
+#
+#Coefficients:
+#              Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) -585.65219   32.31396  -18.12   <2e-16 ***
+#year           0.32590    0.01632   19.96   <2e-16 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#Residual standard error: 11.63 on 1702 degrees of freedom
+#Multiple R-squared:  0.1898,	Adjusted R-squared:  0.1893 
+#F-statistic: 398.6 on 1 and 1702 DF,  p-value: < 2.2e-16
 ```
 如何理解这里面的各种玩意儿呢？我们直接看Coefficients部分：
 其中Estimate为估值，Std.Error为标准误差，t value为T值，Pr为P值，一般而言，P<0.05以为数据有显著差异，我们认为这些数据通过了显著性检验，可以用了，有了统计学意义，而P<0.001意为数据有极显著差异（现在一般不提这个，误导性比较强）。
@@ -572,48 +565,46 @@ ggplot(life, aes(log(gdpPercap), log(lifeExp))) + geom_point()
 #回归
 lm2 <- lm(log(lifeExp) ~ log(gdpPercap), data = life)
 summary(lm2)
-```
-接着系统会生成结果：
-```
-lm(formula = log(lifeExp) ~ log(gdpPercap), data = life)
-
-Residuals:
-     Min       1Q   Median       3Q      Max 
--0.42480 -0.05350  0.01827  0.05729  0.23078 
-
-Coefficients:
-               Estimate Std. Error t value Pr(>|t|)    
-(Intercept)    2.920294   0.060789   48.04   <2e-16 ***
-log(gdpPercap) 0.139064   0.007296   19.06   <2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 0.1036 on 140 degrees of freedom
-Multiple R-squared:  0.7219,	Adjusted R-squared:  0.7199 
-F-statistic: 363.3 on 1 and 140 DF,  p-value: < 2.2e-16
+##接着系统会生成结果：
+#lm(formula = log(lifeExp) ~ log(gdpPercap), data = life)
+#
+#Residuals:
+#     Min       1Q   Median       3Q      Max 
+#-0.42480 -0.05350  0.01827  0.05729  0.23078 
+#
+#Coefficients:
+#               Estimate Std. Error t value Pr(>|t|)    
+#(Intercept)    2.920294   0.060789   48.04   <2e-16 ***
+#log(gdpPercap) 0.139064   0.007296   19.06   <2e-16 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#Residual standard error: 0.1036 on 140 degrees of freedom
+#Multiple R-squared:  0.7219,	Adjusted R-squared:  0.7199 
+#F-statistic: 363.3 on 1 and 140 DF,  p-value: < 2.2e-16
 ```
 ![ggplot导出的简单散点图](R/Rplot2.jpeg)
 我们注意一下现在的$R^2$是**0.7219**，结果很好，所以……
 #### 为什么要取对数？
 我们先试试上面的数据不取对数会如何？
 代码就不列了，结果如下：
-```
-lm(formula = lifeExp ~ gdpPercap, data = life)
-
-Residuals:
-    Min      1Q  Median      3Q     Max 
--42.058  -5.709   1.995   6.082  12.468 
-
-Coefficients:
-             Estimate Std. Error t value Pr(>|t|)    
-(Intercept) 5.308e+01  9.106e-01   58.29   <2e-16 ***
-gdpPercap   8.862e-04  8.192e-05   10.82   <2e-16 ***
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Residual standard error: 8.255 on 140 degrees of freedom
-Multiple R-squared:  0.4553,	Adjusted R-squared:  0.4514 
-F-statistic:   117 on 1 and 140 DF,  p-value: < 2.2e-16
+```r
+#lm(formula = lifeExp ~ gdpPercap, data = life)
+#
+#Residuals:
+#    Min      1Q  Median      3Q     Max 
+#-42.058  -5.709   1.995   6.082  12.468 
+#
+#Coefficients:
+#             Estimate Std. Error t value Pr(>|t|)    
+#(Intercept) 5.308e+01  9.106e-01   58.29   <2e-16 ***
+#gdpPercap   8.862e-04  8.192e-05   10.82   <2e-16 ***
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#Residual standard error: 8.255 on 140 degrees of freedom
+#Multiple R-squared:  0.4553,	Adjusted R-squared:  0.4514 
+#F-statistic:   117 on 1 and 140 DF,  p-value: < 2.2e-16
 ```
 ![ggplot导出的简单散点图](R/Rplot3.jpeg)
 此时不仅仅是图丑出天际的问题了，而是$R^2$变成了**0.4553**，数据的拟合程度都下降了好多！
@@ -638,18 +629,16 @@ data("engel")
 fit1 <- rq(foodexp ~ income, tau = .5, data = engel)
 fit1
 summary(fit1)
-```
-可得到：
-```r
-Call: rq(formula = foodexp ~ income, tau = 0.5, data = engel)
-
-tau: [1] 0.5
-#coefficient列给出了估计的截距和斜率
-#lower bd和upper bd则是估计的置信区间
-Coefficients:
-            coefficients lower bd  upper bd 
-(Intercept)  81.48225     53.25915 114.01156
-income        0.56018      0.48702   0.60199
+##可得到：
+#Call: rq(formula = foodexp ~ income, tau = 0.5, data = engel)
+#
+#tau: [1] 0.5
+##coefficient列给出了估计的截距和斜率
+##lower bd和upper bd则是估计的置信区间
+#Coefficients:
+#            coefficients lower bd  upper bd 
+#(Intercept)  81.48225     53.25915 114.01156
+#income        0.56018      0.48702   0.60199
 ```
 ```r {class=line-numbers}
 #接着使用其内置的函数计算模型拟合残差，并绘制残差图
@@ -761,49 +750,47 @@ ggplot(d, aes(log(wingl), log(beakh), colour = taxon)) +
 最后我们可以查看回归效果：
 ```r
 summary(m_lmer)
-```
-关于数据的查看上文已经提及，不再赘述：
-```r
-Linear mixed model fit by REML ['lmerMod']
-Formula: log(beakh) ~ log(wingl) + (1 | taxon)
-   Data: d
-
-REML criterion at convergence: -3656.1
-
-Scaled residuals: 
-    Min      1Q  Median      3Q     Max 
--6.2724 -0.6086 -0.0306  0.6211  3.6835 
-
-Random effects:
- Groups   Name        Variance Std.Dev.
- taxon    (Intercept) 0.050586 0.22491 
- Residual             0.004278 0.06541 
-Number of obs: 1434, groups:  taxon, 15
-
-Fixed effects:
-            Estimate Std. Error t value
-(Intercept) -2.60848    0.18819  -13.86
-log(wingl)   1.18318    0.04232   27.96
-
-Correlation of Fixed Effects:
-           (Intr)
-log(wingl) -0.951
+##关于数据的查看上文已经提及，不再赘述：
+#Linear mixed model fit by REML ['lmerMod']
+#Formula: log(beakh) ~ log(wingl) + (1 | taxon)
+#   Data: d
+#
+#REML criterion at convergence: -3656.1
+#
+#Scaled residuals: 
+#    Min      1Q  Median      3Q     Max 
+#-6.2724 -0.6086 -0.0306  0.6211  3.6835 
+#
+#Random effects:
+# Groups   Name        Variance Std.Dev.
+# taxon    (Intercept) 0.050586 0.22491 
+# Residual             0.004278 0.06541 
+#Number of obs: 1434, groups:  taxon, 15
+#
+#Fixed effects:
+#            Estimate Std. Error t value
+#(Intercept) -2.60848    0.18819  -13.86
+#log(wingl)   1.18318    0.04232   27.96
+#
+#Correlation of Fixed Effects:
+#           (Intr)
+#log(wingl) -0.951
 ```
 一个小技巧，可以通过`arm::display(m_lmer)`(这里使用了arm包）命令来让我们的结果更加直观：
 ```r
-lmer(formula = log(beakh) ~ log(wingl) + (1 | taxon), data = d)
-            coef.est coef.se
-(Intercept) -2.61     0.19  
-log(wingl)   1.18     0.04  
-
-Error terms:
- Groups   Name        Std.Dev.
- taxon    (Intercept) 0.22    
- Residual             0.07    
----
-number of obs: 1434, groups: taxon, 15
-AIC = -3648.1, DIC = -3672.8
-deviance = -3664.4 
+#lmer(formula = log(beakh) ~ log(wingl) + (1 | taxon),data = d)
+#            coef.est coef.se
+#(Intercept) -2.61     0.19  
+#log(wingl)   1.18     0.04  
+#
+#Error terms:
+# Groups   Name        Std.Dev.
+# taxon    (Intercept) 0.22    
+# Residual             0.07    
+#---
+#number of obs: 1434, groups: taxon, 15
+#AIC = -3648.1, DIC = -3672.8
+#deviance = -3664.4 
 ```
 #### 混合线性回归-lmerTest
 R语言中实现混合线性模型可以使用lme4包或lmerTest包，这里以lmerTest包为例，其基本表达式为：
@@ -831,63 +818,62 @@ fit1 = lmer(frequency ~ scenario * attitude + attitude|subject + attitude|gender
 这时候系统提示：`boundary (singular) fit: see ?isSingular`这表明有些效应是彼此的线性组合或者某个地方的方差是0。当p>>n(比样本更多的参数)时也会发生这种情况。这也意味着模型可能被过度拟合和/或遭受数值稳定性问题。
 ```r
 summary(fit1)
+##得到结果：
+#Linear mixed model fit by REML. t-tests use #Satterthwaite's method ['lmerModLmerTest']
+#Formula: frequency ~ scenario * attitude + (1 + attitude | subject) +  
+#    (1 + attitude | gender)
+#   Data: politeness
+#
+#REML criterion at convergence: 680.1
+#
+#Scaled residuals: 
+#     Min       1Q   Median       3Q      Max 
+#-1.65342 -0.68640 -0.03677  0.50256  2.85422 
+##这里是随机效应的结果，variance为方差，Std.Dev为标准差，可以看出确实对不同的被试组合性别组而言，态度的影响是不同的
+#Random effects:
+# Groups   Name        Variance  Std.Dev. Corr 
+# subject  (Intercept) 6.037e+02 24.5696       
+#          attitudepol 1.076e-02  0.1037  1.00 
+# gender   (Intercept) 6.467e+03 80.4167       
+#          attitudepol 1.118e+02 10.5749  -1.00
+# Residual             6.101e+02 24.7001       
+#Number of obs: 83, groups:  subject, 6; gender, 2
+##固定效应的结果如下，我们发现场合3和4的音高是较显著的
+#Fixed effects:
+#                      Estimate Std. Error      df t value Pr(>|t|)   
+#(Intercept)            180.767     58.615   1.065   3.084  0.18720   
+#scenario2               17.450     14.261  63.998   1.224  0.22557   
+#scenario3               46.667     14.261  63.998   3.272  0.00172 **
+#scenario4               44.833     14.261  63.998   3.144  0.00253 **
+#scenario5               16.800     14.261  63.998   1.178  0.24313   
+#scenario6                8.867     14.261  63.998   0.622  0.53631   
+#scenario7               18.133     14.261  63.998   1.272  0.20813   
+#attitudepol             -9.717     16.102   9.583  -0.603  0.56023   
+#scenario2:attitudepol   15.133     20.168  63.998   0.750  0.45578   
+#scenario3:attitudepol  -31.283     20.168  63.998  -1.551  0.12579   
+#scenario4:attitudepol   -4.650     20.168  63.998  -0.231  0.81839   
+#scenario5:attitudepol   -4.783     20.168  63.998  -0.237  0.81327   
+#scenario6:attitudepol  -14.703     20.701  64.030  -0.710  0.48011   
+#scenario7:attitudepol  -30.033     20.168  63.998  -1.489  0.14135   
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#Correlation matrix not shown by default, as p = 14 > 12.
+#Use print(x, correlation=TRUE)  or
+#    vcov(x)        if you need it
+#
+#convergence code: 0
+#boundary (singular) fit: see ?isSingular
 ```
-得到结果：
+但是这里的固定效应不是主效应和交互作用，要查看主效应和交互作用需要用anova()函数得到；
 ```r
-Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
-Formula: frequency ~ scenario * attitude + (1 + attitude | subject) +  
-    (1 + attitude | gender)
-   Data: politeness
-
-REML criterion at convergence: 680.1
-
-Scaled residuals: 
-     Min       1Q   Median       3Q      Max 
--1.65342 -0.68640 -0.03677  0.50256  2.85422 
-#这里是随机效应的结果，variance为方差，Std.Dev为标准差，可以看出确实对不同的被试组合性别组而言，态度的影响是不同的
-Random effects:
- Groups   Name        Variance  Std.Dev. Corr 
- subject  (Intercept) 6.037e+02 24.5696       
-          attitudepol 1.076e-02  0.1037  1.00 
- gender   (Intercept) 6.467e+03 80.4167       
-          attitudepol 1.118e+02 10.5749  -1.00
- Residual             6.101e+02 24.7001       
-Number of obs: 83, groups:  subject, 6; gender, 2
-#固定效应的结果如下，我们发现场合3和4的音高是较显著的
-Fixed effects:
-                      Estimate Std. Error      df t value Pr(>|t|)   
-(Intercept)            180.767     58.615   1.065   3.084  0.18720   
-scenario2               17.450     14.261  63.998   1.224  0.22557   
-scenario3               46.667     14.261  63.998   3.272  0.00172 **
-scenario4               44.833     14.261  63.998   3.144  0.00253 **
-scenario5               16.800     14.261  63.998   1.178  0.24313   
-scenario6                8.867     14.261  63.998   0.622  0.53631   
-scenario7               18.133     14.261  63.998   1.272  0.20813   
-attitudepol             -9.717     16.102   9.583  -0.603  0.56023   
-scenario2:attitudepol   15.133     20.168  63.998   0.750  0.45578   
-scenario3:attitudepol  -31.283     20.168  63.998  -1.551  0.12579   
-scenario4:attitudepol   -4.650     20.168  63.998  -0.231  0.81839   
-scenario5:attitudepol   -4.783     20.168  63.998  -0.237  0.81327   
-scenario6:attitudepol  -14.703     20.701  64.030  -0.710  0.48011   
-scenario7:attitudepol  -30.033     20.168  63.998  -1.489  0.14135   
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-Correlation matrix not shown by default, as p = 14 > 12.
-Use print(x, correlation=TRUE)  or
-    vcov(x)        if you need it
-
-convergence code: 0
-boundary (singular) fit: see ?isSingular
-```
-但是这里的固定效应不是主效应和交互作用，要查看主效应和交互作用需要用anova()函数`anova(fit1)`得到；
-```r
-Type III Analysis of Variance Table with Satterthwaite's method
-                   Sum Sq Mean Sq NumDF  DenDF F value   Pr(>F)    
-scenario          19400.1  3233.4     6 64.006  5.2998 0.000173 ***
-attitude           2789.7  2789.7     1  1.143  4.5725 0.253068    
-scenario:attitude  4985.4   830.9     6 64.006  1.3619 0.243577    
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+anova(fit1)
+#Type III Analysis of Variance Table with #Satterthwaite's method
+#                   Sum Sq Mean Sq NumDF  DenDF F value   Pr(>F)    
+#scenario          19400.1  3233.4     6 64.006  5.2998 #0.000173 ***
+#attitude           2789.7  2789.7     1  1.143  4.5725 0.253068    
+#scenario:attitude  4985.4   830.9     6 64.006  1.3619 0.243577    
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 可见只有场景的主效应显著，态度的主效应和交互作用都不显著。在上面建立的模型中，包含随机斜率和随机截距，但是注意到，有两个固定效应，是把两个固定效应及其交互作用全都作为随机效应，还是选其中部分作为随机效应呢？这里我们课题组的标准是：首先考虑全模型，即如下命令：
 ```r
@@ -925,30 +911,28 @@ $$\textup{ln}(\frac{p}{1-p})=\beta _0+\beta _1x_1+\beta _2x_2+\beta _3x_3$$
 ```r
 logit.glm <- glm(y ~ X1 + X2 + X3, family = binomial,data = data)
 summary(logit.glm)
-```
-```r
-glm(formula = y ~ X1 + X2 + X3, family = binomial, data = data)
-
-Deviance Residuals: 
-    Min       1Q   Median       3Q      Max  
--1.5636  -0.9131  -0.7892   0.9637   1.6000  
-
-Coefficients:
-             Estimate Std. Error z value Pr(>|z|)  
-(Intercept)  0.597610   0.894831   0.668   0.5042  
-X1          -1.496084   0.704861  -2.123   0.0338 *
-X2          -0.001595   0.016758  -0.095   0.9242  
-X3           0.315865   0.701093   0.451   0.6523  
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-(Dispersion parameter for binomial family taken to be 1)
-
-    Null deviance: 62.183  on 44  degrees of freedom
-Residual deviance: 57.026  on 41  degrees of freedom
-AIC: 65.026
-
-Number of Fisher Scoring iterations: 4
+#glm(formula = y ~ X1 + X2 + X3, family = binomial, data = data)
+#
+#Deviance Residuals: 
+#    Min       1Q   Median       3Q      Max  
+#-1.5636  -0.9131  -0.7892   0.9637   1.6000  
+#
+#Coefficients:
+#             Estimate Std. Error z value Pr(>|z|)  
+#(Intercept)  0.597610   0.894831   0.668   0.5042  
+#X1          -1.496084   0.704861  -2.123   0.0338 *
+#X2          -0.001595   0.016758  -0.095   0.9242  
+#X3           0.315865   0.701093   0.451   0.6523  
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#(Dispersion parameter for binomial family taken to be 1)
+#
+#    Null deviance: 62.183  on 44  degrees of freedom
+#Residual deviance: 57.026  on 41  degrees of freedom
+#AIC: 65.026
+#
+#Number of Fisher Scoring iterations: 4
 ```
 由此得到初步的Logistic回归模型：
 $$p=\frac{\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}{1+\textup{exp}(0.598-1.496x_1-0.002x_2+0.316x_3)}$$
@@ -958,28 +942,26 @@ $$\textup{Logit}(p)=0.598-1.496x_1-0.002x_2+0.316x_3$$
 ```r
 logit.step <- step(logit.glm, direction = "both")
 summary(logit.step)
-```
-```r
-glm(formula = y ~ X1, family = binomial, data = data)
-
-Deviance Residuals: 
-    Min       1Q   Median       3Q      Max  
--1.4490  -0.8782  -0.8782   0.9282   1.5096  
-
-Coefficients:
-            Estimate Std. Error z value Pr(>|z|)  
-(Intercept)   0.6190     0.4688   1.320   0.1867  
-X1           -1.3728     0.6353  -2.161   0.0307 *
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-(Dispersion parameter for binomial family taken to be 1)
-
-    Null deviance: 62.183  on 44  degrees of freedom
-Residual deviance: 57.241  on 43  degrees of freedom
-AIC: 61.241
-
-Number of Fisher Scoring iterations: 4
+#glm(formula = y ~ X1, family = binomial, data = data)
+#
+#Deviance Residuals: 
+#    Min       1Q   Median       3Q      Max  
+#-1.4490  -0.8782  -0.8782   0.9282   1.5096  
+#
+#Coefficients:
+#            Estimate Std. Error z value Pr(>|z|)  
+#(Intercept)   0.6190     0.4688   1.320   0.1867  
+#X1           -1.3728     0.6353  -2.161   0.0307 *
+#---
+#Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+#
+#(Dispersion parameter for binomial family taken to be 1)
+#
+#    Null deviance: 62.183  on 44  degrees of freedom
+#Residual deviance: 57.241  on 43  degrees of freedom
+#AIC: 61.241
+#
+#Number of Fisher Scoring iterations: 4
 ```
 可以得到新的回归方程为：
 $$p=\frac{\textup{exp}(0.619-1.373x_1)}{1+\textup{exp}(0.619-1.373x_1)}$$
@@ -1001,3 +983,49 @@ $$AIC=nlog(\hat{\sigma}^2)+2(k+1)$$
 其中$\hat{\sigma}^2=\frac{RSS}{n}$，k为参数个数，$\hat{\sigma}^2$是$\sigma^2$的极大似然估计，$n$为样本大小，$RSS$为残差平方和。
 AIC为模型选择提供了有效的规则，但也有不足之处。当样本容量很大时，在AIC准则中拟合误差提供的信息就要受到样本容量的放大，而参数个数的惩罚因子却和样本容量没关系，因此当样本容量很大时，使用AIC准则选择的模型不收敛与真实模型，它通常比真实模型所含的未知参数个数要多。BIC（Bayesian InformationCriterion）贝叶斯信息准则是Schwartz在1978年根据Bayes理论提出的判别准则，称为SBC准则(也称BIC)，弥补了AIC的不足。SBC的定义为： 
 $$BIC = ln(k) - 2ln(L)$$
+## 生物信息学
+### 系统发育广义最小二乘法（PGLS）
+```r {class=line-numbers}
+library(ape)
+library(maps)
+library(geiger)
+library(nlme)
+library(phytools)
+anoleData <- read.csv("",row.name = 1)
+anoleTree <- read.tree("anolis.phy")
+plot(anoleTree)
+name.check(anoleTree, anoleData)
+plot(anoleData[, c("awesomeness", "hostility")])
+host <- anoleData[, "hostility"]
+awe <- anoleData[, "awesomeness"]
+names(host) <- names(awe) <- rownames(anoleData)
+hPic <- pic(host, anoleTree)
+aPic <- pic(awe, anoleTree)
+picModel <- lm(hPic ~ aPic - 1)
+summary(picModel)
+plot(hPic ~ aPic)
+abline(a = 0, b = coef(picModel))
+pglsModel <- gls(hostility ~ awesomeness, correlation = corBrownian(phy = anoleTree),
+    data = anoleData, method = "ML")
+summary(pglsModel)
+coef(pglsModel)
+plot(host ~ awe)
+abline(a = coef(pglsModel)[1], b = coef(pglsModel)[2])
+pglsModel2 <- gls(hostility ~ ecomorph, correlation = corBrownian(phy = anoleTree),
+    data = anoleData, method = "ML")
+anova(pglsModel2)
+coef(pglsModel2)
+pglsModel3 <- gls(hostility ~ ecomorph * awesomeness, correlation = corBrownian(phy = anoleTree),
+    data = anoleData, method = "ML")
+anova(pglsModel3)
+pglsModelLambda <- gls(hostility ~ awesomeness, correlation = corPagel(1, phy = anoleTree,
+    fixed = FALSE), data = anoleData, method = "ML")
+tempTree <- anoleTree
+tempTree$edge.length <- tempTree$edge.length * 100
+pglsModelLambda <- gls(hostility ~ awesomeness, correlation = corPagel(1, phy = tempTree,
+    fixed = FALSE), data = anoleData, method = "ML")
+summary(pglsModelLambda)
+pglsModelOU <- gls(hostility ~ awesomeness, correlation = corMartins(1, phy = tempTree), 
+    data = anoleData, method = "ML")
+summary(pglsModelOU)    
+```
