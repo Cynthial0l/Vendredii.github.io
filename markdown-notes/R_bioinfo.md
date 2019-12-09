@@ -1,8 +1,130 @@
 # 生物信息学
+生物信息学非常有用，据说当前生物信息学的平均年薪已经接近10w刀，那么学习相关知识对于我们未来的发展非常重要。
 [TOC]
 ## 系统发育数据
 原作者：Jesús N. Pinto-Ledezma and Jeannine Cavender-Bares
 了解数据对于研究生物多样性非常重要，而现在使用的一个常见数据是描述谱系之间以及谱系之间的进化关系的系统发育树。从这里到本简短教程的结尾，我们将尝试解释如何导入/导出和处理系统发育信息的基础知识。
+### 格式
+储存系统发育树的最常见格式是Newick，Nexus(Maddison et al. 1997)。
+Newick格式将系统发育关系表示为”**(**“，”**,**“，”**:**“，具体如下：
+括号将谱系链接到树的特定节点，而逗号“，”将从该节点下降的谱系分隔开。 节点名称后可以使用冒号标点“：”，后续数字值表示分支长度。 最后，用分号标点“;” 表示系统发育树的末端：
+```r
+library(ape)
+#建树
+newick_tree <- "((A:10,B:9)D:5,C:15)F;"
+#读树
+newick_tree <- read.tree(text = newick_tree)
+#画树
+plot(newick_tree, show.node.label = TRUE)
+```
+![建小树](R/Rplot28.jpeg)
+还有一种格式是Nexus，它有着更大的灵活性。
+```r
+#首先在工作目录里创建一个Nexus文件的树
+cat(
+ "#NEXUS
+ BEGIN TAXA;
+ DIMENSIONS NTAXA=3;
+ TaxLabels A B C;
+ END;
+ BEGIN TREES;
+ TREE=((A:10,B:9)D:5,C:15)F;
+ END;",
+file = "Data/Nexus_tree.nex"
+)
+#读树（使用read.nexus）
+nexus_tree <- read.nexus("Data/Nexus_tree.nex")
+#画树，图和上面一样，就不放了
+plot(nexus_tree, show.node.label = TRUE)
+#可以检查我们的树
+#概览我们的树
+str(nexus_tree)
+#List of 5
+# $ edge       : int [1:4, 1:2] 4 5 5 4 5 1 2 3
+# $ edge.length: num [1:4] 5 10 9 15
+# $ Nnode      : int 2 ##节点数？
+# $ node.label : chr [1:2] "F" "D"
+# $ tip.label  : chr [1:3] "A" "B" "C"
+# - attr(*, "class")= chr "phylo"
+# - attr(*, "order")= chr "cladewise"
+nexus_tree$tip.label
+#[1] "A" "B" "C"
+#查看枝长
+nexus_tree$edge.length
+#[1]  5 10  9 15
+#nexus_tree$edge
+#可以查看发育树的边的矩阵。在此矩阵中，每一行代表树中的一个分支，第一列显示该分支的祖先节点的索引，第二列显示该分支的后代节点。
+nexus_tree$edge
+#[,1] [,2]
+#[1,]    4    5
+#[2,]    5    1
+#[3,]    5    2
+#[4,]    4    3
+#这些数据让人摸不着头脑，我们可以在树上显示数字代号以便理解
+plot(nexus_tree, show.tip.label = FALSE)
+nodelabels()
+tiplabels()
+```
+![标号的小树](R/Rplot29.jpeg)
+最后，系统发育树也可以列表的形式导入，并且在系统发育比较方法中，系统发育树的列表称为multiPhylo，我们可以两种格式导入/导出这些multiPhylos。
+```r
+#模拟10个不同的系统发育树，每个系统发育树内有5个种
+multitree <- replicate(10, rcoal(5), simplify = FALSE)
+#将这些一起保存为一个multiPhylo项目
+class(multitree) <- "multiPhylo"
+#把其中的第10个发育树画出来
+plot(multitree[[10]])
+#分成2行2列来显示下面4个发育树
+par(mfrow = c(2, 2))
+#下面是四个发育树
+plot(multitree[[1]])
+plot(multitree[[3]])
+plot(multitree[[7]])
+plot(multitree[[10]])
+```
+![4课树](R/Rplot30.jpeg)
+```r
+#导入导出这些数据
+#作为newick导入
+write.tree(phy = multitree, file = "Data/multitree_example_newick.txt")
+#导出
+multitree_example_newick <- read.tree("Data/multitree_example_newick.txt")
+#查看
+multitree_example_newick
+#10 phylogenetic trees
+#作为nexus导入
+write.nexus(phy = multitree, file = "Data/multitree_example_nexus.nex")
+multitree_example_nexus <- read.nexus("Data/multitree_example_nexus.nex")
+multitree_example_nexus
+#10 phylogenetic trees
+```
+### 循环
+编程中最重要的就是活用**for**进行循环，其基本结构是：`for (variable in vector 向量中的变量) {execute defined statements执行定义的语句}`
+在编程时，通常使用循环变量**i**来确定步数因为**i**是iteration一词的第一个字母，不过你也可以使用任何字母或单词作为循环变量。
+```r
+#cat函数将里面的数据排排站输出
+for (i in 1:10){
+    cat(i, sep = '')
+}
+#12345678910
+#让1-10的数据换行输出，结果不列
+for (i in 1:10){
+  cat(i, sep = '\n')
+}
+BioSciNames <- c("Jeannine", "Jesús", "Bailey","Kalli", "Ariadna", "Samantha", "Maxell",
+                 "Sara", "Nicholas", "Carmen", "Ashley", "Mikkel", "Shana", "Kirsten",
+                 "Lucy", "Joe", "Joshua")
+for (i in 12:length(BioSciNames)){
+  cat("Hi,", BioSciNames[i], ", welcome to the first practice!","\n");
+}
+#从第12个人开始套娃输出这句话
+#Hi, Mikkel , welcome to the first practice! 
+#Hi, Shana , welcome to the first practice! 
+#Hi, Kirsten , welcome to the first practice! 
+#Hi, Lucy , welcome to the first practice! 
+#Hi, Joe , welcome to the first practice! 
+#Hi, Joshua , welcome to the first practice!
+```
 ## 系统发育广义最小二乘法（PGLS）
 来源：R course in Ilhabela, Brazil, June 2015
 首先，我们需要安装一些程序包
