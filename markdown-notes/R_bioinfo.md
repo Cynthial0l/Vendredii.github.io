@@ -336,7 +336,7 @@ BBScdm2 <- BBScdm[, c(1, 2, 5, 6, 9, 12, 13, 14, 15)]
 names(BBScdm2) <- c("SR", "PD", "RaoD", "MPD", "MNTD", "PSV", "PSR", "PSE", "qDP")
 head(BBScdm2)
 ```
-## 系统发育广义最小二乘法（PGLS）
+## 系统发育广义最小二乘法PGLS
 来源：R course in Ilhabela, Brazil, June 2015
 首先，我们需要安装一些程序包
 ```r
