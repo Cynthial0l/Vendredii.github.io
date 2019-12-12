@@ -6,9 +6,7 @@ R语言在其他学科中属于小角色，但是在生态学中，由于其开�
 因此在这篇R学习当中，我希望
 1. 分享学习R语言的进度，同时也是给自己增加一些学习的压力与动力。
 2. 避免不求甚解，成为无情的代码搬运工，我希望可以从数学出发，对R语言的分析做一个“面向对象”又“直达底层”的综述。
-
 [TOC]
-
 ## 从安装R和Package开始
 ### 安装R 
 不多说
@@ -112,7 +110,7 @@ class(lst)
 #使用双括号[[]]即可检查我们list中的对象
 lst[[1]]
 ```
-
+[回到目录](#r%e5%ad%a6%e4%b9%a0)
 ## 利用R整理并绘制数据
 ### ggplot2
 ggplot2是R中最高效的绘图工具，在ggplot2中，我们的数据集必须得是data.frame格式，这种格式易于保存数据，而且能在保留原有的绘图参数下, 用%+%方便地变更已有数据集。ggplot2由数据与映射、几何对象(geom)、统计变化(stats)、标度、坐标系(coord)和分面(facet)这几个部分构成。在实际操作中，我们通过”+”将这些功能以图层的形式连接在一起。
@@ -409,7 +407,7 @@ library(export)
 filen <- tempfile(pattern = "ggplot")
 graph2tif(x=x, file = filen, dpi = 400, height = 5)
 ```
-
+[回到目录](#r%e5%ad%a6%e4%b9%a0)
 ## 水平分析
 ### 入门单因素方差分析
 通过r语言自带的函数（aov）即可进行简单的单因素方差（ANOVA）分析，我们可以比较因素A在r个水平下实验结果的差异究竟是随机的还是与水平相关的。
@@ -562,8 +560,9 @@ ggplot(d2, aes(x = Comp.1,y = Comp.2))+
 #osx用户需要设定family，win就不用了
 biplot(PCA, family = "STKaiti")
 ```
-就很nb
+就很nb。
 ![主成分分析3](R/Rplot25.jpeg)
+[回到目录](#r%e5%ad%a6%e4%b9%a0)
 ## 各种各样的回归
 ### 从lm()开始进行简单一元线性回归
 首先需要从gapminder上获得一些练习数据，gapminder是一个有着全球各种数据的公益网站，我们可以通过R包“gapminder”去下载(http://github.com/jennybc/gapminder)。
@@ -1054,3 +1053,4 @@ $$AIC=nlog(\hat{\sigma}^2)+2(k+1)$$
 其中$\hat{\sigma}^2=\frac{RSS}{n}$，k为参数个数，$\hat{\sigma}^2$是$\sigma^2$的极大似然估计，$n$为样本大小，$RSS$为残差平方和。
 AIC为模型选择提供了有效的规则，但也有不足之处。当样本容量很大时，在AIC准则中拟合误差提供的信息就要受到样本容量的放大，而参数个数的惩罚因子却和样本容量没关系，因此当样本容量很大时，使用AIC准则选择的模型不收敛与真实模型，它通常比真实模型所含的未知参数个数要多。BIC（Bayesian InformationCriterion）贝叶斯信息准则是Schwartz在1978年根据Bayes理论提出的判别准则，称为SBC准则(也称BIC)，弥补了AIC的不足。SBC的定义为： 
 $$BIC = ln(k) - 2ln(L)$$
+[回到目录](#r%e5%ad%a6%e4%b9%a0)
