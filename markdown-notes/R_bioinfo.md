@@ -969,3 +969,4 @@ source("https://raw.githubusercontent.com/jesusNPL/BetaDivNA/master/SARr2.R")
 SARr2(Lfull = sar_nb1.5.w$LL, Lnull = sar_nb1.5.w$logLik_lm.model, N = nrow(fdata))
 #'log Lik.' 0.8852386 (df=4)
 ```
+[返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
