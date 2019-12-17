@@ -1,5 +1,5 @@
-# 生物信息学
-生物信息学非常有用，据说当前生物信息学的平均年薪已经接近10w刀，那么学习相关知识对于我们未来的发展非常重要。
+# 生物多样性
+生物多样性是生态学研究的基础，我们将在系统发育、功能性状、地理分布等方面详细探讨如何研究生物多样性。同时也会涉及许多生物信息学的内容，那么生物信息学非常有用，据说当前生物信息学的平均年薪已经接近10w刀，所以学习相关知识对于我们未来的发展非常重要。
 [TOC]
 ## 系统发育数据基础
 原作者：Jesús N. Pinto-Ledezma and Jeannine Cavender-Bares
@@ -338,7 +338,7 @@ names(BBScdm2) <- c("SR", "PD", "RaoD", "MPD", "MNTD", "PSV", "PSR", "PSE", "qDP
 head(BBScdm2)
 ```
 [返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
-## 生物多样性指标的构建
+## 系统发育与生物多样性
 本小结内容与系统发育可视化，为离散和连续性状确定祖源相关信息，性状-发育模型的测试模型，执行回归模型的系统发育校正有关。该课程数据基于Luke Harmon的试验和课程：
 http://lukejharmon.github.io/ilhabela/instruction/2015/07/03/PGLS/
 我们需要下面这两个数据：
@@ -629,7 +629,7 @@ legend("bottomleft", fill = c("black", "red", "green", "blue"),
 ```
 ![SYM2](R/Rplot39.jpeg)
 [返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
-## 基于R的生物地理学
+## 物种分布与生物多样性
 在本实验中，你将学习R中的基本工具，以可视化物种分布，建立地理范围，以测试不同方法下生物多样性梯度的驱动力。
 你将需要三个数据集，它们都在[我的github](https://github.com/Vendredii/Rstats)中：
    1.物种分布数据点-live.oaks.txt
@@ -968,5 +968,125 @@ title(main = "Correlogram SARerr", cex = 1.5)}
 source("https://raw.githubusercontent.com/jesusNPL/BetaDivNA/master/SARr2.R")
 SARr2(Lfull = sar_nb1.5.w$LL, Lnull = sar_nb1.5.w$logLik_lm.model, N = nrow(fdata))
 #'log Lik.' 0.8852386 (df=4)
+```
+[返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
+## 生态功能与生物多样性
+在本节中，我们将探讨有关生物多样性及其对生态系统功能的影响的问题。为此，我们将使用Jake Gorssman提供的数据和脚本（进行一些修改）。
+从大佬(Grossman et al. 2017; Ecology 98:2601-14)的”Species richness and traits predict overyielding in stem growth in an early‐successional tree diversity experiment“中获得数据并整理：
+```r
+library(agricolae)
+df <- read.csv("Data/BEF_Lesson_Data.csv", header = T)
+#查看第一行
+names(df)
+#看看数据结构，df是一个具有9列140行的数据帧。这些行是FAB实验中的140个实验图。
+dim(df)
+```
+我们需要知道：
+1. plot = 每个地块的任意索引
+2. SR = 样地的物种丰富度（1、2、5或12种）
+3. Comp = 分类代码，对于具有相同成分的图，该代码相同。 M = 单种养殖，B = 双种养殖，F = 5种，T = 12种
+4. PSV = 系统发生种的变异性（Helmus et al。2007）: 一种独立于物种丰富度的系统发生多样性的度量
+5. FDis = 功能分散度（Laliberte和Legendre，2010年）: 一种独立于物种丰富度的功能多样性指标
+6. NBE = 生物多样性净效应: 观察到的生物多样性（d_Y）减去预期生物多样性（基于单一文化（在此示例中未给出））
+7. CE = 互补效应（Loreau and Hector 2001）: CE + SE = NBE；使用Forest Isbell中的脚本进行计算-UMN--Twin Cities
+8. SE = 选择效应（Loreau and Hector 2001），见上文
+9. d_Y = 地块生物量: 给定地块中树木茎生物量的平均变化量（kg）
+重要提示-请注意，对于纯林(?)而言，NBE，CE和SE没有价值，因为它们**只能计算得出混交林(?)的数值**。
+### 地块组成与物种丰富度对生物的影响
+**Q1：茎生物量产量是否取决于地块组成和丰富度？**
+首先，设置颜色方案以按颜色区分构图，然后绘制数据以查看是否存在可见趋势：
+```r
+#设置颜色
+comp.cols <- c(rep("red", 12), rep("orange", 28), rep("yellow", 10), rep("green", 1))
+with(df, plot(Comp, d_Y, col = comp.cols))
+```
+![多彩的趋势](R/Rplot55.jpeg)
+接下来可以进行一些数学分析
+```r
+#线性回归
+m1 <- lm(d_Y ~ Comp, data = df)
+summary(m1)
+#anova
+anova(m1)
+#HSD
+m1.df <- HSD.test(m1, "Comp", group = TRUE, console = TRUE)
+```
+**Q2:那么这些超额收益（overyield，NBE）是否取决于地块的组成和丰富程度？**
+请记住，现在的响应变量不是该地块产生多少生物量，而是该数字减去如果该地块中的某树的纯林的情况下的预期值。因此，这需要调整每种物种的“先天”生产力。
+这时不同地块的情况如何呢？
+```r
+#绘图
+with(df, plot(Comp, NBE, col = comp.cols))
+#回归
+m3 <- lm(NBE ~ Comp, data = df) 
+summary(m3)
+#anova
+anova(m3)
+#HSD
+m3.df <- HSD.test(m3, "Comp", group = TRUE, console = TRUE)
+```
+![NBE](R/Rplot56.jpeg)
+所以，根据事后检验，那一块地的产量最高呢？
+在评估超额收益与物种丰富度的关系时，我们又会发现什么？可以比较m4与上面m2的结果：
+```r
+with(df, plot(SR, NBE))
+m4 <- lm(NBE ~ SR, data = df)
+summary(m4)
+anova(m4)
+m4.df <- HSD.test(m4, "SR", group = TRUE, console = TRUE)
+```
+这有助于解释单变量控制试验在生物多样性研究中的重要性。
+### 生物多样性的互补与选择
+**Q3:如何在互补性和选择性方面比较不同级别的物种丰富度？**
+我们现在很熟悉这一套了：首先，以图形方式进行分析；然后建立线性模型，并使用ANOVA进行评估（如果ANOVA显着），最后使用事后测试HSD：
+```r
+#首先查看互补效应
+with(df, plot(SR, CE))
+m5 <- lm(CE ~ SR, data = df)
+summary(m5)
+anova(m5)
+m5.df <- HSD.test(m5, "SR", group = TRUE, console = TRUE)
+#接着查看选择效应
+with(df, plot(SR, SE))
+m6 <- lm(SE ~ SR, data = df)
+summary(m6)
+anova(m6)
+m6.df <- HSD.test(m6, "SR", group = TRUE, console = TRUE)
+#还可以把CE和SE的图放在一块比较，使之更易看出正负相关
+with(df, plot(SR, CE, col = "blue"))
+with(df, points(SR, SE, col = "red"))
+abline(h = 0)
+```
+那么。
+1. CE和SE如何与NBE（超额收益overyield）进行比较？
+2. CE阳性是什么意思？CE阴性意味着什么？
+3. SE的正值和负值如何？（这可能会造成混淆。）
+你是否发现超乎寻常的超额收益的证据？
+```r
+#回到问题1的图
+with(df, plot(SR, d_Y, ylim = c(-0.05, 0.25)))
+#加条分界线
+abline(h = 0)
+```
+就很明显：
+![NBE2](R/Rplot57.jpeg)
+**Q4:那么生产力最低（或平均）的混交林是否比生产力最高的单一纯林更高？**
+可以将所有纯林编码为“0”，并将所有混交林编码为“1”，然后进行t检验...
+### 生物多样性的维度与其生产力
+**Q5:哪个方面的生物多样性维度？物种、功能性状还是系统发育可以确定最高的生产力呢？**
+为了解决这个问题，我们将看到每个维度解释了多少超额收益（NBE）。对于单变量回归模型，我们可以仅使用线性模型输出中的R^2进行模型比较。结果如下：
+```r
+#这是物种多样性
+m4 <- lm(NBE ~ SR, data = df)
+summary(m4)
+#Adjusted R-squared:  0.643
+#这是系统发育多样性
+m7 <- lm(NBE ~ PSV, data = df) 
+summary(m7)
+#Adjusted R-squared:  0.02538
+#这是功能多样性
+m8 <- lm(NBE ~ FDis, data = df) 
+summary(m8)
+#Adjusted R-squared:  0.1768
 ```
 [返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
