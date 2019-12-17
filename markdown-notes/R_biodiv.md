@@ -972,7 +972,7 @@ SARr2(Lfull = sar_nb1.5.w$LL, Lnull = sar_nb1.5.w$logLik_lm.model, N = nrow(fdat
 [返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
 ## 生态功能与生物多样性
 在本节中，我们将探讨有关生物多样性及其对生态系统功能的影响的问题。为此，我们将使用Jake Gorssman提供的数据和脚本（进行一些修改）。
-从大佬(Grossman et al. 2017; Ecology 98:2601-14)的”Species richness and traits predict overyielding in stem growth in an early‐successional tree diversity experiment“中获得数据并整理：
+从大佬(Grossman et al. 2017; Ecology 98:2601-14)的”Species richness and traits predict overyielding in stem growth in an early‐successional tree diversity experiment“中获得数据并整理，它们在[我的github](https://github.com/Vendredii/Rstats)中也可以获得：
 ```r
 library(agricolae)
 df <- read.csv("Data/BEF_Lesson_Data.csv", header = T)
