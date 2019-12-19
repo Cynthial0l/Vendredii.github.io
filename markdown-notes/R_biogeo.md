@@ -1,5 +1,7 @@
 # 生物地理学
 生物地理学结合了GIS技术、遥感和生态学的知识，不学就亏了。
+但以下内容都可以用ArcGIS和ENVI解决，因此也就图一乐。
+原作：Jesús N. Pinto-Ledezma and Jeannine Cavender-Bares
 [TOC]
 ## 物种分布与生物多样性
 在本实验中，你将学习R中的基本工具，以可视化物种分布，建立地理范围，以测试不同方法下生物多样性梯度的驱动力。
@@ -666,4 +668,142 @@ plot(map.mean.weight, main = "Weighted mean of all models")
 plot(map.sd, main = "Standard deviation of all models")
 ```
 ![加权](R/Rplot71.jpeg)
+[返回目录](#%e7%94%9f%e7%89%a9%e5%9c%b0%e7%90%86%e5%ad%a6)
+## 运用光谱数据调查生物多样性
+在本实验中，我们随便研究一下“光谱数据”。为此，我们将使用R包**spectrolab**和其中存储的数据。spectrolab是一个R包，用于处理和可视化来自便携式光谱仪的数据，并建立通用的光谱信息接口。处理光谱信息/数据与处理任何其他信息（例如物种，社区）没什么不同似，因此可以用于计算任何多样性指标，即称为"光谱多样性"的生物多样性维度。
+Jesús对这个算法进行了一些修改和补充，但基本上是基于spectrolab软件包的说明（https://cran.r-project.org/web/packages/spectrolab/vignettes/introduction_to_spectrolab.pdf）。也感谢感谢Dudu（JoséEduardo Meireles）使光谱数据易于处理。
+首先准备各种数据和软件：
+```r
+#安装包
+install.packages("spectrolab", dependencies = TRUE)
+library(spectrolab)
+#有两种方法可以使光谱进入R：
+#1）将矩阵或数据框转换为光谱；
+#2）从原始数据文件（格式：SVC的sig，Spectral Evolution的sed和ASD的asd）中读取光谱。 这是几个例子：
+#这是一个使用spectrolab软件包提供的名为spec_matrix_meta.csv的数据集矩阵的示例。
+#从csv中读取数据，但不用check.names = FALSE
+dir_path <- system.file("extdata/spec_matrix_meta.csv", package = "spectrolab")
+spec_csv <- read.csv(dir_path, check.names = FALSE)
+head(spec_csv)
+#将光谱转为R的矩阵或数据框后，就可以使用函数as.spectra()将其转换为光谱对象。
+#矩阵必须在行中具有样本，在列中必须具有波长。波长列的标题必须是（数字）波长标签。
+#您还应该使用name_idx参数声明哪一列具有样品名称（必填）。 如果存在其他列（样品名称和反射率除外），则必须将其索引作为meta_idxs参数传递给as.spectra。
+#1,2列为元数据，3为样本列
+achillea_spec = as.spectra(spec_csv, name_idx = 3, meta_idxs = c(1, 2))
+#这就是光谱数据
+achillea_spec
+#找到自带的样本数据
+dir_path <- system.file("extdata", "Acer_example", package = "spectrolab")
+#读取波段数据（.sig格式）
+acer_spectra <- read_spectra(path = dir_path, format = "sig")
+#查看数据
+acer_spectra
+#查看维度？波段？
+dim(acer_spectra)
+#你可以访问光谱的各个组成部分。
+#查看样本名称，允许重复
+n <- names(achillea_spec)
+#查看波长数据
+w <- wavelengths(achillea_spec)
+#查看反射率矩阵
+r <- reflectance(achillea_spec)
+#meta()代表相关的元数据（如果你有的话）
+m <- meta(achillea_spec, "ssp", simplify = TRUE)
+```
+您可以使用类似于矩阵和data.frames中使用的[i，j]函数的符号对光谱信息进行子集（分波段）化。[i，]中的第一个参数匹配样本名称（行），而第二个参数[，j]匹配波长名称（列）。以下是”["在频谱中的工作方式的一些示例：
+•x [1：3，]将保留x的前三个样本，即1：3为索引。
+•x [“ sp_1”，]将样本名称与“ sp_1”匹配的所有条目保留在x中。
+•x [，800：900]将保持800至900之间的波长。
+•x [，1：5]将报错，因为波长不能通过索引子集。
+通过子集，你可以排除频谱开始和结尾的嘈杂区域，或者将数据限制为特定的波段。
+但某些光谱的分辨率可能不同于1nm，就像SVC一样。在这些情况下，最好的方法是使用光谱的最小和最大参数来标准化光谱。
+同时通过索引对样本进行子集的划分是可行的，通过数字或字符对波长进行子集设置也可以实现
+```r
+#按波长和样本进行匹配
+spec_sub_vis <- achillea_spec[ , 400:700 ]
+spec_sub_byname <- achillea_spec["ACHMI_7", ]
+spec_sub_byidx <- achillea_spec[ 1:3, ]
+#标准化光谱
+acer_spectra_trim <-  acer_spectra[ , wavelengths(acer_spectra, 400, 2400) ]
+#通过参数划设子集
+spec_sub_byidx[1, "405"] == spec_sub_byidx[1, 405]
+```
+也可以将光谱图转为矩阵或data.frame。
+也可以使用as.matrix()或as.data.frame()函数将光谱对象转换为矩阵或data.frame。因为我们经常要以特定格式（例如csv）导出数据。
+```r
+#从spectra生成一个矩阵
+spec_as_mat = as.matrix(achillea_spec, fix_names = "none")
+spec_as_mat[1:4, 1:3]
+#生成一个矩阵
+spec_as_df = as.data.frame(achillea_spec, fix_names = "none", metadata = TRUE)
+spec_as_df[1:4, 1:5]
+```
+### 获取波段图谱
+绘制光谱的主要功能是**plot()**。它将在光谱对象中共同绘制每个光谱。 您应该能够将常用的绘图参数传递给它，例如col，ylab，lwd等:
+```r
+#简单绘制
+plot(achillea_spec, lwd = 0.75, lty = 1, col = "grey25", main = "All Spectra")
+```
+![光谱1](R/Rplot72.jpeg)
+您还可以使用plot_quantile()绘制光谱对象的分位数。第二个参数total_prob是分位数包含的总“质量”。例如，total_prob = 0.95涵盖了光谱对象中95％的变化，即0.025至0.975分位数。 如果add = TRUE，则分位数图可以单独使用，也可以添加到当前图中。
+```r
+plot_quantile(achillea_spec, total_prob = 0.8, col = rgb(1, 0, 0, 0.5), lwd = 0.5, border = TRUE)
+title("80% spectral quantile")
+```
+![光谱分位数](R/Rplot73.jpeg)
+函数plot_regions()有助于阴影不同的光谱区域。spectrolab提供了一个default_spec_regions()矩阵作为示例，但显然需要对其进行自定义（有关详细信息，请参见plot_regions的帮助页面）。
+```r
+#结合了单个光谱，分位数和阴影光谱区域的图
+plot(achillea_spec, lwd = 0.25, lty = 1, col = "grey50", main = "Spectra, quantile and regions")
+plot_quantile(achillea_spec, total_prob = 0.8, col = rgb(1, 0, 0, 0.25), border = FALSE, add = TRUE)
+plot_regions(achillea_spec, regions = default_spec_regions(), add = TRUE)
+```
+![光谱全图](R/Rplot74.jpeg)
+### 基于遥感的生态指标
+请注意，光谱范围为400到2400，以下我们将光谱数据分为不同的光谱。 这些是**VIS（可见光）**或，**NIR（近红外）**或，**SWIR1**和**SWIR2**为短波红外。
+```r
+VIS <- c(400:700)
+NIR <- c(800:1300)
+SWIR1 <- c(1550:1800)
+SWIR2 <- c(2000:2400)
+#VIS
+achillea_spec_VIS <- achillea_spec[, VIS]
+achillea_spec_VIS
+achillea_spec_VIS_df <- as.data.frame(achillea_spec_VIS, fix_names = "none", metadata = TRUE)
+achillea_spec_VIS_df[1:10, 1:5]
+#可以绘制出来，其他波段也可以如法炮制
+plot(achillea_spec_VIS, lwd = 0.75, lty = 1, col = "grey25", main = "Visible")
+#删除前3列以进一步分析
+spec_as_df_clean <- spec_as_df[, 4:2004]
+spec_as_df_clean[1:10, 1:5]
+#选择光谱数据
+achillea_spec_VIS_df_clean <- achillea_spec_VIS_df[, 4:304]
+achillea_spec_VIS_df_clean[1:10, 1:5]
+#例如选择ACHMI的第一行。结果是规格为1行和2001列的data.frame。
+spec_as_df_clean_ind1 <- spec_as_df_clean[1, ]
+dim(spec_as_df_clean_ind1)
+spec_as_df_clean_ind1
+```
+现在让我们计算一些描述性统计信息以更好地理解数据。可以自己做，但是Jesús准备了一个函数来自动进行此计算。其称为**Descriptives()**，您只需要输入值即可。
+```r
+source("mixR.R")
+Descriptives(as.numeric(spec_as_df_clean_ind1))
+```
+现在可以为其他对象重复该过程，并查看与Achillea的区别。请注意，函数**Descriptives()**可以在**for**循环中使用，但是也可以使用**apply**函数。此函数将特定函数应用于矩阵或data.frame。
+```r
+descript_all_individuals <- apply(spec_as_df_clean, MARGIN = 1, FUN = Descriptives)
+descript_all_individuals[[10]]
+```
+最后，我们将计算一些植被指数：
+1.简单植被指数：SR = Rnir / Rr
+其中：R =反射率，nir =波段845，r =波段665。
+2.归一化植被指数：NDVI =（Rnir-Rr）/（Rnir + Rr）
+其中：nir = 845和r = 665。
+3.光化学反射指数：PRI ＝（R531-R570）/（R531 + R570）。这些数字分别对应于531和570波段，R是反射率。
+4.归一化水文指数：NDWI =（R860-R1240）/（R860 + R1240）
+5.水平衡指数：WBI = R900 / R970。
+```r
+SR_achillea = spec_as_df[, "845"]/spec_as_df[, "665"]
+SR_achillea
+```
 [返回目录](#%e7%94%9f%e7%89%a9%e5%9c%b0%e7%90%86%e5%ad%a6)
