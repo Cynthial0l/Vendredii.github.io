@@ -1054,3 +1054,5 @@ $$AIC=nlog(\hat{\sigma}^2)+2(k+1)$$
 AIC为模型选择提供了有效的规则，但也有不足之处。当样本容量很大时，在AIC准则中拟合误差提供的信息就要受到样本容量的放大，而参数个数的惩罚因子却和样本容量没关系，因此当样本容量很大时，使用AIC准则选择的模型不收敛与真实模型，它通常比真实模型所含的未知参数个数要多。BIC（Bayesian InformationCriterion）贝叶斯信息准则是Schwartz在1978年根据Bayes理论提出的判别准则，称为SBC准则(也称BIC)，弥补了AIC的不足。SBC的定义为： 
 $$BIC = ln(k) - 2ln(L)$$
 [回到目录](#r%e5%ad%a6%e4%b9%a0)
+## ggtree与系统发育树
+[G Yu的教程无敌](yulab-smu.github.io/treedata-book/)
