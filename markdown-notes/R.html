@@ -3,7 +3,7 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       
-      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.10.2/dist/katex.min.css">
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css">
       
       
 
@@ -342,6 +342,7 @@ R&#x8BED;&#x8A00;&#x5728;&#x5176;&#x4ED6;&#x5B66;&#x79D1;&#x4E2D;&#x5C5E;&#x4E8E
 </li>
 </ul>
 </li>
+<li><a href="#ggtree%E4%B8%8E%E7%B3%BB%E7%BB%9F%E5%8F%91%E8%82%B2%E6%A0%91">ggtree&#x4E0E;&#x7CFB;&#x7EDF;&#x53D1;&#x80B2;&#x6811;</a></li>
 </ul>
 </li>
 </ul>
@@ -1268,6 +1269,9 @@ Akaike&#x53D1;&#x73B0;K-L&#x8DDD;&#x79BB;&#x7684;&#x4F30;&#x8BA1;&#x5728;&#x5B9E
 AIC&#x4E3A;&#x6A21;&#x578B;&#x9009;&#x62E9;&#x63D0;&#x4F9B;&#x4E86;&#x6709;&#x6548;&#x7684;&#x89C4;&#x5219;&#xFF0C;&#x4F46;&#x4E5F;&#x6709;&#x4E0D;&#x8DB3;&#x4E4B;&#x5904;&#x3002;&#x5F53;&#x6837;&#x672C;&#x5BB9;&#x91CF;&#x5F88;&#x5927;&#x65F6;&#xFF0C;&#x5728;AIC&#x51C6;&#x5219;&#x4E2D;&#x62DF;&#x5408;&#x8BEF;&#x5DEE;&#x63D0;&#x4F9B;&#x7684;&#x4FE1;&#x606F;&#x5C31;&#x8981;&#x53D7;&#x5230;&#x6837;&#x672C;&#x5BB9;&#x91CF;&#x7684;&#x653E;&#x5927;&#xFF0C;&#x800C;&#x53C2;&#x6570;&#x4E2A;&#x6570;&#x7684;&#x60E9;&#x7F5A;&#x56E0;&#x5B50;&#x5374;&#x548C;&#x6837;&#x672C;&#x5BB9;&#x91CF;&#x6CA1;&#x5173;&#x7CFB;&#xFF0C;&#x56E0;&#x6B64;&#x5F53;&#x6837;&#x672C;&#x5BB9;&#x91CF;&#x5F88;&#x5927;&#x65F6;&#xFF0C;&#x4F7F;&#x7528;AIC&#x51C6;&#x5219;&#x9009;&#x62E9;&#x7684;&#x6A21;&#x578B;&#x4E0D;&#x6536;&#x655B;&#x4E0E;&#x771F;&#x5B9E;&#x6A21;&#x578B;&#xFF0C;&#x5B83;&#x901A;&#x5E38;&#x6BD4;&#x771F;&#x5B9E;&#x6A21;&#x578B;&#x6240;&#x542B;&#x7684;&#x672A;&#x77E5;&#x53C2;&#x6570;&#x4E2A;&#x6570;&#x8981;&#x591A;&#x3002;BIC&#xFF08;Bayesian InformationCriterion&#xFF09;&#x8D1D;&#x53F6;&#x65AF;&#x4FE1;&#x606F;&#x51C6;&#x5219;&#x662F;Schwartz&#x5728;1978&#x5E74;&#x6839;&#x636E;Bayes&#x7406;&#x8BBA;&#x63D0;&#x51FA;&#x7684;&#x5224;&#x522B;&#x51C6;&#x5219;&#xFF0C;&#x79F0;&#x4E3A;SBC&#x51C6;&#x5219;(&#x4E5F;&#x79F0;BIC)&#xFF0C;&#x5F25;&#x8865;&#x4E86;AIC&#x7684;&#x4E0D;&#x8DB3;&#x3002;SBC&#x7684;&#x5B9A;&#x4E49;&#x4E3A;&#xFF1A;<br>
 <span class="katex-display"><span class="katex"><span class="katex-mathml"><math xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>B</mi><mi>I</mi><mi>C</mi><mo>=</mo><mi>l</mi><mi>n</mi><mo stretchy="false">(</mo><mi>k</mi><mo stretchy="false">)</mo><mo>&#x2212;</mo><mn>2</mn><mi>l</mi><mi>n</mi><mo stretchy="false">(</mo><mi>L</mi><mo stretchy="false">)</mo></mrow><annotation encoding="application/x-tex">BIC = ln(k) - 2ln(L)</annotation></semantics></math></span><span class="katex-html" aria-hidden="true"><span class="base"><span class="strut" style="height:0.68333em;vertical-align:0em;"></span><span class="mord mathdefault" style="margin-right:0.05017em;">B</span><span class="mord mathdefault" style="margin-right:0.07847em;">I</span><span class="mord mathdefault" style="margin-right:0.07153em;">C</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span><span class="mrel">=</span><span class="mspace" style="margin-right:0.2777777777777778em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mopen">(</span><span class="mord mathdefault" style="margin-right:0.03148em;">k</span><span class="mclose">)</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span><span class="mbin">&#x2212;</span><span class="mspace" style="margin-right:0.2222222222222222em;"></span></span><span class="base"><span class="strut" style="height:1em;vertical-align:-0.25em;"></span><span class="mord">2</span><span class="mord mathdefault" style="margin-right:0.01968em;">l</span><span class="mord mathdefault">n</span><span class="mopen">(</span><span class="mord mathdefault">L</span><span class="mclose">)</span></span></span></span></span><br>
 <a href="#r%e5%ad%a6%e4%b9%a0">&#x56DE;&#x5230;&#x76EE;&#x5F55;</a></p>
+<h2 class="mume-header" id="ggtree%E4%B8%8E%E7%B3%BB%E7%BB%9F%E5%8F%91%E8%82%B2%E6%A0%91">ggtree&#x4E0E;&#x7CFB;&#x7EDF;&#x53D1;&#x80B2;&#x6811;</h2>
+
+<p><a href="yulab-smu.github.io/treedata-book/">G Yu&#x7684;&#x6559;&#x7A0B;&#x65E0;&#x654C;</a></p>
 
       </div>
       
