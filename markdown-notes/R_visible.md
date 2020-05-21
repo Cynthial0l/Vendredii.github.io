@@ -301,4 +301,4 @@ graph2tif(x=x, file = filen, dpi = 400, height = 5)
 ```
 ## MuMIn包
 对回归模型进行模型比较必不可少的包
-[MuMIn包教程翻译](./MuMIn.md)
+[MuMIn包教程翻译](./MuMIn.html)
