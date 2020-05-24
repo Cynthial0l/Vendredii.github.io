@@ -14,4 +14,4 @@
 [生态学数学原理](markdown-notes/MathPrinciples.html)
 [生物信息学教程](https://github.com/Vendredii/Bioinformatic-trans)
 ### 关于作者
-目前生态学硕士在读，邮箱：edenchen1226@outlook.com,微信公众号：第二太平洋舰队。
+目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 微信公众号：第二太平洋舰队。
