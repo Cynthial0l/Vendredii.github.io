@@ -6,12 +6,13 @@
 1. 以通俗易懂的方式介绍我学习介绍各种程序语言，帮助大家在学习编程，或者说学习数学分析时少走一些弯路。
 2. 以相对严谨的方式介绍并推导（如果可以的话）概率论、线性代数、回归分析、机器学习、神经网络等。?
 ### 目录
-[Python学习笔记](markdown-notes/Python.html)
+[Python学习笔记（绝赞更新中）](markdown-notes/Python.html)
 [R语言入门与简单数学分析](markdown-notes/R.html)
 [R语言与数据处理及可视化](markdown-notes/R_visible.html)
 [R语言与生物多样性](markdown-notes/R_biodiv.html)
 [R语言与生物地理学/遥感](markdown-notes/R_biogeo.html)
 [生态学数学原理](markdown-notes/MathPrinciples.html)
 [生物信息学教程](https://github.com/Vendredii/Bioinformatic-trans)
+[R语言与机器学习？（施工中）](markdown-notes/rmodel.html)
 ### 关于作者
 目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 微信公众号：第二太平洋舰队。
