@@ -17,3 +17,50 @@ library(randomForest)
 #devtools::install_github("MI2DataLab/randomForestExplainer")
 library(randomForestExplainer)
 ```
+在这里用于演示随机森林模型运算的数据来自R包MASS中的Boston数据，这是波士顿郊区的房价数据，其中```crim```为按城镇划分的犯罪率，```zn```为25000尺以上面积的豪宅的比例，```indus```为每个城镇的非零售业务的商业用地比例，```chas```为是否在查理河边，1为在，0为不在，```nox```为氮氧化物浓度，```rm```为每间房屋的平均房间数，```age```1940年前就住在这里的自建房户数的比例，```dis```距离五个就业中心的加权平均数，```rad```公路可达性指数，```tax```每10000美元的增值税率，```ptratio```按城镇划分的教师比例，```black```黑人比例，```lstat```底层人口比例，```medv```房价的中值。
+```r
+#提取数据
+data(Boston, package = "MASS")
+#将chas转为逻辑变量，即FALSE和TURE
+Boston$chas <- as.logical(Boston$chas)
+#显示数据
+str(Boston)
+```
+接下来可以使用randomForest包进行随机森林的拟合
+```r
+#mtry函数为指定随机森林的训练次数，默认是500
+forest <- randomForest(medv ~ ., data = Boston, localImp = TRUE)
+forest
+#Call:
+# randomForest(formula = medv ~ ., data = Boston, localImp = TRUE) 
+#               Type of random forest: regression
+#                     Number of trees: 500
+#No. of variables tried at each split: 4
+#
+#          Mean of squared residuals: 9.671408
+#endregion                    % Var explained: 88.54
+```
+这就是随机森林模型的简单实现了
+### 基于R包的随机森林扩展
+#### 随机森林的决策树
+决策树是一个递归过程，即通过对变量（节点）进行不断分类，细分出最符合结果的特征。在决策树的基本算法中，有三种情形会导致递归返回：(1)当前的节点所包含的样本全属于同一类别，无需划分；(2)当前属性集为空或是所有样本在所有属性上取值相同，无需划分；(3)当前节点包含的样本集合为空，不能划分。
+另外，我们还可以看到决策树学习的关键是算法，即如何选择最优划分属性？一般而言，随着划分过程不断进行，我们希望决策树的分支节点所包含的样本尽可能属于同一类别，即节点的“纯度”越来越高。
+变量重要性是通过考虑节点纯度的平均增加程度决定的（该变量导致的分裂）来计算的。哪个变量的分裂导致节点纯度的更大增加在这一指标中显得尤为重要。一般而言第一次分裂通常会导致节点纯度的最大增加因此往往这个变量的重要性最高。而最小深度表示此变量首次用于拆分树的时间是什么。如果是这种情况，则有意义的是，更重要的变量具有较低的最小深度值。导致纯度增加较大的分裂较早发生，因此重要变量会在早期分裂，因此最小深度较低的变量有着更高的重要性。
+#### 平均最小深度的绘制
+函数```plot_min_depth_distribution```用于绘制随机森林的最小深度分布，其在默认设置下根据随机森林使用的顶部树（mean_sample = "top_trees"）计算的平均最小深度来获得前十个变量的最小深度分布图。我们也可以将随机森林的直接传递给绘图函数，但是如果要制作多个深度最小分布图，则将传递```min_depth_frame```给绘图函数更有效，这样就不会为每个绘图再次计算。
+```r
+#显示决策树的最小深度分布
+min_depth_frame <- min_depth_distribution(forest)
+save(min_depth_frame, file = "min_depth_frame.rda")
+load("min_depth_frame.rda")
+head(min_depth_frame, n = 10)
+#绘制最小分布图像
+#也可以这样：plot_min_depth_distribution(forest)
+plot_min_depth_distribution(min_depth_frame)
+```
+![最小分布图1](R/Rplot76.jpeg)
+函数 `plot_min_depth_distribution` 计算平均最小深度时，该函数提供了三种可能性，它们的不同之处在于，它们处理在不使用变量在树的分支时出现的缺失值。它们可以描述如下：
+- `mean_sample = "all_trees"` （填充缺失值）：所有树的所有变量的最小深度的平均计算为等于树的平均深度。需要注意的是，一棵树的深度等于该树中从根到结束的最长路径的长度。这等于该树中变量的最大深度加一，因为根据定义，叶子没有被任何变量分割​​。
+- `mean_sample = "top_trees"` (限制样本): 仅计算平均最小深度 $\tilde{B}$ 在 $B$ (树的数量) 以上的值, 小于 $B$ 的将会定义为缺失。
+- ```mean_sample = "relevant_trees" ```（忽略缺失值）：仅使用非缺失值来计算最小深度。
+请注意 $x$轴的范围是从零棵树到使用任何变量进行拆分的最大树数($\tilde{B}$)，在这种情况下等于500，并且可以通过绘制的所有变量达到。
