@@ -12,6 +12,8 @@ Python好啊
 [TOC]
 
 ## 关于编译与语言——一些杂谈
+### 选择一个编译工具
+在VScode中，使用Command+/可以给代码快速添加注释（#）符号
 ### 在Mac（OSX）上使用Github
 #### 关于git 
 git是一个开源的分布式的版本控制（Revision Control）系统，通过git我们可以实现跨区域的多人协同开发。而github就是一个基于git的面向开源软件项目的托管平台。  
