@@ -14,6 +14,7 @@ Bootstrap是一种非参数统计蒙特卡洛方法，原理就是通过抽样�
 随机森林在大部分分类问题中的训练速度和精度远大于knn和svm。knn易于实现但是预测缓慢，是惰性学习算法。svm的优势是效果不错且稳定，预测速度快（只需要和支持向量进行比较，支持向量往往很少）。 大部分竞赛中，随机森林比knn和svm用的要多。
 ### 基于R包的随机森林实现
 我们主要通过R包randomForest和它的优化包randomForestExplainer来实现。
+来源: [vignettes/randomForestExplainer.Rmd](https://github.com/ModelOriented/randomForestExplainer/blob/master/vignettes/randomForestExplainer.Rmd)
 ```r
 #安装并启动相关包
 library(randomForest)
@@ -66,7 +67,7 @@ plot_min_depth_distribution(min_depth_frame)
 ```
 ![最小分布图1](R/Rplot76.jpeg)
 函数 `plot_min_depth_distribution` 计算平均最小深度时，该函数提供了三种可能性，它们的不同之处在于，它们处理在不使用变量在树的分支时出现的缺失值。它们可以描述如下：
-- ```mean_sample = "relevant_trees" ```：这仅考虑存在交互作用的树。
+- `mean_sample = "relevant_trees" `：这仅考虑存在交互作用的树。
 - `mean_sample = "all_trees"` ：relevant_trees存在一个主要问题，即对于仅出现在少量树中的交互，采用条件最小深度的平均值会忽略这种交互并不那么重要的事实。在这种情况下，较小的平均条件最小深度并不意味着交互是重要的。为了解决这个问题，该函数用根变量的最大子树的平均深度替换相关的有交互作用的条件最小深度。基本上，如果我们查看x1：x2的交互作用，则表示对于不存在这种交互作用的树，请为其提供根为x1的最深树的值。这为mean_min_depth交互提供了一个（希望是很大的）数值，以免因为x1:x2的交互作用使其重要性下降。
 - `mean_sample = "top_trees"` : 这是的默认选项，它类似于all_trees，但是尝试降低替换缺失值的贡献。原因是当有许多参数但观测不足时，即树的长度比较浅时，all_trees将其拉近mean_min_depth相同的值。为了减少替换缺失值的影响，top_trees仅计算子树n的平均条件最小深度，其中n是存在与指定根的任何交互的树数。
 下面我们只查看有交互作用的树产生的结果：
@@ -136,4 +137,51 @@ plot_multi_way_importance(importance_frame, size_measure = "no_of_nodes")
 plot_multi_way_importance(importance_frame, x_measure = "mse_increase", y_measure = "node_purity_increase", size_measure = "p_value", no_of_labels = 5)
 ```
 ![重要性图2](R/Rplot79.jpeg)
-#### 比较不同度量指标
+#### 选择合适的重要性指标
+一般来说，多向重要性图提供了多种可能性，因此很难选择最重要的那一个。克服这一障碍的一个想法是，首先探索不同重要性指标之间的关系，然后选择三个最不一致的指标，并将它们运用到多因素重要性图中，以选择最重要的变量。第一种方法很容易实现，方法是使用下面的`plot_importance_ggpairs`函数将选定的重要性度量成对地绘制出来。当然，我们可以在图中包含所有七个度量值，但默认情况下，p值和树的数量被排除在外，因为它们携带的信息与节点数相似。
+```r
+#plot_importance_ggpairs(forest)
+plot_importance_ggpairs(importance_frame)
+```
+![重要性图3](R/Rplot81.jpeg)
+我们可以看到，所有描述的测量值都是高度相关的（当然，任何测量值与平均最小深度的相关性都是负相关），但是有些测量值比其他测量值低。此外，无论我们比较哪种度量，似乎总有两个点是突出的，而这两个点最有可能对应于`lstat`和`rm`，它们可以是主要的预测因子/重要的影响因子。
+#### 变量的交互作用
+这里我们可以使用有条件的最小深度来衡量基于交互作用修正后的各个因子之间的最小深度。
+在选择了一组最重要的变量之后，我们可以研究它们之间的相互作用，即在最大子树中出现的与所选变量之一相关的分裂。为了根据变量出现的树的平均最小深度和树数，我们提取5个最重要变量，将我们的重要性评价系统传递给函数重要变量。
+```r
+#(vars <- important_variables(forest, k = 5, measures = c("mean_min_depth", "no_of_trees")))
+(vars <- important_variables(importance_frame, k = 5, measures = c("mean_min_depth", "no_of_trees")))
+```
+结果：`[1] "lstat" "rm"    "crim"  "nox"   "dis"  `
+我们将结果和研究出的forest一起传递给`min_depth_interactions`函数，以获得一个东西，其中包含关于变量的每个元素的变量的平均条件最小深度的信息（缺失值与无条件最小深度类似地填充，用`mean_sample`指定的三种方式之一）。如果我们不指定`vars`参数，那么默认情况下，条件变量的向量将使用重要变量`measure_importance（forest）`获得。
+```r
+#interactions_frame <- min_depth_interactions(forest, vars)
+#save(interactions_frame, file = "interactions_frame.rda")
+load("interactions_frame.rda")
+head(interactions_frame[order(interactions_frame$occurrences, decreasing = TRUE), ])
+```
+然后，我们将我们的`interactions_frame`传递给绘图函数`plot_min_depth_interactions`，得到以下结果：
+```r
+# plot_min_depth_interactions(forest)
+plot_min_depth_interactions(interactions_frame)
+```
+![交互修正](R/Rplot82.jpeg)
+交互作用是通过减少出现次数来排序的,即为最频繁的一次，所以lstat和rm有最小平均条件最小深度。值得注意的是，以lstat为根变量，rm在森林中的无条件平均最小深度几乎等于其在最大子树上的最小平均深度。
+需要注意的是，使用默认的“top_trees”会惩罚出现频率低于最频繁的交互。所以如果在计算最小深度时设置`mean_sample = "relevant_trees" `会有不一样的结果。
+#### 利用随机森林进行预测
+预测的话很简单，如下
+```r
+#仅用于演示，实际上没有testdata
+predict(forest, newdata = testdata)
+```
+但为了进一步研究房价和最相关的两个变量rm与lstat之间的关系，我们使用函数`plot_predict_interaction`来绘制我们的随机森林预测结果图像。该函数需要随机森林本体，训练集与x和y轴所用的变量。在内存不足的情况下，可以使用参数`grid`从默认值100开始减少网格的两个维度中的点数
+```r
+plot_predict_interaction(forest, Boston, "rm", "lstat")
+```
+![预测结果与交互](R/Rplot80.jpeg)
+在上面的图中我们可以清楚地看到相互作用的影响：当lstat较低时，预测的中间状态（模糊？）最高，反之则为rm的高低。为了进一步研究交互作用的影响，我们可以在网格上绘制其他频繁的交互作用。
+#### 随机森林可视化
+可以直接输出上述的所有结果，通过网页的形式：(**非常占用计算资源与内存！！！**)
+```r
+explain_forest(forest, interactions = TRUE, data = Boston)
+```
