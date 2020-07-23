@@ -1,5 +1,5 @@
 # R语言与机器学习？
-其实我觉得这一个新的单元应该称为r语言与复杂数学模型，机器学习（Machine Learning）算是一个老生常谈的话题，也是一个论文灌水的重灾区，但随着时间的迁移，一些新的方法逐渐成为了灌水的大趋势，如遗传算法，神经网络，这些东西非常玄学，如果要应用其皮毛的话，大概要再开一章称为R语言与超级复杂数学模型。因此这里还是简单介绍一些难度相对不大，可能属于机器学习但也可能不是的数学模型，这些模型可以解决许多复杂的生态学问题或者是别的什么问题，各种问题。
+其实我觉得这一个新的单元应该称为r语言与复杂数学模型/黑箱的玩意，机器学习（Machine Learning）算是一个老生常谈的话题，也是一个论文灌水的重灾区，但随着时间的迁移，一些新的方法逐渐成为了灌水的大趋势，如遗传算法，神经网络，这些东西非常玄学，如果要应用其皮毛的话，大概要再开一章称为R语言与超级复杂数学模型。因此这里还是简单介绍一些难度相对不大，可能属于机器学习但也可能不是的数学模型，这些模型可以解决许多复杂的生态学问题或者是别的什么问题，各种问题。
 [TOC]
 ## 随机森林
 ### 定义与介绍
@@ -184,4 +184,143 @@ plot_predict_interaction(forest, Boston, "rm", "lstat")
 可以直接输出上述的所有结果，通过网页的形式：(**非常占用计算资源与内存！！！**)
 ```r
 explain_forest(forest, interactions = TRUE, data = Boston)
+```
+## 灰色预测
+一般适用于一些社会、经济、生态学等让人摸不着头脑的地方，就是一个系统，一个因素，受到很多已知条件的影响，也受到很多未知条件...就可以用灰色预测来进行预测（不知所云中）
+接下来是GM11灰色预测的R程序：
+来源：[DATAKilimanjaro的CSDN博客](https://blog.csdn.net/qq_38742877/article/details/101700392)
+灰色预测的执行
+```r
+gm <- function(x0,t)	#gm(xO,t)，其中xO是向量，为原始数据，t为表示预测到第几个数据
+{
+  xl <- cumsum(x0) #读原始数列xO,并用cumsum(xO)累加生成数列文1;步骤1完成
+  b <- numeric(length (x0)-1)
+  #lengthO计算xO的长度，numericO生成指定长度的0向量，这里生成比xO长度少1的0向量，记作b，实质是向量b的初始化
+  n <- length(x0)-1	#向量xO的长度减1，记作n
+  for(i in 1:n){	#循环语句i从1到n循环，步进为1
+    b[i]<--(xl[i] + xl[i+1])/2
+    }#b[i]:向量b的第i个元素
+    d <- numeric(length(b)) # 向量 d 初始化
+    d[] <- 1#向量d的元素全部赋值1，即单位向量
+    B <- cbind(b,d)	#cbind(,)以列方式将向量b和d合并成矩阵B;步骤2中矩阵B生成
+    BT <- t(B)	#t(),将矩阵B的转置，记作BT
+    M <- solve(BT%*%B)
+    #solve(A，b),解方程Ax=b，返回x的值，如果b缺失，则返回A的逆矩阵，这里M是BT * B的逆矩阵* %是乘法运箅符记作BT
+    yn<-numeric(length(x0)-1)	# 向量 yn 初始化
+    yn<-x0[2:length(x0)] #将原始向量xO除第一个外的其余元素赋与yn步骤2的yn生成
+    alpha<-M%*%BT%*%yn #最小二乘法计算微分方程参数,a和u赋予向量alpha
+    alpha2<-matrix(alpha, ncol =1)
+    a<-alpha2[1]	#提取参数a似乎直接从alpha提也行
+    u<-alpha2[2]	#提取参数u步骤3完成
+         y<-numeric(length(c(1:t))) # 向量 y 初始化
+         y[1]<-x0[1]	#原数列的第一个数值付给y的第一个数值
+         for(w in 1:(t-1))
+         {
+         y[w+1]<-(x0[1]-u/a)*exp(-a*w) + u/a
+         }            #建模生成模型计算值完成步骤4
+
+         xy<-numeric(length(y))	#向量xy 初始化
+         xy[1]<-y[1] #向量xy的第1个与y的第1个值不变,初始化
+         for(o in 2:t)
+         {
+         xy[o]<-y[o]-y[o-1]
+         }	#数据还原xy为还原值。完成步骤5
+xy<-round(xy,4)
+         m<-length(x0)
+         e<-numeric(length(x0)) #残差向量 e 初始化
+for(L in 1 :m)
+{
+  e[L]<-xy[L]-x0[L]
+}	#循环语句计算残差向量e
+e<-round(e,4)
+q<-numeric(length(x0))	#相对误差向量初始化
+for(L in 1:m){
+    q[L]<-(e[L]/x0[L]) * 100
+    }	#循环语句计算相对误差向量q完成步骤6
+q<-round(q,4)
+se<-sd(e)	#计算残差向量e标准差
+sx<-sd(x0)	#计算原数列xO标准差
+cv<-se/sx	#计算后验差比值C
+#窗口打印后验差比值
+pe<-abs(e-mean(e))#小频率误差 P
+i<-length(pe)
+accumulator=0
+for(L in 1:i){
+  if (pe[L]<0.6745 * sx) accumulator = accumulator+1
+}
+pv=accumulator/i #小频率误差P，完成步骤7
+if((pv>0.95)&(cv<0.35)) d<-c("predictions is Good")
+else if((pv>0.8)&(cv<0.4)) d<-c("predictions is Qualified")
+else if((pv>0.7)&(cv<0.45)) d<-c("predictions is Reluctantly")
+else d<-c("predictions is not good")
+list(model=paste("a=",round(a,4),"u=",round(u,4)),original.data=x0,
+      lAGO.predictions=y,predict.values=xy,Residuals=e,relative.error=q,C=cv,P=pv,test.re=d)
+ }
+```
+绘图函数
+```r
+plot.gm<-function(list,start=1,frequency=0)#plot.gm(上面的结果)
+{
+m1<-list
+x0<-m1$original.data
+xy<-m1$predict.values
+lonx0<-length(x0)
+lonxy<-length(xy)
+mx<-max(max(xy),max(x0))
+mn<-min(min(xy),min(x0))
+one<-(mx-mn)/25
+if((start&TRUE)&(frequency&TRUE)){
+  x1<-seq(start,start+(lonxy-1)*frequency,frequency)
+  x2<-seq(start,start+(lonx0-1)*frequency,frequency)
+  plot(x1,xy,col='blue',type='b',pch= 16,xlab='Time series',ylab='Values',ylim = c(mn-one,mx+one))
+  points(x2,x0,col='red',type='b',pch=18)
+  legend(locator(1),c('Predictions','Raw data'),pch = c(16,18),lty=1,col = c('blue','red'))}
+  else if((start&T)&(frequency==F)){
+    frequency<-1
+    x1<-seq(start,start+(lonxy-1)*frequency,frequency)
+    x2<-seq(start,start+(lonx0-1)*frequency,frequency)
+    plot(x1,xy,col='blue',type='b',pch= 16,xlab='Time series',ylab='Values',ylim = c(mn-one,mx+one))
+    points(x2,x0,col='red',type='b',pch=18)
+    legend(locator(1),c('Predictions','Raw data'),pch = c(16,18),lty=1,col = c('blue','red'))
+  }
+  else{plot(xy,col='blue',type='b',pch= 16,xlab='Time series',ylab='Values',ylim = c(mn-one,mx+one))
+    points(x0,col='red',type='b',pch=18)
+    legend(locator(1),inset = 0.5,c('Predictions','Raw data'),pch = c(16,18),lty=1,col = c('blue','red')) }
+
+}
+```
+结果输出为excel
+```r
+putout.gm<-function(list,file="")
+{
+  m1<-list
+  x0<-m1$original.data
+  xy<-m1$predict.values
+  e<-m1$Residuals
+  q<-m1$relative.error
+  t<-length(xy)
+original.data<-numeric(t) # 结果输出阶段
+original.data[]<-'NA'#全缺失值填充向量
+original.data[1:length(x0)]<-x0	#原数据填充向量前端，[length(x0)5 t]的元素值缺失
+predict.values<-round(xy,4)
+Residuals<-numeric(t)
+Residuals[]<-'NA'
+Residuals[1:length(e)]<-round(e,4)	# 误差数据填充向量前端，[length(x0)： t]的元素值缺失
+Relative.error<-numeric(t)
+Relative.error[]<-'NA'
+Relative.error[1:length(e)]<- round(q,4)#相对误差数据填充向量前端，[length(xO) : t]的元素值缺失
+result<-cbind(original.data,predict.values,Residuals,Relative.error)#合并输出原数据、预测值、残差、相对误差
+colnames(result)<-c("原始数据","预测值","残差","相对误差")
+
+if(file == ""){
+  wd<-getwd()
+  wd2<-paste(wd,"result.csv",sep="/")
+  print(wd2)
+  write.table(result,file=wd2,sep=",",row.names = F)
+  }
+else{
+  write.table(result,file=file,sep=",",row.names = F)
+  print(file)
+}
+}
 ```
