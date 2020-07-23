@@ -12,7 +12,7 @@
 [R语言与生物多样性](markdown-notes/R_biodiv.html)
 [R语言与生物地理学/遥感](markdown-notes/R_biogeo.html)
 [生态学数学原理](markdown-notes/MathPrinciples.html)
-[生物信息学教程](https://github.com/Vendredii/Bioinformatic-trans)
-[R语言与机器学习？（施工中）](markdown-notes/rmodel.html)
+[生物信息学教程（咕咕）](https://github.com/Vendredii/Bioinformatic-trans)
+[R语言与机器学习？（随机森林绝赞更新中）](markdown-notes/rmodel.html)
 ### 关于作者
 目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 微信公众号：第二太平洋舰队。
