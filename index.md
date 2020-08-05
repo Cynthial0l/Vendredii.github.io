@@ -5,18 +5,19 @@
 关于内容：
 1. 以通俗易懂的方式介绍我学习介绍各种程序语言，帮助大家在学习编程，或者说学习数学分析时少走一些弯路。
 2. 以相对严谨的方式介绍并推导（如果可以的话）概率论、线性代数、回归分析、机器学习、神经网络等。?
+3. 学会称为调包奇侠
 ### 目录
-[Python学习笔记（绝赞更新中）](markdown-notes/Python.html)
+[预测：原理与实践（赚钱技能！绝赞更新中）](markdown-notes/forecast.html)
+[Python学习笔记（绝赞咕咕中）](markdown-notes/Python.html)
+[R语言与机器学习？（随机森林更新完了）](markdown-notes/R_model.html)
 [R语言入门与简单数学分析](markdown-notes/R.html)
 [R语言与数据处理及可视化](markdown-notes/R_visible.html)
 [R语言与生物多样性](markdown-notes/R_biodiv.html)
 [R语言与生物地理学/遥感](markdown-notes/R_biogeo.html)
 [生态学数学原理](markdown-notes/MathPrinciples.html)
-[生物信息学教程（咕咕）](https://github.com/Vendredii/Bioinformatic-trans)
-[R语言与机器学习？（随机森林绝赞更新中）](markdown-notes/R_model.html)
+[生物信息学教程（早已咕咕）](https://github.com/Vendredii/Bioinformatic-trans)
 ### 友情链接（傍大腿
 [MP](https://mpraiser.github.io) 微电子大师（Master），现居上海（不是），吃鸡很刚
 [Benja](https://aiifabbf.github.io) CS职业选手（指computer science）
-
 ### 关于作者
 目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 微信公众号：第二太平洋舰队。
