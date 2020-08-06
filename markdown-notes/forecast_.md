@@ -1,30 +1,60 @@
-# 预测：原理与实践
-## 前言
-来自澳大利亚莫纳什大学的教材[Forecast：Principles and Practice](https://otexts.com/fpp2/index.html)
+#  预测：原理与实践
+  
+##  前言
+  
+来自澳大利亚莫纳什大学的教材[Forecast：Principles and Practice](https://otexts.com/fpp2/index.html )
 所有计算与建模均基于R语言，可以通过在CRAN上安装fpp2软件包以便进行下面所有的操作。
 ***
 Hyndman, R.J., & Athanasopoulos, G. (2018) Forecasting: principles and practice, 2nd edition, OTexts: Melbourne, Australia. OTexts.com/fpp2.
-[TOC]
-## 入门
-### 关于预测
+  
+  
+- [预测：原理与实践](#预测原理与实践 )
+  - [前言](#前言 )
+  - [入门](#入门 )
+    - [关于预测](#关于预测 )
+  - [时间序列图像的绘制](#时间序列图像的绘制 )
+    - [ts对象](#ts对象 )
+    - [时间图（折线）](#时间图折线 )
+    - [散点图](#散点图 )
+    - [滞后图](#滞后图 )
+    - [自相关](#自相关 )
+    - [白噪声](#白噪声 )
+  - [预测工具箱](#预测工具箱 )
+    - [简单预测](#简单预测 )
+    - [数据预处理](#数据预处理 )
+    - [残差诊断](#残差诊断 )
+    - [评估预测结果的准确性](#评估预测结果的准确性 )
+    - [fpp2函数包](#fpp2函数包 )
+  - [判断性预测](#判断性预测 )
+    - [Delphi法](#delphi法 )
+    - [类比预测](#类比预测 )
+  - [时间序列回归模型](#时间序列回归模型 )
+    - [简单线性回归](#简单线性回归 )
+  
+##  入门
+  
+###  关于预测
+  
 有些预测很简单，而有些预测很难，事件的预测取决于以下三个因素：
 1. 我们对造成这种情况的因素的了解程度（对变量的了解
 2. 有多少数据可供预测
 3. 预测是否会影响我们要预测的事物
-
+  
 一个好的预测模型可以捕捉事物变化的方式，我们通常假定环境变化的方式将持续到未来，即高度波动的环境将继续高度波动...等。
 如果没有可用数据，或可用数据与预测不相关，则必须使用**定性预测**的方法，而当有关于过去的数字信息且有理由假设过去模式的某些方面将持续到将来时，则可以采用**定量预测**的方式，定量预测可以通过时间序列数据进行预测。
 在预测时，我们通常不直接指出预测的值，而是给出预测间隔，该间隔给出了随机变量可以相对较高的概率获取的一系列值。例如，一个95％的预测间隔包含一系列值，其中应包括概率为95％的实际未来值。其中给了一条线表示了各个预测结果的平均值，这种预测方法称**点预测**。
-
+  
 预测任务可以分解为以下5个步骤：
 1. 问题定义：怎么预测
 2. 搜集信息：相关专业知识与数据
 3. 初步分析：绘制图表，探讨趋势
 4. 选择模型：就是选择模型啦
 5. 使用模型：并评估其效果
-
-## 时间序列图像的绘制
-### ts对象
+  
+##  时间序列图像的绘制
+  
+###  ts对象
+  
 时间可以作为`ts`对象存储与r中，如2012年的数据为10，2013年为11，2014年为15：
 ```r
 y <- ts(c(10,11,15), start = 2012)
@@ -34,10 +64,11 @@ y <- ts(c(10,11,15), start = 2012)
 y <- ts(z, start = 2012, frequency = 12)
 ```
 备注：一年有52周
-
-### 时间图（折线）
+  
+###  时间图（折线）
+  
 对于时间序列数据，首先应当绘制相关的时间图。即将观察值相对于观察时间绘制，连续观察由直线连接。下图显示了澳大利亚两个最大城市之间的安捷航空每周的经济客运量。
-![plot1](Forecast/Rplot1.jpeg)
+![plot1](Forecast/Rplot1.jpeg )
 ```r
 #autoplot可以自动生成合适的图表
 autoplot(melsyd[,"Economy.Class"]) +
@@ -52,7 +83,7 @@ autoplot(melsyd[,"Economy.Class"]) +
 4. 每年年初，负载都有一些大的下降。这些是由于假期的影响。
 5. 该系列的水平存在长期波动，该波动在1987年增加，在1989年减少，并在1990年和1991年再次增加。
 6. 有些时期缺少观察结果。
-
+  
 也有一些简单的时间序列图：
 ```r
 autoplot(a10) +
@@ -60,33 +91,34 @@ autoplot(a10) +
   ylab("$ million") +
   xlab("Year")
 ```
-![plot2](Forecast/Rplot2.jpeg)
+![plot2](Forecast/Rplot2.jpeg )
 这是澳大利亚抗糖尿病药物的月销售额。显然这里的趋势是不断增长，每年年初的下降则与政府年初的补贴有关。
-
+  
 对于那些有季节性变化趋势的数据，我们可以将不同年份的数据进行对比，如上面的澳大利亚糖尿病药物数据：
 ```r
 ggseasonplot(a10, year.labels=TRUE, year.labels.left=TRUE) +
   ylab("$ million") +
   ggtitle("Seasonal plot: antidiabetic drug sales")
 ```
-![plot3](Forecast/Rplot3.jpeg)
+![plot3](Forecast/Rplot3.jpeg )
 我们可以直观的观察到，在这种情况下，很明显，每年一月份的销售额都有很大的增长。实际上，这些可能是12月下旬的销售，因为客户在年末之前有库存，但是直到一两周后才向政府注册销售。该图还显示，2008年3月的销售额异常少（大多数其他年份显示2月至3月之间有所增长）。2008年6月的销售量很少，可能是由于在收集数据时对销售的计数不完整。
-
+  
 也许我们还可以用极坐标来显示：
 ```r
 ggseasonplot(a10, polar=TRUE) +
   ylab("$ million") +
   ggtitle("Polar seasonal plot: antidiabetic drug sales")
 ```
-![plot4](Forecast/Rplot4.jpeg)
+![plot4](Forecast/Rplot4.jpeg )
 也可以把每个季节的数据搜集在一起来显示：
 ```r
 ggsubseriesplot(a10) +
   ylab("$ million") +
   ggtitle("Seasonal subseries plot: antidiabetic drug sales")
 ```
-![plot5](Forecast/Rplot5.jpeg)
-### 散点图
+![plot5](Forecast/Rplot5.jpeg )
+###  散点图
+  
 散点图可以探索不同因素的时间序列图像之间的关系。
 下图显示了两个时间序列：澳大利亚维多利亚州2014年的半小时用电需求（千兆瓦）和温度（摄氏度）。温度是墨尔本（维多利亚州最大的城市）的温度，而需求值是整个州的温度。
 ```r
@@ -94,62 +126,65 @@ autoplot(elecdemand[,c("Demand","Temperature")], facets=TRUE) +
   xlab("Year: 2014") + ylab("") +
   ggtitle("Half-hourly electricity demand: Victoria, Australia")
 ```
-![plot6](Forecast/Rplot6.jpeg)
+![plot6](Forecast/Rplot6.jpeg )
 我们可以通过绘制一个序列与另一个序列的散点图来研究用电需求与温度之间的关系。
 ```r
 qplot(Temperature, Demand, data=as.data.frame(elecdemand)) +
   ylab("Demand (GW)") + xlab("Temperature (Celsius)")
 ```
-![plot7](Forecast/Rplot7.jpeg)
+![plot7](Forecast/Rplot7.jpeg )
 此散点图有助于我们可视化变量之间的关系。显然，由于空调的影响，当温度高时会出现高需求。但是相反的，对于非常低的温度，需求增加。
 相关系数就是衡量两个变量之间是否是线性关系的一种手段，相关系数仅测量线性关系的强度，有时会产生误导，因此还需要查看数据图来获得更多详细结论。
-
+  
 散点图矩阵
 当存在多个潜在的预测变量时，将每个变量相对于另一个变量作图很有用。下图显示了五个时间序列，该序列显示了澳大利亚新南威尔士州五个地区的季度访客人数。
 ```r
 autoplot(visnights[,1:5], facets=TRUE) +
   ylab("Number of visitor nights each quarter (millions)")
 ```
-![plot8](Forecast/Rplot8.jpeg)
+![plot8](Forecast/Rplot8.jpeg )
 显示它们的散点图矩阵（需要GGally包）
 ```r
 GGally::ggpairs(as.data.frame(visnights[,1:5]))
 ```
-![plot9](Forecast/Rplot9.jpeg)
+![plot9](Forecast/Rplot9.jpeg )
 散点图矩阵的值是可以快速查看所有变量对之间的关​​系。在此示例中，曲线的第二列显示，新南威尔士州北部海岸的游客和新南威尔士州南部海岸的游客之间存在很强的正相关关系，但新南威尔士州北部海岸的游客和新南威尔士州南部内陆的游客之间没有可检测的关系。异常值也可以看到。新南威尔士州都会区有一个异常高的季度，与2000年悉尼奥运会相对应。
-### 滞后图
+###  滞后图
+  
 滞后嘛，就是滞后，比如5月数据一阶滞后后就算到4月里去了，那种意思。下图显示了澳大利亚啤酒季度产量的散点图，其中横轴显示了时间序列的滞后值。
 ```r
 beer2 <- window(ausbeer, start=1992)
 gglagplot(beer2)
 ```
-![plot10](Forecast/Rplot10.jpeg)
+![plot10](Forecast/Rplot10.jpeg )
 我们可以发现啤酒产量有4个月的滞后期，即生产4个月后可能才进入销售渠道。
-### 自相关
+###  自相关
+  
 自相关性度量时间序列的滞后值之间的线性关系，即数据是否自己有规律地变动。
 对于上图中的九个散点图分别求相关系数可得其自相关情况。
 ```r
 ggAcf(beer2)
 ```
-![plot11](Forecast/Rplot11.jpeg)
+![plot11](Forecast/Rplot11.jpeg )
 蓝色虚线外表示相关性是否显着不为零。
-
+  
 当数据具有趋势时，小的滞后的自相关往往会很大并且是正的，因为及时附近的观测值的大小也很近。因此，趋势时间序列的ACF倾向于具有正值，而正值随着滞后的增加而逐渐降低。
-
+  
 当数据是季节性的时，季节性滞后（以季节性频率的倍数）的自相关将大于其他滞后。
-
+  
 如澳大利亚每月电力需求及其自相关：
-
+  
 ```r
 aelec <- window(elec, start=1980)
 autoplot(aelec) + xlab("Year") + ylab("GWh")
 ```
-![plot12](Forecast/Rplot12.jpeg)
+![plot12](Forecast/Rplot12.jpeg )
 ```r
 ggAcf(aelec, lag=48)
 ```
-![plot13](Forecast/Rplot13.jpeg)
-### 白噪声
+![plot13](Forecast/Rplot13.jpeg )
+###  白噪声
+  
 没有自相关的时间序列称为白噪声（R6里的white noise）
 如：
 ```r
@@ -157,14 +192,16 @@ set.seed(30)
 y <- ts(rnorm(50))
 autoplot(y) + ggtitle("White noise")
 ```
-![plot14](Forecast/Rplot14.jpeg)
+![plot14](Forecast/Rplot14.jpeg )
 ```r
 ggAcf(y)
 ```
-![plot15](Forecast/Rplot15.jpeg)
-对于白噪声系列，我们希望每个自相关接近于零。当然，由于存在一些随机变化，它们将不完全等于零。对于白噪声系列，我们预计ACF中95％的尖峰位于$\pm 2/\sqrt{\check{\textup{T}}}$内,其中$\check{\textup{T}}$是时间序列的长度。
-## 预测工具箱
-### 简单预测
+![plot15](Forecast/Rplot15.jpeg )
+对于白噪声系列，我们希望每个自相关接近于零。当然，由于存在一些随机变化，它们将不完全等于零。对于白噪声系列，我们预计ACF中95％的尖峰位于<img src="https://latex.codecogs.com/gif.latex?&#x5C;pm%202&#x2F;&#x5C;sqrt{&#x5C;check{&#x5C;textup{T}}}"/>内,其中<img src="https://latex.codecogs.com/gif.latex?&#x5C;check{&#x5C;textup{T}}"/>是时间序列的长度。
+##  预测工具箱
+  
+###  简单预测
+  
 1. 取平均，未来预测值等于历史数据的均值
 ```r
 meanf(y, h)
@@ -200,9 +237,10 @@ autoplot(beer2) +
   xlab("Year") + ylab("Megalitres") +
   guides(colour=guide_legend(title="Forecast"))
 ```
-![plot16](Forecast/Rplot16.jpeg)
+![plot16](Forecast/Rplot16.jpeg )
 当然，这些方法都不是很靠谱。
-### 数据预处理
+###  数据预处理
+  
 1. 日历调整，`monthdays`可以消除因为每月日数不同而带来的差异。如下图中的每月数据因为每月日期不同而产生了“锯齿”。
 ```r
 dframe <- cbind(Monthly = milk,
@@ -211,7 +249,7 @@ dframe <- cbind(Monthly = milk,
     xlab("Years") + ylab("Pounds") +
     ggtitle("Milk production per cow")
 ```
-![plot17](Forecast/Rplot17.jpeg)
+![plot17](Forecast/Rplot17.jpeg )
 2. 人口调整，尽量使用人均数据而不是人数数据。
 3. 通货膨胀调整，根据价格指数或者CPI进行调整。
 4. 数字转换，幂变换等，`BoxCox`函数可以自动寻找一个合适的lambda进行幂变化。
@@ -230,8 +268,9 @@ autoplot(eggs) +
   autolayer(fc2, series="Bias adjusted", PI=FALSE) +
   guides(colour=guide_legend(title="Forecast"))
 ```
-![plot18](Forecast/Rplot18.jpeg)
-### 残差诊断
+![plot18](Forecast/Rplot18.jpeg )
+###  残差诊断
+  
 即为预测值与实际值的偏差。以谷歌股价为例，我们使用随机游走预测谷歌的股价，并计算它的残差。
 绘制谷歌股价：
 ```r
@@ -239,7 +278,7 @@ autoplot(goog200) +
   xlab("Day") + ylab("Closing Price (US$)") +
   ggtitle("Google Stock (daily ending 6 December 2013)")
 ```
-![plot19](Forecast/Rplot19.jpeg)
+![plot19](Forecast/Rplot19.jpeg )
 进行朴素预测：
 ```r
 autoplot(naive(goog200)) +
@@ -252,20 +291,21 @@ res <- residuals(naive(goog200))
 autoplot(res) + xlab("Day") + ylab("") +
   ggtitle("Residuals from naïve method")
 ```
-![plot20](Forecast/Rplot20.jpeg)
+![plot20](Forecast/Rplot20.jpeg )
 绘制残差直方图，右尾确实有点长：
 ```r
 gghistogram(res) + ggtitle("Histogram of residuals")
 ```
-![plot21](Forecast/Rplot21.jpeg)
+![plot21](Forecast/Rplot21.jpeg )
 绘制ACF，可以认为缺乏相关性，因此预测结果不错
 ```r
 ggAcf(res) + ggtitle("ACF of residuals")
 ```
-![plot22](Forecast/Rplot22.jpeg)
+![plot22](Forecast/Rplot22.jpeg )
 这些图表明，朴素的方法(随机游走)所产生的预测似乎可以说明所有可用信息。残差的平均值接近零，并且在残差序列中没有显着的相关性。残差的时间图显示，除一个异常值外，残差的变化在整个历史数据中保持几乎相同，因此残差方差可以视为恒定值。这也可以在残差的直方图中看到。直方图表明残差可能不正常-即使我们忽略异常值，右尾也似乎太长。因此，使用此方法进行的预测可能会很好，但是假设正态分布而计算出的预测间隔可能不准确。
 同时还可以进行Portmanteau自相关检验，包括Box-Pierce检验（`Box.test(res, lag=10, fitdf=0)`）和Ljung-Box测试（`Box.test(res,lag=10, fitdf=0, type="Lj")`），也可以用一个函数包搞定上面所有：`checkresiduals(naive(goog200))`。
-### 评估预测结果的准确性
+###  评估预测结果的准确性
+  
 需要将数据分为训练集与测试集进行评估，测试集通常为总样本的20%。我们在训练集上与结果的差称为残差，在测试集上则称为误差
 可以使用`window`函数提取时间序列中的一部分作为子集。
 ```r
@@ -293,7 +333,7 @@ autoplot(window(ausbeer, start=1992)) +
   ggtitle("Forecasts for quarterly beer production") +
   guides(colour=guide_legend(title="Forecast"))
 ```
-![plot23](Forecast/Rplot23.jpeg)
+![plot23](Forecast/Rplot23.jpeg )
 接着我们来看看它的准确性，显然，季节性随机游走预测比较好：
 ```r
 beer3 <- window(ausbeer, start=2008)
@@ -340,14 +380,17 @@ mse <- colMeans(e^2, na.rm = T)
 data.frame(h = 1:8, MSE = mse) %>%
   ggplot(aes(x = h, y = MSE)) + geom_point()
 ```
-![plot24](Forecast/Rplot24.jpeg)
+![plot24](Forecast/Rplot24.jpeg )
 时间序列交叉验证表明，预测误差随着预测范围的增加而增加。
 如果我们在预测参数中加入`bootstrap=TRUE`，就可以看到预测结果在不同的置信区间内的情况。
-### fpp2函数包
+###  fpp2函数包
+  
 `forecast()`函数是主要的预测手段，其主要输入时间序列模型。其还有自动绘图功能`autoplot()`
-## 判断性预测
+##  判断性预测
+  
 判断性预测即指在没有历史数据的情况下进行预测，通常比较主观。
-### Delphi法
+###  Delphi法
+  
 德尔菲认为群体的预测要比个体准确，因此他设计了一套流程：
 1. 组成了一个专家小组。
 2. 设置了预测任务/挑战并将其分发给专家。
@@ -355,23 +398,26 @@ data.frame(h = 1:8, MSE = mse) %>%
 4. 向专家提供了反馈，专家们现在根据反馈检查了他们的预测。可以重复执行此步骤，直到达到令人满意的共识水平。
 5. 最终预测是通过汇总专家的预测来构建的。
 值得注意的是专家应当是匿名，且平等的。
-### 类比预测
+###  类比预测
+  
 找一些别的相似的例子，或是进行结构化类比：
 1. 聚集了可能具有类似情况经验的专家小组。
 2. 设置任务/挑战并将其分发给专家。
 3. 专家会识别并描述尽可能多的类比，并根据每个类比生成预测。
 4. 专家列出每个类比与目标情况的相似性和差异，然后在一个量表上评估每个类比与目标情况的相似性。
 5. 预测是由主持人使用设定规则得出的。这可以是加权平均值，其中权重可以由专家对每个类比的排名分数进行指导。
-## 时间序列回归模型
+##  时间序列回归模型
+  
 其基本概念是我们要预测的感兴趣的时间序列假设它与其他变量的时间序列具有线性关系。
-### 简单线性回归
+###  简单线性回归
+  
 如研究美国消费支出：
 我们认为和收入有关：
 ```r
 autoplot(uschange[,c("Consumption","Income")]) +
   ylab("% change") + xlab("Year")
 ```
-![plot25](Forecast/Rplot25.jpeg)
+![plot25](Forecast/Rplot25.jpeg )
 显然消费和支出有线性关系：
 绘图：
 ```r
@@ -384,7 +430,7 @@ uschange %>%
     geom_smooth(method="lm", se=FALSE)
 #> `geom_smooth()` using formula 'y ~ x'
 ```
-![plot26](Forecast/Rplot26.jpeg)
+![plot26](Forecast/Rplot26.jpeg )
 计算回归系数：
 ```r
 tslm(Consumption ~ Income, data=uschange)
@@ -396,4 +442,5 @@ tslm(Consumption ~ Income, data=uschange)
 #> (Intercept)       Income  
 #>       0.545        0.281
 ```
-
+  
+  
