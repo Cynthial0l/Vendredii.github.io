@@ -364,6 +364,10 @@ data.frame(h = 1:8, MSE = mse) %>%
 5. 预测是由主持人使用设定规则得出的。这可以是加权平均值，其中权重可以由专家对每个类比的排名分数进行指导。
 ## 时间序列回归模型
 其基本概念是我们要预测的感兴趣的时间序列假设它与其他变量的时间序列具有线性关系。
+
+**事前预测**是仅使用预先提供的信息进行的预测。例如，对样本结束后每个季度美国消费百分比变化的事前预测，只能使用2016年第三季度之前（含）的可用信息。这些是真实的预测，使用当时可用的信息预先进行。因此，为了生成事前预测，模型需要预测变量的预测。为了获得这些，我们可以使用在节中介绍的简单的方法。可替代地，来自其他来源（例如政府机构）的预测可能可用并且可以使用。
+**事后预测**是使用以后的预测因素信息进行的预测。例如，对消费量的事后预测可以使用对预测变量的实际观察，一旦观测到。这些不是真正的预测，但对于研究预测模型的行为很有用。
+不应使用预测期间的数据来估计生成事后预测的模型。也就是说，事后预测可以假设您了解预测变量。
 ### 简单线性回归
 如研究美国消费支出：
 我们认为和收入有关：
@@ -396,4 +400,151 @@ tslm(Consumption ~ Income, data=uschange)
 #> (Intercept)       Income  
 #>       0.545        0.281
 ```
+当有两个以上的预测变量时，回归模型称为**多元回归模型**。如我们预测美国的消费支出和工业生产、个人储蓄、收入与失业率的关系：
+```r
+uschange %>%
+  as.data.frame() %>%
+  GGally::ggpairs()
+```
+![plot27](Forecast/Rplot27.jpeg)
+### 最小二乘估计
+最小二乘原理提供了一种通过最小化平方误差之和来有效选择回归系数的方法。该`tslm()`函数将线性回归模型拟合到时间序列数据。它类似于`lm()`广泛用于线性模型的功能。
+如还是上面的我美国的消费支出和工业生产、个人储蓄、收入与失业率的关系，通过`tslm`我们可以得到多元回归的系数：
+```r
+fit.consMR <- tslm(
+  Consumption ~ Income + Production + Unemployment + Savings,
+  data=uschange)
+summary(fit.consMR)
+#> 
+#> Call:
+#> tslm(formula = Consumption ~ Income + Production + Unemployment + 
+#>     Savings, data = uschange)
+#> 
+#> Residuals:
+#>     Min      1Q  Median      3Q     Max 
+#> -0.8830 -0.1764 -0.0368  0.1525  1.2055 
+#> 
+#> Coefficients:
+#>              Estimate Std. Error t value Pr(>|t|)    
+#> (Intercept)   0.26729    0.03721    7.18  1.7e-11 ***
+#> Income        0.71448    0.04219   16.93  < 2e-16 ***
+#> Production    0.04589    0.02588    1.77    0.078 .  
+#> Unemployment -0.20477    0.10550   -1.94    0.054 .  
+#> Savings      -0.04527    0.00278  -16.29  < 2e-16 ***
+#> ---
+#> Signif. codes:  
+#> 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+#> 
+#> Residual standard error: 0.329 on 182 degrees of freedom
+#> Multiple R-squared:  0.754,	Adjusted R-squared:  0.749 
+#> F-statistic:  139 on 4 and 182 DF,  p-value: <2e-16
+```
+根据多元回归的模型绘图并比较：
+```r
+autoplot(uschange[,'Consumption'], series="Data") +
+  autolayer(fitted(fit.consMR), series="Fitted") +
+  xlab("Year") + ylab("") +
+  ggtitle("Percent change in US consumption expenditure") +
+  guides(colour=guide_legend(title=" "))
+```
+![plot28](Forecast/Rplot28.jpeg)
+```r
+cbind(Data = uschange[,"Consumption"],
+      Fitted = fitted(fit.consMR)) %>%
+  as.data.frame() %>%
+  ggplot(aes(x=Data, y=Fitted)) +
+    geom_point() +
+    ylab("Fitted (predicted values)") +
+    xlab("Data (actual values)") +
+    ggtitle("Percent change in US consumption expenditure") +
+    geom_abline(intercept=0, slope=1)
+```
+![plot29](Forecast/Rplot29.jpeg)
+接下来我们可以评估该结果：
+```r
+checkresiduals(fit.consMR)
+#	Breusch-Godfrey test for serial correlation of order up to
+#	8
+#
+#data:  Residuals from Linear regression model
+#LM test = 14.874, df = 8, p-value = 0.06163
+```
+![plot30](Forecast/Rplot30.jpeg)
+我们希望残差被随机分散而不显示任何系统模式。一种简单快速的检查方法是针对每个预测变量检查残差的散点图。如果这些散点图显示了一种模式，则该关系可能是非线性的，因此需要相应地修改模型:
+```r
+df <- as.data.frame(uschange)
+df[,"Residuals"]  <- as.numeric(residuals(fit.consMR))
+p1 <- ggplot(df, aes(x=Income, y=Residuals)) +
+  geom_point()
+p2 <- ggplot(df, aes(x=Production, y=Residuals)) +
+  geom_point()
+p3 <- ggplot(df, aes(x=Savings, y=Residuals)) +
+  geom_point()
+p4 <- ggplot(df, aes(x=Unemployment, y=Residuals)) +
+  geom_point()
+gridExtra::grid.arrange(p1, p2, p3, p4, nrow=2)
+```
+![plot31](Forecast/Rplot31.jpeg)
+许多时候我们的变量也许并不是连续的数值，而是诸如是/否或者是季节，我们可以设置一个虚拟变量，该变量包含两个数：0和1...对于季节：春夏秋冬，我们应该设置**3个虚拟变量**，春（0和1），夏（0和1），秋（0和1），当春夏秋都为0时自然就是冬天...
+我们也可以设置一些干预变量，干预变量时仅仅在某些特定时期起很大作用的变量，一般而言，在干预时为1，在其他时期为0。而对于**交易日**来说也可以用这种方法，或者使用`bizdays()`函数过滤月度或季度的交易日数据。
+### 选择合适的预测变量
+提供了CV函数包可以计算各种变量是否准确：
+```r
+CV(fit.consMR)
+#>        CV       AIC      AICc       BIC     AdjR2 
+#>    0.1163 -409.2980 -408.8314 -389.9114    0.7486
+```
+在可能的情况下，应拟合所有潜在的回归模型（如上述示例中所述），并应根据所讨论的一种方法选择最佳模型。这称为“最佳子集”回归或“所有可能的子集”回归。
+如果存在大量预测变量，则不可能拟合所有可能的模型。这时可以采取逐步回归的手法，特别是向后逐步回归，这可以一直迭代到回归效果没有进一步改善位置。
+### 非线性回归（或分段线性
+tips：不建议在预测中使用二次或更高阶趋势。对其进行推断时，得出的预测通常是不现实的。如研究波士顿马拉松比赛获胜时间：
+```r
+h <- 10
+fit.lin <- tslm(marathon ~ trend)
+fcasts.lin <- forecast(fit.lin, h = h)
+fit.exp <- tslm(marathon ~ trend, lambda = 0)
+fcasts.exp <- forecast(fit.exp, h = h)
 
+t <- time(marathon)
+t.break1 <- 1940
+t.break2 <- 1980
+tb1 <- ts(pmax(0, t - t.break1), start = 1897)
+tb2 <- ts(pmax(0, t - t.break2), start = 1897)
+
+fit.pw <- tslm(marathon ~ t + tb1 + tb2)
+t.new <- t[length(t)] + seq(h)
+tb1.new <- tb1[length(tb1)] + seq(h)
+tb2.new <- tb2[length(tb2)] + seq(h)
+
+newdata <- cbind(t=t.new, tb1=tb1.new, tb2=tb2.new) %>%
+  as.data.frame()
+fcasts.pw <- forecast(fit.pw, newdata = newdata)
+
+fit.spline <- tslm(marathon ~ t + I(t^2) + I(t^3) +
+  I(tb1^3) + I(tb2^3))
+fcasts.spl <- forecast(fit.spline, newdata = newdata)
+
+autoplot(marathon) +
+  autolayer(fitted(fit.lin), series = "Linear") +
+  autolayer(fitted(fit.exp), series = "Exponential") +
+  autolayer(fitted(fit.pw), series = "Piecewise") +
+  autolayer(fitted(fit.spline), series = "Cubic Spline") +
+  autolayer(fcasts.pw, series="Piecewise") +
+  autolayer(fcasts.lin, series="Linear", PI=FALSE) +
+  autolayer(fcasts.exp, series="Exponential", PI=FALSE) +
+  autolayer(fcasts.spl, series="Cubic Spline", PI=FALSE) +
+  xlab("Year") + ylab("Winning times in minutes") +
+  ggtitle("Boston Marathon") +
+  guides(colour = guide_legend(title = " "))
+```
+![plot32](Forecast/Rplot32.jpeg)
+上面的图显示了拟合线和来自线性，指数，分段线性和三次样条曲线趋势的预测。最好的预测似乎来自分段线性趋势，而三次样条曲线最适合历史数据，但预测较差。
+三次样条曲线的另一种表示形式（称为自然三次平滑样条曲线）具有一些约束，因此样条曲线函数的末尾是线性的，通常可以在不影响拟合的情况下提供更好的预测。
+我们使用该`splinef()`函数来生成三次样条曲线预测。与我们在上图中使用的结相比，它使用了更多的结，但为防止过度拟合，系数受到限制，并且曲线的两端均为线性。这具有附加的优点，即结点选择不是主观的。我们还使用了对数转换`（lambda=0）`来处理异方差性。
+```r
+marathon %>%
+  splinef(lambda=0) %>%
+  autoplot()
+```
+![plot33](Forecast/Rplot33.jpeg)
+## 时间序列的分解

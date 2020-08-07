@@ -5,9 +5,9 @@
 关于内容：
 1. 以通俗易懂的方式介绍我学习介绍各种程序语言，帮助大家在学习编程，或者说学习数学分析时少走一些弯路。
 2. 以相对严谨的方式介绍并推导（如果可以的话）概率论、线性代数、回归分析、机器学习、神经网络等。?
-3. 学会称为调包奇侠
+3. 学会成为调包奇侠
 ### 目录
-[预测：原理与实践（赚钱技能！绝赞更新中）](markdown-notes/forecast.html)
+[预测未来？原理与实践（赚钱技能！绝赞更新中）](markdown-notes/forecast.html)
 [Python学习笔记（绝赞咕咕中）](markdown-notes/Python.html)
 [R语言与机器学习？（随机森林更新完了）](markdown-notes/R_model.html)
 [R语言入门与简单数学分析](markdown-notes/R.html)
