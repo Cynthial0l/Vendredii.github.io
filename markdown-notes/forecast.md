@@ -548,3 +548,258 @@ marathon %>%
 ```
 ![plot33](Forecast/Rplot33.jpeg)
 ## 时间序列的分解
+时间序列数据可以表现出各种模式，将时间序列划分为几个组成部分通常很有帮助，每个组成部分代表一个基础的模式类别。
+我们已经讨论了三种时间序列模式：趋势，季节性和周期。当我们将时间序列分解为各个组成部分时，通常将趋势和周期组合为单个趋势周期性的组成。因此，我们认为时间序列包括三个部分：趋势周期部分，季节性部分和余下部分。组成如下：
+$$y_{t}=S_{t}+T_{t}+R_{t}$$
+$S_{t}$为季节性因素，$T_{t}$为趋势周期，$R_{t}$为剩余部分。
+### 移动平均法
+移动平均值是一个最老也是最流行的技术分析工具。若依次得到一组测定值时，按顺序取一定数量的数据并算得其全部算术平均值，得到的数据就叫做移动平均值。移动平均的本质是一种低通滤波。它的目的是过滤掉时间序列中的高频扰动，保留有用的低频趋势。
+$$\hat{T}_{t}=\frac{1}{m}\sum_{j=-k}^{k}y_{t+j}$$
+式中$m=2k+1$。也就是说，t是通过k个周期内的时间序列的平均值来获得的。在时间上接近的观测值也可能在值上接近。因此，平均值消除了数据中的一些随机性，留下平滑的趋势周期成分。我们称之为m-MA，意思是m阶的移动平均值。
+以下是南澳大利亚的用电销售状况
+```r
+autoplot(elecsales) + xlab("Year") + ylab("GWh") +
+  ggtitle("Annual electricity sales: South Australia")
+```
+![plot34](Forecast/Rplot34.jpeg)
+进行5阶平均：
+```r
+ma(elecsales, 5)
+```
+绘制趋势周期图
+```r
+autoplot(elecsales, series="Data") +
+  autolayer(ma(elecsales,5), series="5-MA") +
+  xlab("Year") + ylab("GWh") +
+  ggtitle("Annual electricity sales: South Australia") +
+  scale_colour_manual(values=c("Data"="grey50","5-MA"="red"),
+                      breaks=c("Data","5-MA"))
+```
+![plot35](Forecast/Rplot35.jpeg)
+我们设置可以将移动平均的数据进行移动平均以获得更好的数据。
+但这也有缺点：前几个和最后几个观察都无法获得趋势周期的估计值。
+### X11分解法
+此方法基于经典分解，但是包括许多额外的步骤和功能，以克服上一部分中讨论的经典分解的缺点。特别是，趋势周期估计值可用于所有观测值（包括终点），并且季节性分量可以随时间缓慢变化。X11还具有一些复杂的方法来处理交易日变化，假日影响和已知预测因素的影响。它处理加法分解和乘法分解。该过程是完全自动的，并且对时间序列中的异常值和水平移位趋向于高度鲁棒。
+R语言`seasonal`包中可以使用X11方法对电气设备订单数据进行分解：
+```r
+library(seasonal)
+elecequip %>% seas(x11="") -> fit
+autoplot(fit) +
+  ggtitle("X11 decomposition of electrical equipment index")
+```
+![plot36](Forecast/Rplot36.jpeg)
+给定`seas()`函数的输出，`seasonal()`将提取季节性成分，`trendcycle()`将提取趋势周期成分，`remainder()`将提取余数成分，并`seasadj()`计算经季节性调整的时间序列。
+下图显示了趋势周期分量和经季节性调整的数据以及原始数据：
+```r
+autoplot(elecequip, series="Data") +
+  autolayer(trendcycle(fit), series="Trend") +
+  autolayer(seasadj(fit), series="Seasonally Adjusted") +
+  xlab("Year") + ylab("New orders index") +
+  ggtitle("Electrical equipment manufacturing (Euro area)") +
+  scale_colour_manual(values=c("gray","blue","red"),
+             breaks=c("Data","Seasonally Adjusted","Trend"))
+```
+![plot37](Forecast/Rplot37.jpeg)
+使用季节性部分的季节性图和季节性子系列图可能很有用。这些有助于我们直观地看到季节性成分随时间的变化。下图显示了上图中季节部分的季节子序列图。在这种情况下，随着时间的推移只有很小的变化。
+```r
+fit %>% seasonal() %>% ggsubseriesplot() + ylab("Seasonal")
+```
+![plot38](Forecast/Rplot38.jpeg)
+### SEATS分解
+“SEATS”代表“ARIMA时间序列中的季节提取”。此程序是在西班牙银行开发的，现在已被世界各地的政府机构广泛使用。该过程仅适用于季度和月度数据。因此，其他类型的季节性，例如每日数据，每小时数据或每周数据，则需要另一种方法。下面还是对电气设备订单数据进行分解：
+```r
+library(seasonal)
+elecequip %>% seas() %>%
+autoplot() +
+  ggtitle("SEATS decomposition of electrical equipment index")
+```
+![plot39](Forecast/Rplot39.jpeg)
+与X11的方法类似，我们可以使用`seasonal()`，`trendcycle()`和`remainder()`函数提取的各个组件，并通过`seasadj()`计算季节性调整的时间序列。
+### STL分解
+STL：使用局部加权回归进行季节与趋势分解。
+还是对电气设备订单数据进行分解：
+```r
+elecequip %>%
+  stl(t.window=13, s.window="periodic", robust=TRUE) %>%
+  autoplot()
+```
+![plot40](Forecast/Rplot40.jpeg)
+使用STL时要选择的两个主要参数是趋势周期窗口（`t.window`）和季节窗口（`s.window`）。这些控制着趋势周期和季节成分变化的速度。较小的值允许更快速的更改。`t.window`与`s.window`应该是奇数; `t.window`是在估计趋势周期时要使用的连续观察数；`s.window`是用于估计季节部分中每个值的连续年份。用户必须指定，`s.window`因为没有默认值。将其设置为无限等效于强制将季节性成分设置为周期性（即跨年相同）。指定`t.window`是可选的，如果省略，将使用默认值。
+
+`mstl()`功能使用提供了便利的自动STL分解`s.window=13`，并且`t.window`也可以自动选择。通常，这可以在过度适应季节性和使其随时间缓慢变化之间取得良好的平衡。但是，与任何自动过程一样，默认设置需要针对某些时间序列进行调整。
+
+与本书中讨论的其他分解方法一样，要获得单独成分的分析，请使用`seasonal()`季节性成分`trendcycle()`函数，趋势周期成分`remainder()`函数和其余成分函数。该`seasadj()`函数可用于计算季节性调整后的序列。
+## 指数平滑
+指数平滑法实际上是一种特殊的加权移动平均法。使用指数平滑方法生成的预测是过去观测值的加权平均值，并且随着观测值变老，权重呈指数衰减。换句话说，观察越近，相关的权重就越高。该框架可在广泛的时间范围内快速生成可靠的预测，这是一个巨大的优势，对工业应用至关重要。
+### 简单指数平滑
+自然地，最简单的指数平滑方法称为简单指数平滑（SES）。此方法适用于没有明确趋势或季节性模式的预测数据。
+我们探索一下阿拉伯石油数据：
+```r
+oildata <- window(oil, start=1996)
+autoplot(oildata) +
+  ylab("Oil (millions of tonnes)") + xlab("Year")
+```
+![plot41](Forecast/Rplot41.jpeg)
+进行简单指数平滑：
+```r
+oildata <- window(oil, start=1996)
+# Estimate parameters
+fc <- ses(oildata, h=5)
+# Accuracy of one-step-ahead training errors
+round(accuracy(fc),2)
+#>               ME  RMSE   MAE MPE MAPE MASE  ACF1
+#> Training set 6.4 28.12 22.26 1.1 4.61 0.93 -0.03
+autoplot(fc) +
+  autolayer(fitted(fc), series="Fitted") +
+  ylab("Oil (millions of tonnes)") + xlab("Year")
+```
+![plot42](Forecast/Rplot42.jpeg)
+### 趋势法
+Holt线性趋势法，不再像以前一样预测出一条平行的直线，而是一条带有斜率的东西了。但Holt线性方法生成的预测在未来无限期地显示出恒定的趋势（增加或减少）。经验证据表明，这些方法倾向于过度预测，特别是对于较长的预测范围。受此观察的启发，Gardner＆McKenzie（1985）引入了一个参数，该参数在将来的某个时候将趋势“抑制”到一条平坦的线上。包含衰减趋势的方法被证明是非常成功的，并且可以说是当许多序列需要自动进行预测时最受欢迎的单个方法。
+比如我们对澳大利亚航司载客量进行研究：
+```r
+air <- window(ausair, start=1990)
+fc <- holt(air, h=15)
+fc2 <- holt(air, damped=TRUE, phi = 0.9, h=15)
+autoplot(air) +
+  autolayer(fc, series="Holt's method", PI=FALSE) +
+  autolayer(fc2, series="Damped Holt's method", PI=FALSE) +
+  ggtitle("Forecasts from Holt's method") + xlab("Year") +
+  ylab("Air passengers in Australia (millions)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+![plot43](Forecast/Rplot43.jpeg)
+### Holt-Winters的季节性方法
+Holt-Winters季节性方法考虑了季节变化的影响。
+如考察澳大利亚国际游客待的夜数：
+```r
+aust <- window(austourists,start=2005)
+fit1 <- hw(aust,seasonal="additive")
+fit2 <- hw(aust,seasonal="multiplicative")
+autoplot(aust) +
+  autolayer(fit1, series="HW additive forecasts", PI=FALSE) +
+  autolayer(fit2, series="HW multiplicative forecasts",
+    PI=FALSE) +
+  xlab("Year") +
+  ylab("Visitor nights (millions)") +
+  ggtitle("International visitors nights in Australia") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+![plot44](Forecast/Rplot44.jpeg)
+这也有一种阻尼法，可以具有衰减的趋势：
+```r
+hw(y, damped=TRUE, seasonal="multiplicative")
+```
+如研究Hyndsight博客自2014年4月30日起一年的每日综合浏览量：
+```r
+fc <- hw(subset(hyndsight,end=length(hyndsight)-35),
+         damped = TRUE, seasonal="multiplicative", h=35)
+autoplot(hyndsight) +
+  autolayer(fc, series="HW multi damped", PI=FALSE)+
+  guides(colour=guide_legend(title="Daily forecasts"))
+```
+![plot45](Forecast/Rplot45.jpeg)
+### 模型选择与估计
+`est`函数可以进行模型的估计与选择：
+```r
+ets(y, model="ZZZ", damped=NULL, alpha=NULL, beta=NULL,
+    gamma=NULL, phi=NULL, lambda=NULL, biasadj=FALSE,
+    additive.only=FALSE, restrict=TRUE,
+    allow.multiplicative.trend=FALSE)
+```
+其中:
+`y`
+要预测的时间序列。
+`model`
+如果为`damped=TRUE`，则将使用阻尼趋势（A或M）。如果为`damped=FALSE`，则将使用非阻尼趋势。如果`damped=NULL`（默认），则将选择阻尼趋势还是非阻尼趋势，具体取决于哪个模型的信息标准值最小。
+`alpha`, `beta`, `gamma`, `phi`
+可以使用这些参数指定平滑参数的值。如果将它们设置为NULL（每个参数的默认设置），则会估计参数。
+`lambda`
+Box-Cox转换参数。如果lambda=NULL（默认值），它将被忽略。否则，将在估计模型之前对时间序列进行转换。如果`lambda`不是NULL，`additive.only`设置为TRUE。
+`biasadj`
+如果TRUE和`lambda`不是NULL，则将对反向转换后的拟合值和预测进行偏差调整。
+`additive.only`
+如果仅考虑具有加性成分的模型`additive.only=TRUE`。否则，将考虑所有模型。
+`restrict`
+如果为`restrict=TRUE`（默认值），则在模型选择中不考虑引起数值困难的模型。
+`allow.multiplicative.trend`
+也可以使用乘法趋势模型，但本次不做介绍。将此参数设置TRUE为允许考虑这些模型。
+那么，如何处理`ets`对象呢？
+该ets()函数将返回class的对象ets。有许多R函数旨在简化ets对象的处理。其中一些描述如下。
+`coef()`返回所有拟合的参数。
+`accuracy()`返回根据训练数据计算出的准确性测度。
+`summary()`打印有关拟合模型的一些摘要信息。
+`autoplot()` 和 `plot()`生成组件的时间图。
+`residuals()`从估计的模型返回残差。
+`fitted()`返回训练数据的一步预测。
+`simulate()`将从拟合模型中模拟将来的样本路径。
+`forecast()`计算点预测和预测间隔，如下一节所述。
+使用该`ets()`功能，默认的估计方法是最大似然而不是最小平方和。
+我们可以基于此，结合上面的数据，再来使用ETS统计框架来预测2016-2019年期间国际入境游客在澳大利亚的游客住宿天数。
+```r
+aust <- window(austourists, start=2005)
+fit <- ets(aust)
+summary(fit)
+#> ETS(M,A,M) 
+#> 
+#> Call:
+#>  ets(y = aust) 
+#> 
+#>   Smoothing parameters:
+#>     alpha = 0.1908 
+#>     beta  = 0.0392 
+#>     gamma = 2e-04 
+#> 
+#>   Initial states:
+#>     l = 32.3679 
+#>     b = 0.9281 
+#>     s = 1.022 0.9628 0.7683 1.247
+#> 
+#>   sigma:  0.0383
+#> 
+#>   AIC  AICc   BIC 
+#> 224.9 230.2 240.9 
+#> 
+#> Training set error measures:
+#>                   ME  RMSE  MAE     MPE  MAPE   MASE
+#> Training set 0.04837 1.671 1.25 -0.1846 2.693 0.4095
+#>                ACF1
+#> Training set 0.2006
+```
+绘图：
+```r
+autoplot(fit)
+```
+![plot46](Forecast/Rplot46.jpeg)
+获得残差：
+```r
+cbind('Residuals' = residuals(fit),
+      'Forecast errors' = residuals(fit,type='response')) %>%
+  autoplot(facet=TRUE) + xlab("Year") + ylab("")
+```
+![plot47](Forecast/Rplot47.jpeg)
+ETS点预测等于预测分布的中位数。对于仅具有加性成分的模型，预测分布为正态，因此中位数和均值相等。对于具有乘法误差或季节性乘积的ETS模型，点预测将不等于预测分布的均值。
+为了从ETS模型获得预测，我们使用该`forecast()`函数。
+```r
+fit %>% forecast(h=8) %>%
+  autoplot() +
+  ylab("International visitor night in Australia (millions)")
+```
+![plot48](Forecast/Rplot48.jpeg)
+使用`forecast`函数进行预测的通式：
+```r
+forecast(object, h=ifelse(object$m>1, 2*object$m, 10),
+level=c(80,95), fan=FALSE, simulate=FALSE, bootstrap=FALSE,
+npaths=5000, PI=TRUE, lambda=object$lambda, biasadj=NULL, ...)
+```
+`object`函数返回的对象`ets()`。
+`h`预测范围-要预测的期间数。
+`level`预测间隔的置信度。
+`fan`如果fan=TRUE，level=seq(50,99,by=1)。这适用于风扇图。
+`simulate`如果为simulate=TRUE，则预测间隔是通过模拟而不是使用代数公式生成.`simulate=FALSE`在没有适用于特定模型的代数公式的情况下，也将使用仿真（即使是）。
+`bootstrap`如果bootstrap=TRUE和simulate=TRUE，则模拟的预测间隔使用重新采样的误差而不是正态分布的误差。
+`npaths`计算模拟的预测间隔时使用的样本路径数。
+`PI`如果为PI=TRUE，则产生预测间隔；否则为。否则，仅计算点预测。
+`lambda`Box-Cox转换参数。如果忽略此选项lambda=NULL。否则，将通过逆Box-Cox逆变换对预测进行反变换。
+`biasadj`如果lambda不是NULL，则对逆变换的预测（和预测间隔）进行偏差调整。
+## Arima模型
