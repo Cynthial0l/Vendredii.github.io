@@ -803,3 +803,173 @@ npaths=5000, PI=TRUE, lambda=object$lambda, biasadj=NULL, ...)
 `lambda`Box-Cox转换参数。如果忽略此选项lambda=NULL。否则，将通过逆Box-Cox逆变换对预测进行反变换。
 `biasadj`如果lambda不是NULL，则对逆变换的预测（和预测间隔）进行偏差调整。
 ## Arima模型
+时间序列是指将同一统计指标的数值按其先后发生的时间顺序排列而成的数列。时间序列分析的主要目的是根据已有的历史数据对未来进行预测。常用的时间序列模型有四种：自回归模型 AR(p)、移动平均模型 MA(q)、自回归移动平均模型 ARMA(p,q)、自回归差分移动平均模型 ARIMA(p,d,q), 可以说前三种都是 ARIMA(p,d,q)模型的特殊形式，其中p为自相关系数，q为平均移动系数，
+ARIMA 模型是在平稳的时间序列基础上建立起来的，因此时间序列的平稳性是建模的重要前提。检验时间序列模型平稳的方法一般采用 ADF 单位根检验模型去检验。当然如果时间序列不稳定，也可以通过一些操作去使得时间序列稳定（比如取对数，差分），然后进行 ARIMA 模型预测，得到稳定的时间序列的预测结果，然后对预测结果进行之前使序列稳定的操作的逆操作（取指数，差分的逆操作），就可以得到原始数据的预测结果。
+一般而言会运用到差分法，即时间序列在t与t-1时刻的差值。差分（d）：现在数列=现时刻数值-前一时刻数值，也就是本时刻与前一时刻的差值作为新的数列，可以让数列更加平稳，`数据.diff(1)`代表数据与前一时刻的差值
+### 自回归模型（AR）
+P阶自回归：
+$$y_{t}=\mu +\sum_{i=1}^{P }\gamma _{i}y_{t-i}+\epsilon_{t}$$
+其中$y_{t}$是当前值，$\mu$是常数项，$P$是阶数，$\gamma _{i}$是自相关系数。
+自回归简单来说就是当前值只与历史值有关。p阶自回归就是当前值与前p个值有关，求常数与自回归系数。
+在多元回归模型中，我们使用预测变量的线性组合来预测目标变量。在自回归模型中，我们使用变量的过去值的线性组合来预测目标变量。术语自动回归表示它是变量相对于自身的回归。
+自回归模型的限制：
+1. 自回归模型是用自身的数据来进行预测
+必须具有平稳性
+2. 必须具有自相关性，如果自相关系数(φi)小于0.5，则不宜采用
+3. 自回归只适用于预测与自身前期相关的现象
+### 移动平均模型（MA）
+q阶移动平均：
+$$y_{t}=\mu +\epsilon_{t}+\sum_{i=1}^{q }\theta_{i}\epsilon_{t-i}$$
+其中q为移动平均项数，q阶与前q个误差有关。
+移动平均模型关注的是自回归模型中的误差项的累加，移动平均法能有效地消除预测中的随机波动。移动平均模型不是在回归中使用预测变量的过去值，而是在类似回归的模型中使用过去的预测误差。移动平均模型不应与我们在之前中讨论过的移动平均平滑处理混淆。我们一般使用移动平均模型来预测未来值，而使用移动平均平滑来估计过去值的趋势周期。
+
+### （非季节性）ARIMA模型
+ARIMA模型称为差分自回归移动平均模型。
+其中AR就是自回归，p为自回归项，MA就是移动平均，q为移动平均项数，d为时间序列成为平稳时所做的差分次数。
+公式为：
+$$y_{t}=\mu +\sum_{i=1}^{P }\gamma _{i}y_{t-i}+\epsilon_{t}+\sum_{i=1}^{q }\theta_{i}\epsilon_{t-i}$$
+其原理是将非平稳时间序列转化为平稳时间序列；然后将因变量仅对它的滞后值以及随机误差项的现值和滞后值进行回归所建立的模型。
+将差分与自回归和移动平均模型相结合，则将获得非季节性的ARIMA模型。ARIMA是AutoRegressive集成移动平均线的首字母缩写（在这种情况下，“积分”是差分的反面）。称$\textup{ARIMA}(p,d,q)$模型。$p$为自回归的顺序，$d$为所涉及的第一次差异程度，$q$为移动平均线部分的顺序。
+白噪声为ARIMA(0,0,0)，随机漫步为ARIMA(0,1,0)且没有常数，带漂移项的随机游走为ARIMA（0,1,0）且具有常数，自回归	为ARIMA(p,0,0)，移动平均为ARIMA(0,0,q)
+我们研究一下美国消费支出的季度百分比：
+```r
+autoplot(uschange[,"Consumption"]) +
+  xlab("Year") + ylab("Quarterly percentage change")
+```
+![plot49](Forecast/Rplot49.jpeg)
+以下R代码用于自动选择模型:
+```r
+fit <- auto.arima(uschange[,"Consumption"], seasonal=FALSE)
+#Series: uschange[, "Consumption"] 
+#ARIMA(1,0,3) with non-zero mean 
+#
+#Coefficients:
+#         ar1      ma1     ma2     ma3    mean
+#      0.5885  -0.3528  0.0846  0.1739  0.7454
+#s.e.  0.1541   0.1658  0.0818  0.0843  0.0930
+#
+#sigma^2 estimated as 0.3499:  log likelihood=-164.81
+#AIC=341.61   AICc=342.08   BIC=361
+```
+这是ARIMA（1,0,3）模型：
+$$y_t = c + 0.589y_{t-1}
+          -0.353 \varepsilon_{t-1}
+          + 0.0846 \varepsilon_{t-2}
+          + 0.174 \varepsilon_{t-3}
+          + \varepsilon_{t}$$
+这里$c= 0.745 \times (1 - 0.589) = 0.307$，通式$\varepsilon_t$是白噪声，标准差为$0.592 = \sqrt{0.350}$，
+进行预测：
+```r
+fit %>% forecast(h=10) %>% autoplot(include=80)
+```
+![plot50](Forecast/Rplot50.jpeg)
+该`auto.arima()`功能很有用，但是任何自动化操作都可能会有些危险，即使您依靠自动过程为您选择模型，也值得了解模型的某些行为。
+
+常数C对从这些模型获得的长期预测具有重要影响。
+如果C=0且d=0，则长期预测将为零。
+如果C=0和d=1，则长期预测将变为非零常数。
+如果C=0和d=2，则长期预测将遵循一条直线。
+如果C≠0且d=0，则长期预测将取数据的平均值。
+如果C≠0且d=1，则长期预测将遵循一条直线。
+如果C≠0且d=2，则长期预测将遵循二次趋势。
+d对预测间隔也有影响：d值越高，预测间隔的大小增长越快。对于d=0，则长期预测标准差将变为历史数据的标准差，因此预测间隔将基本相同。
+
+通常仅凭时间图就不可能知道p和q是否适用于数据。但是，有时可以使用ACF图和密切相关的PACF图来确定p和q。
+如对美国消费图进行测试：
+```r
+ggAcf(uschange[,"Consumption"])
+```
+![plot51](Forecast/Rplot51.jpeg)
+```r
+ggPacf(uschange[,"Consumption"])
+```
+![plot52](Forecast/Rplot52.jpeg)
+如果数据来自$\textup{ARIMA}(p, d, 0)$或$\textup{ARIMA}(0, d, q)$模型，则ACF和PACF图可以帮助确定p或q：
+如果p和q都是正的，那么这些图就无助于找到合适的p和q。
+如果差异数据的ACF和PACF图显示以下模式，数据可能遵循$\textup{ARIMA}(p, d, 0)$建模：ACF呈指数衰减或正弦曲线；滞后有明显的峰值p在PACF中，但没有滞后p。
+如果差异数据的ACF和PACF图显示以下模式，那么数据可以遵循$\textup{ARIMA}(0, d, q)$模型：PACF呈指数衰减或正弦曲线；滞后在ACF中有明显的峰值q，但没有滞后q。
+
+或者说：
+如果ACF的衰减趋于0（几何型或震荡型）且PACFp阶后截尾，则使用AR(p)
+如果ACFq阶后截尾且PACF的衰减趋于0（几何型或震荡型），则使用MA(q)
+如果ACF的衰减趋于0（几何型或震荡型）且PACF的衰减趋于0（几何型或震荡型），则使用ARMA(p,q)
+
+根据上图的ACF，我们看到ACF中出现三个尖峰，随后在滞后4处出现了一个明显的尖峰。在PACF中，出现了三个显着尖峰，然后此后没有任何明显的尖峰（除了位于边界范围外的一个尖峰）。如果每个曲线都在极限范围内，而不是在最初的几个滞后中，我们可以忽略每个曲线中的一个明显的峰值。毕竟，突然出现尖峰的概率约为二十分之一，我们在每个图中绘制了22个尖峰。前三个峰值中的模式是ARIMA（3,0,0）所期望的，因为PACF趋于减少。因此，在这种情况下，ACF和PACF导致我们认为ARIMA（3,0,0）模型可能是合适的。
+```r
+(fit2 <- Arima(uschange[,"Consumption"], order=c(3,0,0)))
+#> Series: uschange[, "Consumption"] 
+#> ARIMA(3,0,0) with non-zero mean 
+#> 
+#> Coefficients:
+#>         ar1    ar2    ar3   mean
+#>       0.227  0.160  0.203  0.745
+#> s.e.  0.071  0.072  0.071  0.103
+#> 
+#> sigma^2 estimated as 0.349:  log likelihood=-165.2
+#> AIC=340.3   AICc=340.7   BIC=356.5
+```
+该模型实际上比所标识的模型稍好`auto.arima()`（AICc值为340.67，而342.08）。该`auto.arima()`函数找不到此模型，因为它没有在搜索中考虑所有可能的模型。您可以使用参数stepwise=FALSE和来使其更有效率地工作`approximation=FALSE`：
+```r
+(fit3 <- auto.arima(uschange[,"Consumption"], seasonal=FALSE,
+  stepwise=FALSE, approximation=FALSE))
+#> Series: uschange[, "Consumption"] 
+#> ARIMA(3,0,0) with non-zero mean 
+#> 
+#> Coefficients:
+#>         ar1    ar2    ar3   mean
+#>       0.227  0.160  0.203  0.745
+#> s.e.  0.071  0.072  0.071  0.103
+#> 
+#> sigma^2 estimated as 0.349:  log likelihood=-165.2
+#> AIC=340.3   AICc=340.7   BIC=356.5
+```
+我们还可以使用该参数`seasonal=FALSE`来防止它搜索季节性ARIMA模型。
+### 季节性的ARIMA模型
+需要在ARIMA(p,d,q)后加一个(P,D,Q)12来表示季节的循环，这个12表示在PACF的滞后12出现一个明显的峰值。后面的(P,D,Q)可以模拟ACF季节滞后的指数衰减。
+如我们模拟欧洲季度零售贸易数据：
+```r
+autoplot(euretail) + ylab("Retail index") + xlab("Year")
+```
+![plot53](Forecast/Rplot53.jpeg)
+数据显然是不稳定的，具有一定的季节性，因此我们先考察季节性差异：
+```r
+euretail %>% diff(lag=4) %>% ggtsdisplay()
+```
+![plot54](Forecast/Rplot54.jpeg)
+```r
+euretail %>% diff(lag=4) %>% diff() %>% ggtsdisplay()
+```
+![plot55](Forecast/Rplot55.jpeg)
+接下来根据ACF和PACF找到合适的ARIMA模型，ACF的滞后1处的显着尖峰表明非季节性MA(1)分量，ACF的滞后4处的显着尖峰表明存在季节性MA(1)分量。因此模型可以写为ARIMA(1,1,0)(1,1,0)4，加下来进行拟合：
+```r
+euretail %>%
+  Arima(order=c(0,1,1), seasonal=c(0,1,1)) %>%
+  residuals() %>% ggtsdisplay()
+```
+![plot56](Forecast/Rplot56.jpeg)
+ACF和PACF都在滞后2处显示出明显的峰值，而在滞后3处显示出明显的峰值，这表明模型中还需要包含一些其他非季节性项。ARIMA(0,1,2)(0,1,1)4的AICc是74.36，而ARIMA(0,1,3)(0,1,1)是68.53。我们还尝试了其他带有AR值的模型，但没有一个模型给出较小的AICc值。因此，我们选择ARIMA(0,1,3)(0,1,1)4
+模型。其残差绘制在下中。现在所有的尖峰都在有效范围内，因此残差似乎是白噪声。Ljung-Box测试还显示残差没有剩余的自相关。
+```r
+fit3 <- Arima(euretail, order=c(0,1,3), seasonal=c(0,1,1))
+checkresiduals(fit3)
+#	Ljung-Box test
+#
+#data:  Residuals from ARIMA(0,1,3)(0,1,1)[4]
+#Q* = 0.51128, df = 4, p-value = 0.9724
+#
+#Model df: 4.   Total lags used: 8	Ljung-Box test
+#
+#data:  Residuals from ARIMA(0,1,3)(0,1,1)[4]
+#Q* = 0.51128, df = 4, p-value = 0.9724
+#
+#Model df: 4.   Total lags used: 8
+```
+![plot57](Forecast/Rplot57.jpeg)
+因此，我们现在有了一个季节性的ARIMA模型，该模型可以通过所需的检查并可以进行预测:
+```r
+fit3 %>% forecast(h=12) %>% autoplot()
+```
+![plot58](Forecast/Rplot58.jpeg)
+也可以用`auto.arima()`一步到位。
+## 动态回归模型
+前两章中的时间序列模型允许包含来自系列的过去观察的信息，但不允许包含也可能相关的其他信息。例如，假期，竞争对手活动，法律变化，更广泛的经济状况或其他外部变量的影响可能解释了某些历史变化，并可能导致更准确的预测。另一方面，之前的回归模型允许包含来自预测变量的许多相关信息，但不允许有类似ARIMA模型可以处理的细微时间序列动态。在本章中，我们考虑如何扩展ARIMA模型，以便允许其他信息包含在模型中。
