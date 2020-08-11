@@ -14,7 +14,7 @@ Hyndman, R.J., & Athanasopoulos, G. (2018) Forecasting: principles and practice,
 
 一个好的预测模型可以捕捉事物变化的方式，我们通常假定环境变化的方式将持续到未来，即高度波动的环境将继续高度波动...等。
 如果没有可用数据，或可用数据与预测不相关，则必须使用**定性预测**的方法，而当有关于过去的数字信息且有理由假设过去模式的某些方面将持续到将来时，则可以采用**定量预测**的方式，定量预测可以通过时间序列数据进行预测。
-在预测时，我们通常不直接指出预测的值，而是给出预测间隔，该间隔给出了随机变量可以相对较高的概率获取的一系列值。例如，一个95％的预测间隔包含一系列值，其中应包括概率为95％的实际未来值。其中给了一条线表示了各个预测结果的平均值，这种预测方法称**点预测**。
+在预测时，我们通常不直接指出预测的值，而是给出预测区间，该区间给出了随机变量可以相对较高的概率获取的一系列值。例如，一个95％的预测区间包含一系列值，其中应包括概率为95％的实际未来值。其中给了一条线表示了各个预测结果的平均值，这种预测方法称**点预测**。
 
 预测任务可以分解为以下5个步骤：
 1. 问题定义：怎么预测
@@ -263,7 +263,7 @@ gghistogram(res) + ggtitle("Histogram of residuals")
 ggAcf(res) + ggtitle("ACF of residuals")
 ```
 ![plot22](Forecast/Rplot22.jpeg)
-这些图表明，朴素的方法(随机游走)所产生的预测似乎可以说明所有可用信息。残差的平均值接近零，并且在残差序列中没有显着的相关性。残差的时间图显示，除一个异常值外，残差的变化在整个历史数据中保持几乎相同，因此残差方差可以视为恒定值。这也可以在残差的直方图中看到。直方图表明残差可能不正常-即使我们忽略异常值，右尾也似乎太长。因此，使用此方法进行的预测可能会很好，但是假设正态分布而计算出的预测间隔可能不准确。
+这些图表明，朴素的方法(随机游走)所产生的预测似乎可以说明所有可用信息。残差的平均值接近零，并且在残差序列中没有显着的相关性。残差的时间图显示，除一个异常值外，残差的变化在整个历史数据中保持几乎相同，因此残差方差可以视为恒定值。这也可以在残差的直方图中看到。直方图表明残差可能不正常-即使我们忽略异常值，右尾也似乎太长。因此，使用此方法进行的预测可能会很好，但是假设正态分布而计算出的预测区间可能不准确。
 同时还可以进行Portmanteau自相关检验，包括Box-Pierce检验（`Box.test(res, lag=10, fitdf=0)`）和Ljung-Box测试（`Box.test(res,lag=10, fitdf=0, type="Lj")`），也可以用一个函数包搞定上面所有：`checkresiduals(naive(goog200))`。
 ### 评估预测结果的准确性
 需要将数据分为训练集与测试集进行评估，测试集通常为总样本的20%。我们在训练集上与结果的差称为残差，在测试集上则称为误差
@@ -733,7 +733,7 @@ Box-Cox转换参数。如果lambda=NULL（默认值），它将被忽略。否�
 `residuals()`从估计的模型返回残差。
 `fitted()`返回训练数据的一步预测。
 `simulate()`将从拟合模型中模拟将来的样本路径。
-`forecast()`计算点预测和预测间隔，如下一节所述。
+`forecast()`计算点预测和预测区间，如下一节所述。
 使用该`ets()`功能，默认的估计方法是最大似然而不是最小平方和。
 我们可以基于此，结合上面的数据，再来使用ETS统计框架来预测2016-2019年期间国际入境游客在澳大利亚的游客住宿天数。
 ```r
@@ -794,14 +794,14 @@ npaths=5000, PI=TRUE, lambda=object$lambda, biasadj=NULL, ...)
 ```
 `object`函数返回的对象`ets()`。
 `h`预测范围-要预测的期间数。
-`level`预测间隔的置信度。
+`level`预测区间的置信度。
 `fan`如果fan=TRUE，level=seq(50,99,by=1)。这适用于风扇图。
-`simulate`如果为simulate=TRUE，则预测间隔是通过模拟而不是使用代数公式生成.`simulate=FALSE`在没有适用于特定模型的代数公式的情况下，也将使用仿真（即使是）。
-`bootstrap`如果bootstrap=TRUE和simulate=TRUE，则模拟的预测间隔使用重新采样的误差而不是正态分布的误差。
-`npaths`计算模拟的预测间隔时使用的样本路径数。
-`PI`如果为PI=TRUE，则产生预测间隔；否则为。否则，仅计算点预测。
+`simulate`如果为simulate=TRUE，则预测区间是通过模拟而不是使用代数公式生成.`simulate=FALSE`在没有适用于特定模型的代数公式的情况下，也将使用仿真（即使是）。
+`bootstrap`如果bootstrap=TRUE和simulate=TRUE，则模拟的预测区间使用重新采样的误差而不是正态分布的误差。
+`npaths`计算模拟的预测区间时使用的样本路径数。
+`PI`如果为PI=TRUE，则产生预测区间；否则仅计算点预测。
 `lambda`Box-Cox转换参数。如果忽略此选项lambda=NULL。否则，将通过逆Box-Cox逆变换对预测进行反变换。
-`biasadj`如果lambda不是NULL，则对逆变换的预测（和预测间隔）进行偏差调整。
+`biasadj`如果lambda不是NULL，则对逆变换的预测（和预测区间）进行偏差调整。
 ## Arima模型
 时间序列是指将同一统计指标的数值按其先后发生的时间顺序排列而成的数列。时间序列分析的主要目的是根据已有的历史数据对未来进行预测。常用的时间序列模型有四种：自回归模型 AR(p)、移动平均模型 MA(q)、自回归移动平均模型 ARMA(p,q)、自回归差分移动平均模型 ARIMA(p,d,q), 可以说前三种都是 ARIMA(p,d,q)模型的特殊形式，其中p为自相关系数，q为平均移动系数，
 ARIMA 模型是在平稳的时间序列基础上建立起来的，因此时间序列的平稳性是建模的重要前提。检验时间序列模型平稳的方法一般采用 ADF 单位根检验模型去检验。当然如果时间序列不稳定，也可以通过一些操作去使得时间序列稳定（比如取对数，差分），然后进行 ARIMA 模型预测，得到稳定的时间序列的预测结果，然后对预测结果进行之前使序列稳定的操作的逆操作（取指数，差分的逆操作），就可以得到原始数据的预测结果。
@@ -872,7 +872,7 @@ fit %>% forecast(h=10) %>% autoplot(include=80)
 如果C≠0且d=0，则长期预测将取数据的平均值。
 如果C≠0且d=1，则长期预测将遵循一条直线。
 如果C≠0且d=2，则长期预测将遵循二次趋势。
-d对预测间隔也有影响：d值越高，预测间隔的大小增长越快。对于d=0，则长期预测标准差将变为历史数据的标准差，因此预测间隔将基本相同。
+d对预测区间也有影响：d值越高，预测区间的大小增长越快。对于d=0，则长期预测标准差将变为历史数据的标准差，因此预测区间将基本相同。
 
 通常仅凭时间图就不可能知道p和q是否适用于数据。但是，有时可以使用ACF图和密切相关的PACF图来确定p和q。
 如对美国消费图进行测试：
@@ -973,3 +973,199 @@ fit3 %>% forecast(h=12) %>% autoplot()
 也可以用`auto.arima()`一步到位。
 ## 动态回归模型
 前两章中的时间序列模型允许包含来自系列的过去观察的信息，但不允许包含也可能相关的其他信息。例如，假期，竞争对手活动，法律变化，更广泛的经济状况或其他外部变量的影响可能解释了某些历史变化，并可能导致更准确的预测。另一方面，之前的回归模型允许包含来自预测变量的许多相关信息，但不允许有类似ARIMA模型可以处理的细微时间序列动态。在本章中，我们考虑如何扩展ARIMA模型，以便允许其他信息包含在模型中。
+时间序列预测基本上就是自己预测自己，但经过改进后的ARIMA允许把额外的一个或多个变量纳入其中，然后作为额外的补充信息，进行回归:
+$$y_t = \beta_0 + \beta_1 x_t + \eta_t,$$
+其中$\eta_t$为ARIMA模型
+### R语言中的动态回归
+```r
+fit <- Arima(y, xreg=x, order=c(1,1,0))
+```
+其中`xreg`参数可以放入额外的解释变量。
+如研究美国的个人消费与收入的关系：
+```r
+autoplot(uschange[,1:2], facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("Quarterly changes in US consumption
+    and personal income")
+```
+![plot59](Forecast/Rplot59.jpeg)
+把收入作为一个预测变量加入模型：
+```r
+(fit <- auto.arima(uschange[,"Consumption"],
+  xreg=uschange[,"Income"]))
+#Series: uschange[, "Consumption"] 
+#Regression with ARIMA(1,0,2) errors 
+#
+#Coefficients:
+#         ar1      ma1     ma2  intercept    xreg
+#      0.6922  -0.5758  0.1984     0.5990  0.2028
+#s.e.  0.1159   0.1301  0.0756     0.0884  0.0461
+#
+#sigma^2 estimated as 0.3219:  log likelihood=-156.95
+#AIC=325.91   AICc=326.37   BIC=345.29
+```
+模型可以写为：
+$$y_t = 0.599 + 0.203 x_t + \eta_t \\
+\eta_t = 0.692 \eta_{t-1} + \varepsilon_t-0.576 \varepsilon_{t-1} + 0.198 \varepsilon_{t-2}\\
+\varepsilon_t \sim \text{NID}(0,0.322)$$
+可以分别查看$\eta_t$和$\varepsilon_t$的估计：
+```r
+cbind("Regression Errors" = residuals(fit, type="regression"),
+      "ARIMA errors" = residuals(fit, type="innovation")) %>%
+  autoplot(facets=TRUE)
+```
+![plot60](Forecast/Rplot60.jpeg)
+也可以查看整个ARIMA模型和白噪声：
+```r
+checkresiduals(fit)
+```
+![plot61](Forecast/Rplot61.jpeg)
+进行预测：
+```r
+fcast <- forecast(fit, xreg=rep(mean(uschange[,2]),8))
+autoplot(fcast) + xlab("Year") +
+  ylab("Percentage change")
+```
+![plot62](Forecast/Rplot62.jpeg)
+### 随机与确定趋势（斜率？
+有两种不同的线性趋势建模方法：随机的趋势/增长率或者确定的趋势。这种趋势可以通过`xreg`函数进行定义，如我们对国际游客到澳大利亚的人数进行研究：
+```r
+autoplot(austa) + xlab("Year") +
+  ylab("millions of people") +
+  ggtitle("Total annual international visitors to Australia")
+```
+![plot63](Forecast/Rplot63.jpeg)
+我们使用确定趋势的模型：
+```r
+trend <- seq_along(austa)
+(fit1 <- auto.arima(austa, d=0, xreg=trend))
+#> Series: austa 
+#> Regression with ARIMA(2,0,0) errors 
+#> 
+#> Coefficients:
+#>         ar1     ar2  intercept   xreg
+#>       1.113  -0.380      0.416  0.171
+#> s.e.  0.160   0.158      0.190  0.009
+#> 
+#> sigma^2 estimated as 0.0298:  log likelihood=13.6
+#> AIC=-17.2   AICc=-15.2   BIC=-9.28
+```
+其估计的游客人数每年增长17万人。
+模型可以写为：
+$$y_t = 0.416 + 0.171t + \eta_t \\
+\eta_t = 1.113 \eta_{t-1} - 0.380 \eta_{t-2} + \varepsilon_t\\
+\varepsilon_t \sim \text{NID}(0,0.030)$$
+也可以选择随机趋势模型：
+```r
+(fit2 <- auto.arima(austa, d=1))
+#> Series: austa 
+#> ARIMA(0,1,1) with drift 
+#> 
+#> Coefficients:
+#>         ma1  drift
+#>       0.301  0.173
+#> s.e.  0.165  0.039
+#> 
+#> sigma^2 estimated as 0.0338:  log likelihood=10.62
+#> AIC=-15.24   AICc=-14.46   BIC=-10.57
+```
+模型可以写为：
+$$y_t = y_0 + 0.173t + \eta_t \\
+\eta_t =  \eta_{t-1} + 0.301 \varepsilon_{t-1} + \varepsilon_t\\
+\varepsilon_t \sim \text{NID}(0,0.034)$$
+在这种情况下，游客人数的估计增长也是每年17万人。尽管增长估计相似，但预测区间却不一样，随机趋势的预测区间要宽得多，因为误差是非平稳的。
+```r
+fc1 <- forecast(fit1,
+  xreg = length(austa) + 1:10)
+fc2 <- forecast(fit2, h=10)
+autoplot(austa) +
+  autolayer(fc2, series="Stochastic trend") +
+  autolayer(fc1, series="Deterministic trend") +
+  ggtitle("Forecasts from trend models") +
+  xlab("Year") + ylab("Visitors to Australia (millions)") +
+  guides(colour=guide_legend(title="Forecast"))
+```
+![plot64](Forecast/Rplot64.jpeg)
+### 动态谐波回归
+当季节较长时，使用傅立叶项进行动态回归通常比我们在本书中考虑的其他模型更好。例如，每日数据的年度季节性可以为365，每周数据的季节性周期约为52，而半小时数据可以具有多个季节周期，其中最短的是周期48的每日模式。
+ARIMA和ETS模型的季节性版本设计用于较短的时间段，例如12个用于月度数据或4个用于季度数据。该`ets()`功能将季节性限制为最大24个周期，以允许每小时数据，但不允许具有较大季节性频率的数据。而`Arima()`和`auto.arima()`功能将允许季节性长达m=350，但实际上通常会在季节周期超过200左右时耗尽内存。
+我们可以通过谐波回归方法，特别是使用傅立叶项对季节性模式进行建模，就可以用ARMA模型处理复杂的季节性数据了。我们可以使用参数k进行傅里叶变换。
+如我们研究澳大利亚外出就餐的支出：
+```r
+cafe04 <- window(auscafe, start=2004)
+plots <- list()
+for (i in seq(6)) {
+  fit <- auto.arima(cafe04, xreg = fourier(cafe04, K = i),
+    seasonal = FALSE, lambda = 0)
+  plots[[i]] <- autoplot(forecast(fit,
+      xreg=fourier(cafe04, K=i, h=24))) +
+    xlab(paste("K=",i,"   AICC=",round(fit[["aicc"]],2))) +
+    ylab("") + ylim(1.5,4.7)
+}
+gridExtra::grid.arrange(
+  plots[[1]],plots[[2]],plots[[3]],
+  plots[[4]],plots[[5]],plots[[6]], nrow=3)
+```
+![plot65](Forecast/Rplot65.jpeg)
+### 滞后预测变量
+有一些场景中变量具有滞后性，比如投放广告与实际销量增长之间的关系。以美国电视广告与保险报价之间的关系为例：
+```r
+autoplot(insurance, facets=TRUE) +
+  xlab("Year") + ylab("") +
+  ggtitle("Insurance advertising and quotations")
+```
+![plot66](Forecast/Rplot66.jpeg)
+我们将考虑包括最多四个月的广告支出；也就是说，该模型可能包括当月及其之前三个月的广告支出。比较模型时，重要的是它们都使用相同的训练集。在下面的代码中，我们将前三个月排除在外，以便进行公平比较。
+```r
+# Lagged predictors. Test 0, 1, 2 or 3 lags.
+Advert <- cbind(
+    AdLag0 = insurance[,"TV.advert"],
+    AdLag1 = stats::lag(insurance[,"TV.advert"],-1),
+    AdLag2 = stats::lag(insurance[,"TV.advert"],-2),
+    AdLag3 = stats::lag(insurance[,"TV.advert"],-3)) %>%
+  head(NROW(insurance))
+
+# Restrict data so models use same fitting period
+fit1 <- auto.arima(insurance[4:40,1], xreg=Advert[4:40,1],
+  stationary=TRUE)
+fit2 <- auto.arima(insurance[4:40,1], xreg=Advert[4:40,1:2],
+  stationary=TRUE)
+fit3 <- auto.arima(insurance[4:40,1], xreg=Advert[4:40,1:3],
+  stationary=TRUE)
+fit4 <- auto.arima(insurance[4:40,1], xreg=Advert[4:40,1:4],
+  stationary=TRUE)
+```
+接下来，我们根据AICc选择广告的最佳滞后时间:
+```r
+c(fit1[["aicc"]],fit2[["aicc"]],fit3[["aicc"]],fit4[["aicc"]])
+#> [1] 68.500 60.024 62.833 65.457
+```
+那么最好的模型（具有最小的AICc值）具有两个滞后的预测因子。也就是说，它仅包括当月和上个月的广告所起的作用：
+```r
+(fit <- auto.arima(insurance[,1], xreg=Advert[,1:2],
+  stationary=TRUE))
+#> Series: insurance[, 1] 
+#> Regression with ARIMA(3,0,0) errors 
+#> 
+#> Coefficients:
+#>         ar1     ar2    ar3  intercept  AdLag0  AdLag1
+#>       1.412  -0.932  0.359      2.039   1.256   0.162
+#> s.e.  0.170   0.255  0.159      0.993   0.067   0.059
+#> 
+#> sigma^2 estimated as 0.217:  log likelihood=-23.89
+#> AIC=61.78   AICc=65.4   BIC=73.43
+```
+可见其为AR(3)型模型，可以写为：
+$$y_t = 2.039 + 1.256 x_t + 0.162 x_{t-1} + \eta_t$$
+其中，$y_t$是保险报价，$x_t$是广告支出，其中又有：
+$$\eta_t = 1.412 \eta_{t-1} - 0.932 \eta_{t-2} + 0.359 \eta_{t-3} + \varepsilon_t$$
+那么$\varepsilon_t$是白噪声。
+假设未来每月广告支出为8，进行预测：
+```r
+fc8 <- forecast(fit, h=20,
+  xreg=cbind(AdLag0 = rep(8,20),
+             AdLag1 = c(Advert[40,1], rep(8,19))))
+autoplot(fc8) + ylab("Quotes") +
+  ggtitle("Forecast quotes with future advertising set to 8")
+```
+![plot67](Forecast/Rplot67.jpeg)
