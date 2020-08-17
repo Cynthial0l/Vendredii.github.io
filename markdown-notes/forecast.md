@@ -1169,3 +1169,183 @@ autoplot(fc8) + ylab("Quotes") +
   ggtitle("Forecast quotes with future advertising set to 8")
 ```
 ![plot67](Forecast/Rplot67.jpeg)
+## 分层/组时间序列的预测
+时间序列通常可以根据感兴趣的各种属性进行自然分解。例如，自行车制造商销售的自行车总数可以按产品类型（例如公路自行车，山地自行车，儿童自行车和混合动力车）分类。这些中的每一个都可以细分为更细的类别。例如，混合动力自行车可以分为城市，通勤，舒适和徒步自行车。等等。这些类别嵌套在较大的组类别中，因此时间序列的集合遵循分层聚合结构。因此，我们将它们称为“分层时间序列”。
+
+暂时还在研究
+
+## 先进预测方法
+### 复杂季节预测
+有些时候时间序列是很复杂的，比如一个每日的数据它可能有每日的规律，同时又有每周的规律，而设置它还有每季度的规律。之前的`ts`函数只能处理一种时间序列的变化，因此引入了`msts`函数来处理多个时间序列的变化，下面以33周内每个工作日上午7点到晚上9点05之间每5分钟收到的银行胡椒数据为例，也就是这个数据每天有169次记录：
+```r
+#所有33周记录形成的规律
+p1 <- autoplot(calls) +
+  ylab("Call volume") + xlab("Weeks")
+#一个月内的规律
+p2 <- autoplot(window(calls, end = 4)) +
+  ylab("Call volume") + xlab("Weeks")
+gridExtra::grid.arrange(p1,p2)
+```
+![plot68](Forecast/Rplot68.jpeg)
+探索趋势：
+```r
+calls %>% mstl() %>%
+  autoplot() + xlab("Week")
+```
+![plot69](Forecast/Rplot69.jpeg)
+进行预测：
+```r
+calls %>% stlf() %>%
+  autoplot() + xlab("Week")
+```
+![plot70](Forecast/Rplot70.jpeg)
+也可以结合ARMA和傅里叶变换来减少AICc值以增加预测精度：
+```r
+fit <- auto.arima(calls, seasonal = FALSE, lambda = 0, xreg = fourier(calls, K = c(10,10)))
+fit %>%
+  forecast(xreg = fourier(calls, K = c(10,10), h=2*169)) %>%
+  autoplot(include=5*169) +
+     ylab("Call volume") + xlab("Weeks")
+```
+![plot71](Forecast/Rplot71.jpeg)
+### 向量自回归
+有时候我们应当考虑变量之间的相互影响与双向反馈。因此基于自回归而发展出的向量自回归（VAR），这是一种计量经济学模型，VAR模型把系统中每一个内生变量作为系统中所有内生变量的滞后值的函数来构造模型，同一样本期间内的n个变量（内生变量）可以作为它们过去值的线性函数，从而将单变量自回归模型推广到由多元时间序列变量组成的“向量”自回归模型。该功能使用R中的`vars`包实现。
+我们建立用于预测美国消费的VAR模型：
+```r
+library(vars)
+#用于选择滞后次数的各种标准，SC是BIC，HQ是Hunnan-Quinn准则，FPE是最终误差准则
+VARselect(uschange[,1:2], lag.max=8,
+  type="const")[["selection"]]
+#  AIC(n)  HQ(n)  SC(n) FPE(n) 
+#     5      1      1      5 
+```
+基于BIC选择var(1)试试：
+```r
+var1 <- VAR(uschange[,1:2], p=1, type="const")
+serial.test(var1, lags.pt=10, type="PT.asymptotic")
+v
+#Portmanteau Test (asymptotic)
+#
+#data:  Residuals of VAR object var1
+#Chi-squared = 49.102, df = 36, p-value = 0.07144
+```
+似乎有一定的残差相关性，那么试试var(2)：
+```r
+var2 <- VAR(uschange[,1:2], p=2, type="const")
+serial.test(var2, lags.pt=10, type="PT.asymptotic")
+#还是有
+```
+试试var(3)：
+```r
+var3 <- VAR(uschange[,1:2], p=3, type="const")
+serial.test(var3, lags.pt=10, type="PT.asymptotic")
+#	Portmanteau Test (asymptotic)
+#
+#data:  Residuals of VAR object var3
+#Chi-squared = 33.617, df = 28, p-value = 0.2138
+```
+p>0.05了没有了，就可以生成预测图像了：
+```r
+forecast(var3) %>%
+  autoplot() + xlab("Year")
+```
+![plot72](Forecast/Rplot72.jpeg)
+### 神经网络模型
+用于预测响应变量与其预测变量之间存在复杂的非线性关系。利用时间序列数据，时间序列的滞后值可以用作神经网络的输入，就像我们在线性自回归模型中使用滞后值一样。我们称其为神经网络自回归或NNAR模型。NNAR(p,k)中p为滞后输入的值，k为隐藏层的神经元数量。
+太阳的表面包含显示为黑点的磁性区域。这些会影响无线电波的传播，因此电信公司喜欢预测黑子的活动，以计划将来的任何困难：
+先对数据想进行Box-Cox转换，设置lambda使得数据更加平滑，有10个观察值用作预测变量，并且在隐藏层中有6个神经元。
+```r
+fit <- nnetar(sunspotarea, lambda=0)
+autoplot(forecast(fit,h=30))
+```
+![plot73](Forecast/Rplot73.jpeg)
+神经网络的预测区间可以通过反复模拟进行实现：
+```r
+#针对黑子数据的9种可能的未来样本路径的模拟。每个样本路径覆盖了观测数据之后的30年
+sim <- ts(matrix(0, nrow=30L, ncol=9L),
+  start=end(sunspotarea)[1L]+1L)
+for(i in seq(9))
+  sim[,i] <- simulate(fit, nsim=30L)
+autoplot(sunspotarea) + autolayer(sim)
+```
+![plot74](Forecast/Rplot74.jpeg)
+不断重复就能画出预测区间了，PI就是预测次数，默认是FALSE，因为很占用计算资源。
+```r
+fcast <- forecast(fit, PI=TRUE, h=30)
+autoplot(fcast)
+```
+![plot75](Forecast/Rplot75.jpeg)
+### 重复抽样与套袋
+Bootstrapping算法，指的就是利用有限的样本资料经由多次重复抽样，重新建立起足以代表母体样本分布的新样本，如针对冰岛零售借记卡每月支出的十个不同的多次抽样版本：
+```r
+bootseries <- bld.mbb.bootstrap(debitcards, 10) %>%
+  as.data.frame() %>% ts(start=2000, frequency=12)
+autoplot(debitcards) +
+  autolayer(bootseries, colour=TRUE) +
+  autolayer(debitcards, colour=FALSE) +
+  ylab("Bootstrapped series") + guides(colour="none")
+```
+![plot76](Forecast/Rplot76.jpeg)
+时间序列模型的几乎所有预测区间都太窄。这是一个众所周知的现象，是由于它们不能解决所有不确定因素而引起的。我们可以使用自举时间序列来解决该问题。我们使用`debitcards`数据来证明这个想法。首先，我们使用上述的重复抽样程序模拟了许多与原始数据相似的时间序列：
+```r
+nsim <- 1000L
+sim <- bld.mbb.bootstrap(debitcards, nsim)
+```
+对于每个系列，我们都拟合一个ETS模型并从该模型中模拟一个样本路径:
+```r
+h <- 36L
+future <- matrix(0, nrow=nsim, ncol=h)
+for(i in seq(nsim))
+  future[i,] <- simulate(ets(sim[[i]]), nsim=h)
+```
+最后，我们采用这些模拟样本路径的均值和分位数来形成点预测和预测区间：
+```r
+start <- tsp(debitcards)[2]+1/12
+simfc <- structure(list(
+    mean = ts(colMeans(future), start=start, frequency=12),
+    lower = ts(apply(future, 2, quantile, prob=0.025),
+               start=start, frequency=12),
+    upper = ts(apply(future, 2, quantile, prob=0.975),
+               start=start, frequency=12),
+    level=95),
+  class="forecast")
+```
+这些预测区间将大于从直接应用于原始数据的ETS模型获得的预测区间：
+```r
+etsfc <- forecast(ets(debitcards), h=h, level=95)
+autoplot(debitcards) +
+  ggtitle("Monthly retail debit card usage in Iceland") +
+  xlab("Year") + ylab("million ISK") +
+  autolayer(simfc, series="Simulated") +
+  autolayer(etsfc, series="ETS")
+```
+![plot77](Forecast/Rplot77.jpeg)
+与上面相对应的，我们可以运用套袋的方法生成多个预测值并进行平均，这样就能得到更加精确的预测值：
+对冰岛信用卡数据进行了10次预测：
+```r
+sim <- bld.mbb.bootstrap(debitcards, 10) %>%
+  as.data.frame() %>%
+  ts(frequency=12, start=2000)
+fc <- purrr::map(as.list(sim),
+           function(x){forecast(ets(x))[["mean"]]}) %>%
+      as.data.frame() %>%
+      ts(frequency=12, start=start)
+autoplot(debitcards) +
+  autolayer(sim, colour=TRUE) +
+  autolayer(fc, colour=TRUE) +
+  autolayer(debitcards, colour=FALSE) +
+  ylab("Bootstrapped series") +
+  guides(colour="none")
+```
+![plot78](Forecast/Rplot78.jpeg)
+这些预测的平均值给出了原始数据的套袋预测。整个过程可以用`baggedETS()`功能处理。默认情况下，使用100个自举序列，用于获取自举残差的块的长度设置为每月数据24：
+```r
+etsfc <- debitcards %>% ets() %>% forecast(h=36)
+baggedfc <- debitcards %>% baggedETS() %>% forecast(h=36)
+autoplot(debitcards) +
+  autolayer(baggedfc, series="BaggedETS", PI=FALSE) +
+  autolayer(etsfc, series="ETS", PI=FALSE) +
+  guides(colour=guide_legend(title="Forecasts"))
+```
+![plot79](Forecast/Rplot79.jpeg)
+一般而言，套袋法比直接应用袋能提供更好的预测。
