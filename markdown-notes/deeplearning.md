@@ -105,7 +105,7 @@ val_loss和val_acc是测试数据的损失和准确性。
 plot(history) + theme_minimal()
 #ggsave()来保存
 ```
-![plot1](deeplearning/Rplot02.jpeg)
+![plot2](deeplearning/Rplot02.jpeg)
 评估测试数据的性能：
 ```r
 model %>% evaluate(x_test, y_test)
@@ -119,3 +119,116 @@ dim(preds)
 head(round(preds, 4))
 glimpse(preds)
 ```
+## 复杂一点的简单神经网络
+```r
+setwd("your way")
+#为测试集和训练集指定文件路径
+train_path = "data-raw/dog-human/TRAIN"
+val_path = "data-raw/dog-human/VAL"
+#再定义两个变量作为文件的实际名称
+train_images = list.files(train_path, full.names = TRUE, recursive = TRUE)
+val_images = list.files(val_path, full.names = TRUE, recursive = TRUE)
+#我们有600个训练集图像和100个验证集图像
+length(train_images)
+length(val_images)
+#查看图像
+train_images[1]
+val_images[1]
+#绘制图像
+library(cowplot)
+ggdraw() + draw_image(train_images[20])
+ggdraw() + draw_image(val_images[1])
+```
+![plot3](deeplearning/Rplot03.jpeg)
+训练集的狗狗
+![plot4](deeplearning/Rplot04.jpeg)
+测试集的狗狗
+### 定义模型
+我们想在模型之外定义一些特征。这样，我们可以每次都传递相同的变量而不是值。
+```r
+#预期的图像宽度和高度为96像素。
+img_width = img_height = 96L
+#每次迭代要分析的观察数。
+batch_size = 100L
+#训练集数量(600)。
+(num_train_samples = length(list.files(train_path, recursive = TRUE)))
+#验证集数量。
+num_validation_samples = 100L
+#完全通过训练数据的次数。
+epochs = 30L
+```
+我们可以使用`image_data_generator`执行数据扩充，但是，我们将仅使用单独的`rescale`参数将数据缩放到一堆二进制矩阵-每个数字代表深色或浅色像素。
+```r
+#训练集
+train_datagen = keras::image_data_generator(rescale = 1/255)
+#验证集
+val_datagen = keras::image_data_generator(rescale = 1/255)
+train_datagen
+```
+在定义模型之前，我们还需要向keras提供更多关于图像属性的细节。我们将在`train_datagen`和`val_datagen`上使用`flow_from_directory`方法来定义新变量。
+```r
+#配置培训模型
+#指定训练图像的文件路径与图像性状与批量（batch）大小
+#class_mode为分类模板，binary就是二元（人/狗）颜色配置为灰度图像
+train_gen = train_datagen$flow_from_directory(train_path, target_size = c(img_width, img_height), batch_size = batch_size, class_mode = "binary", color_mode = "grayscale")
+#配置验证模型
+val_gen = val_datagen$flow_from_directory(val_path, target_size = c(img_width, img_height), batch_size = batch_size, class_mode = "binary", color_mode = "grayscale")
+```
+### 定义模型
+```r
+# %>%与magrittr函数来自这里
+library(dplyr)
+#负责关于神经网络的layer_flatten, layer_dense, layer_dropout等等指令
+library(keras)
+model = keras::keras_model_sequential()
+model %>%
+#输入层
+#layer_flatten将把我们的三维阵列变成一维阵列
+#Note: 在第1部分中，我们没有必要这样做，因为数据已经变平了
+layer_flatten(input_shape = c(img_width, img_height, 1)) %>%
+#隐藏层
+#layer_dense允许我们实际添加输入层。我们指定了哪些参数？
+layer_dense(units = 96, activation = 'relu', input_shape = c(img_width, img_height)) %>%
+#layer_dropout允许我们对模型应用正则化。
+layer_dropout(rate = 0.4) %>%
+#隐藏层
+layer_dense(units = 192, activation = 'relu') %>%
+layer_dropout(rate = 0.3) %>%
+#输出层
+#在这里，我们可以将我们的激活改为一个二元结果的sigmoid函数?
+layer_dense(units = 1, activation = 'sigmoid')
+summary(model)
+```
+### 输出并评估
+我们可以使用通用`compile`函数来指定损失和优化器函数以及分类指标。
+```r
+model %>% compile(
+#看看是狗是人
+loss = 'binary_crossentropy',
+#把学习速度放慢一点。。。
+optimizer = optimizer_adam(lr = 0.000001), 
+#如何评估模型性能
+metrics = c('accuracy')
+)
+```
+训练模型：
+注意，这次我们必须使用`fit_generator`拟合模型，因为我们还使用了自定义`flow_from_directory`函数，而不是之前的简单格式。
+```r
+batch_size = 100
+#会有警告WARNING:tensorflow:Your input ran out of data; interrupting training. Make sure that your dataset or generator can generate at least `steps_per_epoch * epochs` batches (in this case, 10 batches). You may need to use the repeat() function when building your dataset.
+#batch_size = 10
+num_validation_samples
+
+history = model %>%
+  fit_generator(train_gen,
+                steps_per_epoch = as.integer(num_train_samples / batch_size),
+                epochs = epochs,
+                #epochs = 13,
+                validation_data = val_gen,
+                validation_steps = as.integer(num_validation_samples / batch_size))
+
+# Review fitting history.
+plot(history) + theme_bw()
+model %>% evaluate_generator(generator = val_gen, steps = 10)
+```
+![plot5](deeplearning/Rplot06.jpeg)

@@ -358,7 +358,7 @@ val_loss&#x548C;val_acc&#x662F;&#x6D4B;&#x8BD5;&#x6570;&#x636E;&#x7684;&#x635F;&
 &#x53EF;&#x4EE5;&#x901A;&#x8FC7;ggplot&#x7ED8;&#x5236;&#x8BAD;&#x7EC3;&#x5386;&#x53F2;&#xFF1A;</p>
 <pre data-role="codeBlock" data-info="r" class="language-r">plot<span class="token punctuation">(</span>history<span class="token punctuation">)</span> <span class="token operator">+</span> theme_minimal<span class="token punctuation">(</span><span class="token punctuation">)</span>
 <span class="token comment">#ggsave()&#x6765;&#x4FDD;&#x5B58;</span>
-</pre><p><img src="deeplearning/Rplot02.jpeg" alt="plot1"><br>
+</pre><p><img src="deeplearning/Rplot02.jpeg" alt="plot2"><br>
 &#x8BC4;&#x4F30;&#x6D4B;&#x8BD5;&#x6570;&#x636E;&#x7684;&#x6027;&#x80FD;&#xFF1A;</p>
 <pre data-role="codeBlock" data-info="r" class="language-r">model <span class="token percent-operator operator">%&gt;%</span> evaluate<span class="token punctuation">(</span>x_test<span class="token punctuation">,</span> y_test<span class="token punctuation">)</span>
 <span class="token comment">#&#x7ED3;&#x679C;&#x975E;&#x5E38;&#x597D;</span>
@@ -370,7 +370,110 @@ preds <span class="token operator">=</span> model <span class="token percent-ope
 dim<span class="token punctuation">(</span>preds<span class="token punctuation">)</span>
 head<span class="token punctuation">(</span>round<span class="token punctuation">(</span>preds<span class="token punctuation">,</span> <span class="token number">4</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
 glimpse<span class="token punctuation">(</span>preds<span class="token punctuation">)</span>
-</pre>
+</pre><h2 class="mume-header" id="%E5%A4%8D%E6%9D%82%E4%B8%80%E7%82%B9%E7%9A%84%E7%AE%80%E5%8D%95%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C">&#x590D;&#x6742;&#x4E00;&#x70B9;&#x7684;&#x7B80;&#x5355;&#x795E;&#x7ECF;&#x7F51;&#x7EDC;</h2>
+
+<pre data-role="codeBlock" data-info="r" class="language-r">setwd<span class="token punctuation">(</span><span class="token string">&quot;your way&quot;</span><span class="token punctuation">)</span>
+<span class="token comment">#&#x4E3A;&#x6D4B;&#x8BD5;&#x96C6;&#x548C;&#x8BAD;&#x7EC3;&#x96C6;&#x6307;&#x5B9A;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;</span>
+train_path <span class="token operator">=</span> <span class="token string">&quot;data-raw/dog-human/TRAIN&quot;</span>
+val_path <span class="token operator">=</span> <span class="token string">&quot;data-raw/dog-human/VAL&quot;</span>
+<span class="token comment">#&#x518D;&#x5B9A;&#x4E49;&#x4E24;&#x4E2A;&#x53D8;&#x91CF;&#x4F5C;&#x4E3A;&#x6587;&#x4EF6;&#x7684;&#x5B9E;&#x9645;&#x540D;&#x79F0;</span>
+train_images <span class="token operator">=</span> list.files<span class="token punctuation">(</span>train_path<span class="token punctuation">,</span> full.names <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span> recursive <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+val_images <span class="token operator">=</span> list.files<span class="token punctuation">(</span>val_path<span class="token punctuation">,</span> full.names <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span> recursive <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+<span class="token comment">#&#x6211;&#x4EEC;&#x6709;600&#x4E2A;&#x8BAD;&#x7EC3;&#x96C6;&#x56FE;&#x50CF;&#x548C;100&#x4E2A;&#x9A8C;&#x8BC1;&#x96C6;&#x56FE;&#x50CF;</span>
+length<span class="token punctuation">(</span>train_images<span class="token punctuation">)</span>
+length<span class="token punctuation">(</span>val_images<span class="token punctuation">)</span>
+<span class="token comment">#&#x67E5;&#x770B;&#x56FE;&#x50CF;</span>
+train_images<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+val_images<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span>
+<span class="token comment">#&#x7ED8;&#x5236;&#x56FE;&#x50CF;</span>
+library<span class="token punctuation">(</span>cowplot<span class="token punctuation">)</span>
+ggdraw<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> draw_image<span class="token punctuation">(</span>train_images<span class="token punctuation">[</span><span class="token number">20</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+ggdraw<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">+</span> draw_image<span class="token punctuation">(</span>val_images<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+</pre><p><img src="deeplearning/Rplot03.jpeg" alt="plot3"><br>
+&#x8BAD;&#x7EC3;&#x96C6;&#x7684;&#x72D7;&#x72D7;<br>
+<img src="deeplearning/Rplot04.jpeg" alt="plot4"><br>
+&#x6D4B;&#x8BD5;&#x96C6;&#x7684;&#x72D7;&#x72D7;</p>
+<h3 class="mume-header" id="%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B">&#x5B9A;&#x4E49;&#x6A21;&#x578B;</h3>
+
+<p>&#x6211;&#x4EEC;&#x60F3;&#x5728;&#x6A21;&#x578B;&#x4E4B;&#x5916;&#x5B9A;&#x4E49;&#x4E00;&#x4E9B;&#x7279;&#x5F81;&#x3002;&#x8FD9;&#x6837;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x6BCF;&#x6B21;&#x90FD;&#x4F20;&#x9012;&#x76F8;&#x540C;&#x7684;&#x53D8;&#x91CF;&#x800C;&#x4E0D;&#x662F;&#x503C;&#x3002;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment">#&#x9884;&#x671F;&#x7684;&#x56FE;&#x50CF;&#x5BBD;&#x5EA6;&#x548C;&#x9AD8;&#x5EA6;&#x4E3A;96&#x50CF;&#x7D20;&#x3002;</span>
+img_width <span class="token operator">=</span> img_height <span class="token operator">=</span> <span class="token number">96L</span>
+<span class="token comment">#&#x6BCF;&#x6B21;&#x8FED;&#x4EE3;&#x8981;&#x5206;&#x6790;&#x7684;&#x89C2;&#x5BDF;&#x6570;&#x3002;</span>
+batch_size <span class="token operator">=</span> <span class="token number">100L</span>
+<span class="token comment">#&#x8BAD;&#x7EC3;&#x96C6;&#x6570;&#x91CF;(600)&#x3002;</span>
+<span class="token punctuation">(</span>num_train_samples <span class="token operator">=</span> length<span class="token punctuation">(</span>list.files<span class="token punctuation">(</span>train_path<span class="token punctuation">,</span> recursive <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment">#&#x9A8C;&#x8BC1;&#x96C6;&#x6570;&#x91CF;&#x3002;</span>
+num_validation_samples <span class="token operator">=</span> <span class="token number">100L</span>
+<span class="token comment">#&#x5B8C;&#x5168;&#x901A;&#x8FC7;&#x8BAD;&#x7EC3;&#x6570;&#x636E;&#x7684;&#x6B21;&#x6570;&#x3002;</span>
+epochs <span class="token operator">=</span> <span class="token number">30L</span>
+</pre><p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;<code>image_data_generator</code>&#x6267;&#x884C;&#x6570;&#x636E;&#x6269;&#x5145;&#xFF0C;&#x4F46;&#x662F;&#xFF0C;&#x6211;&#x4EEC;&#x5C06;&#x4EC5;&#x4F7F;&#x7528;&#x5355;&#x72EC;&#x7684;<code>rescale</code>&#x53C2;&#x6570;&#x5C06;&#x6570;&#x636E;&#x7F29;&#x653E;&#x5230;&#x4E00;&#x5806;&#x4E8C;&#x8FDB;&#x5236;&#x77E9;&#x9635;-&#x6BCF;&#x4E2A;&#x6570;&#x5B57;&#x4EE3;&#x8868;&#x6DF1;&#x8272;&#x6216;&#x6D45;&#x8272;&#x50CF;&#x7D20;&#x3002;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment">#&#x8BAD;&#x7EC3;&#x96C6;</span>
+train_datagen <span class="token operator">=</span> keras<span class="token operator">::</span>image_data_generator<span class="token punctuation">(</span>rescale <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">255</span><span class="token punctuation">)</span>
+<span class="token comment">#&#x9A8C;&#x8BC1;&#x96C6;</span>
+val_datagen <span class="token operator">=</span> keras<span class="token operator">::</span>image_data_generator<span class="token punctuation">(</span>rescale <span class="token operator">=</span> <span class="token number">1</span><span class="token operator">/</span><span class="token number">255</span><span class="token punctuation">)</span>
+train_datagen
+</pre><p>&#x5728;&#x5B9A;&#x4E49;&#x6A21;&#x578B;&#x4E4B;&#x524D;&#xFF0C;&#x6211;&#x4EEC;&#x8FD8;&#x9700;&#x8981;&#x5411;keras&#x63D0;&#x4F9B;&#x66F4;&#x591A;&#x5173;&#x4E8E;&#x56FE;&#x50CF;&#x5C5E;&#x6027;&#x7684;&#x7EC6;&#x8282;&#x3002;&#x6211;&#x4EEC;&#x5C06;&#x5728;<code>train_datagen</code>&#x548C;<code>val_datagen</code>&#x4E0A;&#x4F7F;&#x7528;<code>flow_from_directory</code>&#x65B9;&#x6CD5;&#x6765;&#x5B9A;&#x4E49;&#x65B0;&#x53D8;&#x91CF;&#x3002;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment">#&#x914D;&#x7F6E;&#x57F9;&#x8BAD;&#x6A21;&#x578B;</span>
+<span class="token comment">#&#x6307;&#x5B9A;&#x8BAD;&#x7EC3;&#x56FE;&#x50CF;&#x7684;&#x6587;&#x4EF6;&#x8DEF;&#x5F84;&#x4E0E;&#x56FE;&#x50CF;&#x6027;&#x72B6;&#x4E0E;&#x6279;&#x91CF;&#xFF08;batch&#xFF09;&#x5927;&#x5C0F;</span>
+<span class="token comment">#class_mode&#x4E3A;&#x5206;&#x7C7B;&#x6A21;&#x677F;&#xFF0C;binary&#x5C31;&#x662F;&#x4E8C;&#x5143;&#xFF08;&#x4EBA;/&#x72D7;&#xFF09;&#x989C;&#x8272;&#x914D;&#x7F6E;&#x4E3A;&#x7070;&#x5EA6;&#x56FE;&#x50CF;</span>
+train_gen <span class="token operator">=</span> train_datagen<span class="token operator">$</span>flow_from_directory<span class="token punctuation">(</span>train_path<span class="token punctuation">,</span> target_size <span class="token operator">=</span> c<span class="token punctuation">(</span>img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">)</span><span class="token punctuation">,</span> batch_size <span class="token operator">=</span> batch_size<span class="token punctuation">,</span> class_mode <span class="token operator">=</span> <span class="token string">&quot;binary&quot;</span><span class="token punctuation">,</span> color_mode <span class="token operator">=</span> <span class="token string">&quot;grayscale&quot;</span><span class="token punctuation">)</span>
+<span class="token comment">#&#x914D;&#x7F6E;&#x9A8C;&#x8BC1;&#x6A21;&#x578B;</span>
+val_gen <span class="token operator">=</span> val_datagen<span class="token operator">$</span>flow_from_directory<span class="token punctuation">(</span>val_path<span class="token punctuation">,</span> target_size <span class="token operator">=</span> c<span class="token punctuation">(</span>img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">)</span><span class="token punctuation">,</span> batch_size <span class="token operator">=</span> batch_size<span class="token punctuation">,</span> class_mode <span class="token operator">=</span> <span class="token string">&quot;binary&quot;</span><span class="token punctuation">,</span> color_mode <span class="token operator">=</span> <span class="token string">&quot;grayscale&quot;</span><span class="token punctuation">)</span>
+</pre><h3 class="mume-header" id="%E5%AE%9A%E4%B9%89%E6%A8%A1%E5%9E%8B-1">&#x5B9A;&#x4E49;&#x6A21;&#x578B;</h3>
+
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># %&gt;%&#x4E0E;magrittr&#x51FD;&#x6570;&#x6765;&#x81EA;&#x8FD9;&#x91CC;</span>
+library<span class="token punctuation">(</span>dplyr<span class="token punctuation">)</span>
+<span class="token comment">#&#x8D1F;&#x8D23;&#x5173;&#x4E8E;&#x795E;&#x7ECF;&#x7F51;&#x7EDC;&#x7684;layer_flatten, layer_dense, layer_dropout&#x7B49;&#x7B49;&#x6307;&#x4EE4;</span>
+library<span class="token punctuation">(</span>keras<span class="token punctuation">)</span>
+model <span class="token operator">=</span> keras<span class="token operator">::</span>keras_model_sequential<span class="token punctuation">(</span><span class="token punctuation">)</span>
+model <span class="token percent-operator operator">%&gt;%</span>
+<span class="token comment">#&#x8F93;&#x5165;&#x5C42;</span>
+<span class="token comment">#layer_flatten&#x5C06;&#x628A;&#x6211;&#x4EEC;&#x7684;&#x4E09;&#x7EF4;&#x9635;&#x5217;&#x53D8;&#x6210;&#x4E00;&#x7EF4;&#x9635;&#x5217;</span>
+<span class="token comment">#Note: &#x5728;&#x7B2C;1&#x90E8;&#x5206;&#x4E2D;&#xFF0C;&#x6211;&#x4EEC;&#x6CA1;&#x6709;&#x5FC5;&#x8981;&#x8FD9;&#x6837;&#x505A;&#xFF0C;&#x56E0;&#x4E3A;&#x6570;&#x636E;&#x5DF2;&#x7ECF;&#x53D8;&#x5E73;&#x4E86;</span>
+layer_flatten<span class="token punctuation">(</span>input_shape <span class="token operator">=</span> c<span class="token punctuation">(</span>img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token percent-operator operator">%&gt;%</span>
+<span class="token comment">#&#x9690;&#x85CF;&#x5C42;</span>
+<span class="token comment">#layer_dense&#x5141;&#x8BB8;&#x6211;&#x4EEC;&#x5B9E;&#x9645;&#x6DFB;&#x52A0;&#x8F93;&#x5165;&#x5C42;&#x3002;&#x6211;&#x4EEC;&#x6307;&#x5B9A;&#x4E86;&#x54EA;&#x4E9B;&#x53C2;&#x6570;&#xFF1F;</span>
+layer_dense<span class="token punctuation">(</span>units <span class="token operator">=</span> <span class="token number">96</span><span class="token punctuation">,</span> activation <span class="token operator">=</span> <span class="token string">&apos;relu&apos;</span><span class="token punctuation">,</span> input_shape <span class="token operator">=</span> c<span class="token punctuation">(</span>img_width<span class="token punctuation">,</span> img_height<span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token percent-operator operator">%&gt;%</span>
+<span class="token comment">#layer_dropout&#x5141;&#x8BB8;&#x6211;&#x4EEC;&#x5BF9;&#x6A21;&#x578B;&#x5E94;&#x7528;&#x6B63;&#x5219;&#x5316;&#x3002;</span>
+layer_dropout<span class="token punctuation">(</span>rate <span class="token operator">=</span> <span class="token number">0.4</span><span class="token punctuation">)</span> <span class="token percent-operator operator">%&gt;%</span>
+<span class="token comment">#&#x9690;&#x85CF;&#x5C42;</span>
+layer_dense<span class="token punctuation">(</span>units <span class="token operator">=</span> <span class="token number">192</span><span class="token punctuation">,</span> activation <span class="token operator">=</span> <span class="token string">&apos;relu&apos;</span><span class="token punctuation">)</span> <span class="token percent-operator operator">%&gt;%</span>
+layer_dropout<span class="token punctuation">(</span>rate <span class="token operator">=</span> <span class="token number">0.3</span><span class="token punctuation">)</span> <span class="token percent-operator operator">%&gt;%</span>
+<span class="token comment">#&#x8F93;&#x51FA;&#x5C42;</span>
+<span class="token comment">#&#x5728;&#x8FD9;&#x91CC;&#xFF0C;&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x5C06;&#x6211;&#x4EEC;&#x7684;&#x6FC0;&#x6D3B;&#x6539;&#x4E3A;&#x4E00;&#x4E2A;&#x4E8C;&#x5143;&#x7ED3;&#x679C;&#x7684;sigmoid&#x51FD;&#x6570;?</span>
+layer_dense<span class="token punctuation">(</span>units <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> activation <span class="token operator">=</span> <span class="token string">&apos;sigmoid&apos;</span><span class="token punctuation">)</span>
+summary<span class="token punctuation">(</span>model<span class="token punctuation">)</span>
+</pre><h3 class="mume-header" id="%E8%BE%93%E5%87%BA%E5%B9%B6%E8%AF%84%E4%BC%B0">&#x8F93;&#x51FA;&#x5E76;&#x8BC4;&#x4F30;</h3>
+
+<p>&#x6211;&#x4EEC;&#x53EF;&#x4EE5;&#x4F7F;&#x7528;&#x901A;&#x7528;<code>compile</code>&#x51FD;&#x6570;&#x6765;&#x6307;&#x5B9A;&#x635F;&#x5931;&#x548C;&#x4F18;&#x5316;&#x5668;&#x51FD;&#x6570;&#x4EE5;&#x53CA;&#x5206;&#x7C7B;&#x6307;&#x6807;&#x3002;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">model <span class="token percent-operator operator">%&gt;%</span> compile<span class="token punctuation">(</span>
+<span class="token comment">#&#x770B;&#x770B;&#x662F;&#x72D7;&#x662F;&#x4EBA;</span>
+loss <span class="token operator">=</span> <span class="token string">&apos;binary_crossentropy&apos;</span><span class="token punctuation">,</span>
+<span class="token comment">#&#x628A;&#x5B66;&#x4E60;&#x901F;&#x5EA6;&#x653E;&#x6162;&#x4E00;&#x70B9;&#x3002;&#x3002;&#x3002;</span>
+optimizer <span class="token operator">=</span> optimizer_adam<span class="token punctuation">(</span>lr <span class="token operator">=</span> <span class="token number">0.000001</span><span class="token punctuation">)</span><span class="token punctuation">,</span> 
+<span class="token comment">#&#x5982;&#x4F55;&#x8BC4;&#x4F30;&#x6A21;&#x578B;&#x6027;&#x80FD;</span>
+metrics <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&apos;accuracy&apos;</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span>
+</pre><p>&#x8BAD;&#x7EC3;&#x6A21;&#x578B;&#xFF1A;<br>
+&#x6CE8;&#x610F;&#xFF0C;&#x8FD9;&#x6B21;&#x6211;&#x4EEC;&#x5FC5;&#x987B;&#x4F7F;&#x7528;<code>fit_generator</code>&#x62DF;&#x5408;&#x6A21;&#x578B;&#xFF0C;&#x56E0;&#x4E3A;&#x6211;&#x4EEC;&#x8FD8;&#x4F7F;&#x7528;&#x4E86;&#x81EA;&#x5B9A;&#x4E49;<code>flow_from_directory</code>&#x51FD;&#x6570;&#xFF0C;&#x800C;&#x4E0D;&#x662F;&#x4E4B;&#x524D;&#x7684;&#x7B80;&#x5355;&#x683C;&#x5F0F;&#x3002;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">batch_size <span class="token operator">=</span> <span class="token number">100</span>
+<span class="token comment">#&#x4F1A;&#x6709;&#x8B66;&#x544A;WARNING:tensorflow:Your input ran out of data; interrupting training. Make sure that your dataset or generator can generate at least `steps_per_epoch * epochs` batches (in this case, 10 batches). You may need to use the repeat() function when building your dataset.</span>
+<span class="token comment">#batch_size = 10</span>
+num_validation_samples
+
+history <span class="token operator">=</span> model <span class="token percent-operator operator">%&gt;%</span>
+  fit_generator<span class="token punctuation">(</span>train_gen<span class="token punctuation">,</span>
+                steps_per_epoch <span class="token operator">=</span> as.integer<span class="token punctuation">(</span>num_train_samples <span class="token operator">/</span> batch_size<span class="token punctuation">)</span><span class="token punctuation">,</span>
+                epochs <span class="token operator">=</span> epochs<span class="token punctuation">,</span>
+                <span class="token comment">#epochs = 13,</span>
+                validation_data <span class="token operator">=</span> val_gen<span class="token punctuation">,</span>
+                validation_steps <span class="token operator">=</span> as.integer<span class="token punctuation">(</span>num_validation_samples <span class="token operator">/</span> batch_size<span class="token punctuation">)</span><span class="token punctuation">)</span>
+
+<span class="token comment"># Review fitting history.</span>
+plot<span class="token punctuation">(</span>history<span class="token punctuation">)</span> <span class="token operator">+</span> theme_bw<span class="token punctuation">(</span><span class="token punctuation">)</span>
+model <span class="token percent-operator operator">%&gt;%</span> evaluate_generator<span class="token punctuation">(</span>generator <span class="token operator">=</span> val_gen<span class="token punctuation">,</span> steps <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">)</span>
+</pre><p><img src="deeplearning/Rplot06.jpeg" alt="plot5"></p>
+
       </div>
       
       
