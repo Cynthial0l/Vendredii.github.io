@@ -2,6 +2,7 @@
 ## 前言
 施工中
 R语言上与深度学习相关的原生程序包很少，大多其实是基于Python的二道贩子包。
+[TOC]
 我们需要安装相关程序包和程序：
 ```r
 #安装程序包
@@ -17,7 +18,6 @@ keras::is_keras_available()
 reticulate::py_config()
 tensorflow::tf_config()
 ```
-[TOC]
 ## 简单的神经网络预测
 在运行一个简单的神经网络前需要加载这些包与数据
 ```r
