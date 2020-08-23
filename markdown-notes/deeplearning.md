@@ -415,3 +415,227 @@ train_datagen =
                               height_shift_range = 0.2,
                               horizontal_flip = TRUE)
 ```
+## 文本分析
+分析特朗普的推特
+加载相关程序包
+```r
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(rio)
+library(ggplot2)
+library(keras)
+```
+下载相关数据：
+```r
+data_file = "data-raw/condensed_2018.json"
+
+if (!file.exists(data_file)) {
+
+  file_url = "https://github.com/bpb27/trump_tweet_data_archive/raw/master/condensed_2018.json.zip"
+  (local_file = paste0("data-raw/", basename(file_url)))
+  if (!file.exists(local_file)) {
+    download.file(file_url, local_file)
+  }
+  unzip(local_file, exdir = "data-raw")
+}  
+
+data = rio::import(data_file)
+```
+探索数据结构：
+```r
+dplyr::glimpse(data)
+summary(data$favorite_count)
+#哪条推文最受欢迎？
+data %>% arrange(desc(favorite_count)) %>% filter(row_number() == 1)
+qplot(data$favorite_count)
+```
+![plot12](deeplearning/Rplot12.jpeg)
+```r
+qplot(log(data$favorite_count + 1))
+```
+![plot13](deeplearning/Rplot13.jpeg)
+```r
+qplot(data$retweet_count)
+summary(data)
+table(data$source, useNA = "ifany")
+```
+![plot14](deeplearning/Rplot14.jpeg)
+我们试着预测一条特朗普推特会收到多少转发呢？
+数据准备
+```r
+max_words <- 5000
+batch_size <- 32
+epochs <- 5
+cat('Loading data...\n')
+text_col = "text"
+outcome_col = "retweet_count"
+data[[text_col]] = tolower(data[[text_col]])
+#分为训练与测试集
+set.seed(1)
+data$train = 0L
+data$train[sample(nrow(data), ceiling(nrow(data) * 0.8))] = 1L
+table(data$train, useNA = "ifany")
+prop.table(table(data$train, useNA = "ifany"))
+train = data[data$train == 1, ]
+test = data[data$train == 0, ]
+x_train <- train[[text_col]]
+y_train <- train[[outcome_col]]
+x_test <- test[[text_col]]
+y_test <- test[[outcome_col]]
+cat(length(x_train), 'train sequences\n')
+cat(length(x_test), 'test sequences\n')
+cat('Vectorizing sequence data...\n')
+x_train[[1]]
+tokenizer <- text_tokenizer(num_words = max_words)
+tokenizer$fit_on_texts(data[[text_col]])
+#找到的唯一单词（标记）总数。
+length(tokenizer$word_index)
+x_train_seq = texts_to_sequences(tokenizer, x_train)
+x_train_seq[[1]]
+str(x_train_seq)
+#检查标记长度的分布。
+summary(sapply(x_train_seq, length))
+maxlen = 61L
+train_data <- pad_sequences(
+  x_train_seq,
+  #value = word_index_df %>% filter(word == "<PAD>") %>% select(idx) %>% pull(),
+  padding = "post",
+  maxlen = maxlen,
+)
+str(train_data)
+train_data[1, ]
+x_test_seq = texts_to_sequences(tokenizer, x_test)
+test_data <- pad_sequences(
+  x_test_seq,
+#  value = word_index_df %>% filter(word == "<PAD>") %>% select(idx) %>% pull(),
+  padding = "post",
+  maxlen = maxlen,
+)
+```
+### 模型1
+建立模型：
+```r
+#vocab_size <- 10000
+
+(vocab_size = tokenizer$num_words)
+
+model <- keras_model_sequential()
+model %>% 
+  layer_embedding(input_dim = vocab_size, output_dim = 16) %>%
+  layer_global_average_pooling_1d() %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(rate = 0.3) %>%
+  layer_dense(units = 1, activation = "linear")
+
+model %>% summary()
+
+model %>% compile(
+  optimizer = optimizer_adam(lr = 0.005),
+  loss = 'mean_squared_error'
+)
+```
+训练模型：
+```r
+history <- model %>% fit(
+  train_data,
+  y_train,
+  epochs = 50,
+  batch_size = 4,
+  validation_split = 0.2,
+  callbacks = list(
+    callback_early_stopping(patience = 8L, restore_best_weights = TRUE),
+    callback_reduce_lr_on_plateau(patience = 4L)
+  )
+)
+history
+plot(history)
+```
+![plot15](deeplearning/Rplot15.jpeg)
+评估模型：
+```r
+(eval_loss = model %>% evaluate(test_data, y_test, verbose = 0))
+
+# We're typically off by 10,483 retweets
+sqrt(eval_loss)
+
+# Just predicting the mean would only be off by 11,519 retweets typically.
+sd(y_test)
+
+# Look at predictions.
+preds = model %>% predict(test_data)
+head(preds)
+summary(preds)
+mean(y_train)
+qplot(preds)
+```
+![plot16](deeplearning/Rplot16.jpeg)
+```r
+qplot(preds, y_test) + geom_smooth() + theme_minimal()
+# Correlation of 0.44, p is highly significant.
+cor.test(preds, y_test)
+# Spearman correlation of 0.575
+cor.test(rank(preds), rank(y_test))
+```
+![plot17](deeplearning/Rplot17.jpeg)
+### 尝试其他模型结构
+```r
+(vocab_size = tokenizer$num_words)
+
+model <- keras_model_sequential()
+model %>% 
+  layer_embedding(input_dim = vocab_size, output_dim = 32) %>%
+  #layer_lstm(16) %>%
+  layer_conv_1d(64, kernel_size = 1) %>%
+  layer_global_average_pooling_1d() %>%
+  layer_dense(units = 16, activation = "relu") %>%
+  layer_dropout(0.3) %>%
+  layer_dense(units = 1, activation = "linear")
+
+model %>% summary()
+
+model %>% compile(
+  optimizer = optimizer_adam(lr = 0.001),
+  loss = 'mean_squared_error'
+)
+```
+训练模型2：
+```r
+history <- model %>% fit(
+  train_data,
+  y_train,
+  epochs = 50,
+  batch_size = 32,
+  validation_split = 0.2,
+  callbacks = list(
+    callback_early_stopping(patience = 6L, restore_best_weights = TRUE, verbose = 1),
+    callback_reduce_lr_on_plateau(patience = 3L, verbose = 1))
+)
+plot(history)
+```
+![plot18](deeplearning/Rplot18.jpeg)
+### 模型2
+评估模型2：
+```r
+(eval_loss = model %>% evaluate(test_data, y_test, verbose = 0))
+#通常会被10750次转发
+sqrt(eval_loss)
+#查看预测值
+preds = model %>% predict(test_data)
+head(preds)
+summary(preds)
+#开始在我们的预测中传播开来
+qplot(preds)
+```
+![plot19](deeplearning/Rplot19.jpeg)
+```r
+qplot(preds, y_test) + geom_smooth() + theme_minimal()
+# Pearson linear correlation of 0.395
+cor.test(preds, y_test)
+# Spearman correlation of 0.563
+cor.test(rank(preds), rank(y_test))
+# Same thing:
+cor.test(preds, y_test, method = "spearman", exact = FALSE)
+# Kendall's tau 0.402
+cor.test(preds, y_test, method = "kendall", exact = FALSE)
+```
+![plot20](deeplearning/Rplot20.jpeg)
