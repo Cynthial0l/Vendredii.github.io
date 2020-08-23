@@ -231,4 +231,187 @@ history = model %>%
 plot(history) + theme_bw()
 model %>% evaluate_generator(generator = val_gen, steps = 10)
 ```
-![plot5](deeplearning/Rplot06.jpeg)
+![plot6](deeplearning/Rplot06.jpeg)
+## 神经网络的参数优化
+在此之前需要安装magic包，ImageMagick是C ++的开源图像处理库，许多不同的语言都支持它。我们正在使用与C ++代码对接的R包。
+以及其他包：
+```r
+library(keras)
+# Set the seed immediately after loading keras library.
+# If the library was already loaded, we may want to run .rs.restartR() to restart
+# our R session.
+# This is broken right now.
+#use_session_with_seed(1, disable_gpu = FALSE, disable_parallel_cpu = FALSE)
+library(dplyr)
+library(ggplot2)
+# Gives us the tf object for certain manipulations.
+library(tensorflow)
+```
+### 获取、指定并检查数据
+模型用于训练的数据需要单独下载，我们不会将图像数据直接存储在GitHub存储库中，因为Git旨在跟踪更改文本文件，并且不适用于图像之类的二进制文件。我们将下载一个zip文件并以编程方式将其解压缩。这样可以使存储库的大小更小，并且可以更快地克隆或下载。
+```r
+local_file = "data-raw/Open_I_abd_vs_CXRs.zip"
+#如果我们的工作目录中还没有zip文件，请下载它，大约13.5MB。
+#也可以顺着链接去手动下载
+if (!file.exists(local_file)) {
+  download.file("https://raw.githubusercontent.com/paras42/Hello_World_Deep_Learning/master/Open_I_abd_vs_CXRs.zip", local_file)
+}
+#将本地文件解压到data raw目录中（如果还没有的话）。
+if (!file.exists("data-raw/Open_I_abd_vs_CXRs")) {
+  unzip(local_file, exdir = "data-raw")
+}
+```
+我们将使用该dirs列表将不同的目录组织为几个变量：
+`dirs$base` -解压图像后的主目录路径。
+`dirs$train` -训练集文件夹的路径。
+`dirs$val` -验证集文件夹的路径。
+将多个设置组织到一个列表对象中是一个好习惯。首先，它可以使环境更加井井有条，并且还可以更轻松地将这些设置保存到RData文件中以供后代使用。
+```r
+#把我们的目录整理成一个列表。
+dirs = list(base = "data-raw/Open_I_abd_vs_CXRs/")
+#不要在结尾加“/”，因为list.files()将稍后添加这些。
+dirs$train = paste0(dirs$base, "TRAIN")
+dirs$val = paste0(dirs$base, "VAL")
+#打印出我们的目录配置。
+dirs
+```
+每个目录中有多少个图像？
+```r
+#图像被组织到两个子目录中（每种图像类型一个），我们将recursive=TRUE设置为进入每个子目录。
+length((train_files = list.files(dirs$train, recursive = TRUE, full.names = TRUE)))
+#检查前两个文件元素。两者都是腹部x光片（注意子目录）。
+train_files[1:2]
+#挑战：
+#我们的验证目录中有多少个文件？
+#验证文件列表中的第二和第三个元素是什么？
+# Hint:
+# length((val_files = list.files(_________, ________, ________)))
+```
+绘制图像：
+```r
+#magick包是显示图像的一种方式。
+library(magick)
+#在R上显示这些图
+print(image_read(train_files[5]))
+#打开系统查看以查看图像。
+image_browse(image_read(train_files[5]))
+#或者，我们可以使用cowplot在ggplot内部打印图像。
+library(cowplot)
+#使用ggplot, cowplot, magick包绘图
+ggdraw() + draw_image(train_files[1])
+#同时绘制第二幅图像，这次添加了一个标题并删除了额外的项目。
+ggdraw() + draw_image(train_files[2]) + ggtitle("2nd image") + theme_minimal() +
+  theme(axis.text = element_blank(), panel.grid = element_blank())
+###
+#挑战：绘制第三张图片并在标题中输入文件名。
+#额外提示：basename()将从文件路径中删除所有目录。
+###
+```
+![plot7](deeplearning/Rplot07.jpeg)
+![plot8](deeplearning/Rplot08.jpeg)
+### 预训练网络与微调
+为了达到较高的准确性，神经网络通常需要非常深，这意味着许多隐藏层。这使网络可以对输入数据建立复杂的理解，因为更深的层次建立在较早的层次上，以“设计”它已学习的与准确预测有关的新功能。
+
+但是，深度神经网络由神经元之间的数百万个链接（权重）组成，如果我们只有100个观察值，则网络没有足够的信息来准确地调整权重。而从头开始构建的深度神经网络需要进行大量观察：最好是数百万个观察结果，取决于任务。
+
+克服此限制的一种方法是“预训练+微调”。首先，我们在一个大型数据集上训练一个复杂的（深度）神经网络，这使各层能够很好地校准其权重。我们希望它针对该数据集设计的功能将适用于我们的新的较小数据集。这就是所谓的“基础模型”，Keras提供了10种这样的预训练模型供我们使用。
+
+接下来，我们将该预训练的神经网络应用于较小的数据集。我们删除最原始的数据集的最后一两层，然后添加随机初始化的一两层。然后，微调将在我们较小的数据集上重新运行网络，并主要将这些新图层更新为我们的小型数据集；我们也可能会稍微更新“基本”神经网络权重。
+
+设置数据与核心模型：
+```r
+#让我们图像的尺寸与神经结构所期望的一样。
+img_width = img_height = 299L
+batch_size = 5L
+train_datagen = keras::image_data_generator(rescale = 1/255)
+val_datagen = keras::image_data_generator(rescale = 1/255)
+#使用目标大小
+train_gen = train_datagen$flow_from_directory(dirs$train, target_size = c(img_width, img_height), batch_size = batch_size, class_mode = "binary")
+val_gen = val_datagen$flow_from_directory(dirs$val, target_size = c(img_width, img_height), batch_size = batch_size, class_mode = "binary")
+#这将在首次运行时下载初始权重(~84 MB)
+base_model = keras::application_inception_v3(include_top = FALSE, pooling = "avg", input_shape = c(img_width, img_height, 3L))
+#导出一个8x8x2048的tensor.
+base_model$output_shape
+?application_inception_v3
+summary(base_model)
+```
+添加自定义层：
+```r
+#第一：只训练顶层（随机初始化）
+#i.e. 冻结所有的InceptionV3层
+#不起作用，kares可能有bug
+freeze_weights(base_model)
+#添加自定义层到初始。
+model_top = base_model$output %>%
+  #layer_global_average_pooling_2d() %>%
+  layer_dense(units = 128, activation = "relu") %>%
+  layer_dropout(0.5) %>%
+  layer_dense(units = 1, activation = "sigmoid")
+#这是我们将要训练的模型
+model = keras_model(inputs = base_model$input, outputs = model_top)
+length(model$layers)
+#手动冻结初始初始层，只需训练最后3层。
+freeze_weights(model, 1, length(model$layers) - 3)
+summary(model)
+#编译模型（应在*将图层设置为不可训练后*完成）
+model %>%
+  compile(optimizer = optimizer_adam(#lr = 0.00001或lr = 0.0005或lr = 0.0001试试, epsilon是adam优化器的配置设置
+    epsilon = 1e-08),
+    #或者可以使用字符类型的命令:loss=“binary_crossentry”
+    loss = loss_binary_crossentropy,
+    metrics = "accuracy")
+
+(num_train_samples = length(train_files))
+num_validation_samples = 10L
+```
+拟合模型：
+```r
+#在新数据的基础上训练几个时期的模型
+history = model %>%
+  fit_generator(train_gen,
+                steps_per_epoch = as.integer(num_train_samples / batch_size),
+                epochs = 5,
+                validation_data = val_gen,
+                validation_steps = as.integer(num_validation_samples / batch_size))
+#查看拟合历史
+plot(history)
+```
+![plot9](deeplearning/Rplot09.jpeg)
+![plot10](deeplearning/Rplot10.jpeg)
+训练完整模型：
+```r
+#Unfreeze_weights()似乎要求我们具体指定层。
+unfreeze_weights(model, 1, length(model$layers))
+model %>%
+  compile(optimizer =
+            #注意这里的学习速率很低
+            optimizer_adam(lr = 0.00001,
+                           epsilon = 1e-08),
+          loss = loss_binary_crossentropy,
+          metrics = "accuracy")
+#训练全套图层，但仅限于几个时期。
+history = model %>%
+  fit_generator(train_gen,
+                steps_per_epoch = as.integer(num_train_samples / batch_size),
+                epochs = 4,
+                validation_data = val_gen,
+                validation_steps = as.integer(num_validation_samples / batch_size))
+```
+![plot11](deeplearning/Rplot11.jpeg)
+现在，我们的验证损失低于培训损失-为什么会有这样的想法？
+
+挑战：
+返回第一个模型并尝试修改一些设置：隐藏单元数，其他隐藏层和/或辍学率。它们各自如何影响您的结果？
+查看帮助页面中的optimizer_adam，然后尝试更改一个或两个设置。单击其他优化器，然后尝试使用其他优化器。
+其他/扩充：
+作为可选的作业，以下是用于更复杂的图像数据生成器的示例代码。该代码使用数据增强，将数据随机随机的小扰动应用于原始图像，以：1）近似具有较大的样本大小； 2）鼓励网络对原始图像特征不那么敏感。结果，与不这样做相比，此增强步骤应使我们可以获得更好的性能。
+```r
+train_datagen =
+  keras::image_data_generator(rescale = 1 / 255,
+                              shear_range = 0.2,
+                              zoom_range = 0.2,
+                              rotation_range = 20,
+                              width_shift_range = 0.2,
+                              height_shift_range = 0.2,
+                              horizontal_flip = TRUE)
+```
