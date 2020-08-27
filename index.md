@@ -7,11 +7,12 @@
 2. 以相对严谨的方式介绍并推导（如果可以的话）概率论、线性代数、回归分析、机器学习、神经网络等。?
 3. 学会成为调包奇侠
 ### 目录
-[R语言与深度学习](markdown-notes/deeplearning.html)
 [预测未来？原理与实践（赚钱技能！绝赞更新中）](markdown-notes/forecast.html)
 [Python学习笔记（绝赞咕咕中）](markdown-notes/Python.html)
-[R语言与机器学习？（随机森林更新完了）](markdown-notes/R_model.html)
-[R语言入门与简单数学分析](markdown-notes/R.html)
+[R语言与物种分布模型](markdown-notes/sdm.html)
+[R语言与深度学习](markdown-notes/deeplearning.html)
+[R语言与复杂数学分析（随机森林、结构方程）](markdown-notes/R_model.html)
+[R语言入门与简单数学分析（回归、聚类、方差）](markdown-notes/R.html)
 [R语言与数据处理及可视化](markdown-notes/R_visible.html)
 [R语言与生物多样性](markdown-notes/R_biodiv.html)
 [R语言与生物地理学/遥感](markdown-notes/R_biogeo.html)
