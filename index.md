@@ -7,8 +7,8 @@
 2. 以相对严谨的方式介绍并推导（如果可以的话）概率论、线性代数、回归分析、机器学习、神经网络等。?
 3. 学会成为调包奇侠
 ### 目录
-[预测未来？原理与实践（赚钱技能！绝赞更新中）](markdown-notes/forecast.html)
-[Python学习笔记（绝赞咕咕中）](markdown-notes/Python.html)
+[预测未来？原理与实践（绝赞更新完了）](markdown-notes/forecast.html)
+[Python学习笔记（咕了）](markdown-notes/Python.html)
 [R语言与物种分布模型](markdown-notes/sdm.html)
 [R语言与深度学习](markdown-notes/deeplearning.html)
 [R语言与复杂数学分析（随机森林、结构方程）](markdown-notes/R_model.html)
@@ -17,9 +17,9 @@
 [R语言与生物多样性](markdown-notes/R_biodiv.html)
 [R语言与生物地理学/遥感](markdown-notes/R_biogeo.html)
 [生态学数学原理](markdown-notes/MathPrinciples.html)
-[生物信息学教程（早已咕咕）](https://github.com/Vendredii/Bioinformatic-trans)
+[生物信息学教程（可能没了）](https://github.com/Vendredii/Bioinformatic-trans)
 ### 友情链接（傍大腿
 [MP](https://mpraiser.github.io) 微电子大师（Master），现居上海（不是），吃鸡很刚
 [Benja](https://aiifabbf.github.io) CS职业选手（指computer science）
 ### 关于作者
-目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 微信公众号：第二太平洋舰队。
+目前生态学硕士在读，邮箱：edenchen1226@outlook.com, 关于旅游等等：第二太平洋舰队。
