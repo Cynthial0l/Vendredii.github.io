@@ -555,3 +555,146 @@ MI <- modificationIndices(fit)
 subset(MI, mi >10)
 ```
 最后三列包含标准化的epc，使用与普通参数估计相同的标准化约定。
+### 应用lavaan进行SEM建模
+在我们的第二个例子中，我们将探讨“工业化和政治民主”数据集，该数据集以前由Bollen在1989年出版的《结构方程建模》（Bollen 1989）一书中使用，并包含在Lavaan中.  数据集包含了发展中国家政治民主和工业化的各种衡量标准。在模型中，定义了三个潜在变量。分析的重点是模型的结构部分（即潜在变量之间的回归）。
+```r
+model <- '
+    # measurement model
+      ind60 =~ x1 + x2 + x3
+      dem60 =~ y1 + y2 + y3 + y4
+      dem65 =~ y5 + y6 + y7 + y8
+    # regressions
+      dem60 ~ ind60
+      dem65 ~ ind60 + dem60
+    # residual covariances
+      y1~~y5
+      y2~~y4 +y6
+      y3~~y7
+      y4 ~~ y8
+      y6 ~~ y8'
+fit <- sem(model, data = PoliticalDemocracy) 
+summary(fit, standardized = TRUE)
+```
+可以给定参数标签和进行简单的等式约束：
+在lavaan中，每个参数都有一个名称，称为“参数标签(parameter label)”。命名方案是自动的，遵循一组简单的规则。每个标签由三个组件组成，它们描述了定义参数的相关公式。第一部分是显示在公式运算符左侧的变量名。第二部分是公式的运算符类型，第三部分是运算符右侧与参数对应的变量。要查看实际的命名机制，我们可以使用coef()函数，该函数返回自由参数的（估计）值及其相应的参数标签。
+```r
+coef(fit)
+```
+用户可以在模型语法中通过预先将变量名与该标签相乘来提供自定义标签。例如，考虑以下回归公式：
+```r
+y ~ b1*x1 + b2*x2 + b3*x3 + b4*x4
+```
+这里我们将四个回归系数命名为b1、b2、b3和b4。自定义标签很方便，因为您可以在模型语法的其他地方引用它们。特别是，标签可用于对某些参数施加相等约束。如果两个参数具有相同的名称，那么它们将被视为相同的，并且只为它们计算一个值（即，一个简单的等式约束）。为了说明这一点，我们将重新指定政治民主数据的模型语法。在博伦书中的原始示例中，dem60因子的因子载荷被约束为等于dem65因子的因子载荷。这是有意义的，因为这是在两个时间点上测量的同一个结构。为了执行这些等式约束，我们将dem60因子的因子加载（任意）标记为d1、d2和d3。注意，我们没有标记第一个因子加载，因为它是一个固定参数（等于1.0）。接下来，我们对dem65因子的因子加载使用相同的标签，有效地施加了三个等式约束:
+```r
+model.equal <- '# measurement model
+                     ind60 =~ x1 + x2+x3
+                     dem60 =~ y1 + d1*y2 + d2*y3 + d3*y4
+                     dem65 =~ y5 + d1*y6 + d2*y7 + d3*y8
+                   # regressions
+                     dem60 ~ ind60
+                     dem65 ~ ind60 + dem60
+                   # residual covariances
+                     y1~~y5
+                     y2~~y4 +y6
+                     y3~~y7
+                     y4~~y8
+                     y6 ~~ y8'
+fit.equal <- sem(model.equal, data = PoliticalDemocracy) 
+summary(fit.equal)
+```
+与无约束模型相比，约束模型的拟合稍差。但情况是否明显更糟？为了比较两个嵌套模型，我们可以使用`anova()`函数，该函数将计算$χ^2$差异检验：
+```r
+anova(fit, fit.equal)
+```
+接下来可以提取拟合测度：
+带有参数的`summary()`方法合适的措施=TRUE将输出多个拟合度量值。如果进一步处理需要fit统计信息，则首选`fitMeasures()`方法。`fitMeasures()`的第一个参数是fitted对象，第二个参数是包含要提取的fit度量值名称的字符向量。例如，如果我们只需要CFI和RMSEA值，我们可以使用：
+```r
+fitMeasures(fit, c("cfi", "rmsea"))
+```
+为了完成我们的SEM示例，我们将简要介绍`inspect()`方法，该方法允许用户从lavaan对象的引擎盖下窥视。默认情况下，对已安装的Lavan对象调用`inspect()`将返回一个模型矩阵列表，这些矩阵在内部用于表示模型。自由参数是非零整数。
+```r
+inspect(fit)
+```
+输出显示，lavaan目前使用的是LISREL矩阵表示法，尽管没有区分内生变量和外生变量。这就是所谓的“all-y”表示法。在将来的版本中，我计划考虑替代矩阵表示，包括Bentler-Weeks和网状作用模型（RAM）方法（Bollen 1989，第9章）。要查看每个模型矩阵中参数的起始值，请键入
+```r
+inspect(fit, what = "start")
+```
+Lavaan软件包完全支持多组SEM。要请求多组分析，可以将数据集中定义组成员身份的变量传递给`cfa()`、`sem()`或`lavaan()`函数调用的group参数。默认情况下，在所有组中都会拟合同一个模型，而对模型参数没有任何相等约束。在下面的例子中，我们将H&S模型应用于这两所学校（Pasteur和Grant-White）:
+```r
+HS.model <- 'visual =~ x1 + x2 + x3
+             textual =~ x4 + x5 + x6
+            speed =~ x7 + x8 + x9'
+fit <- cfa(HS.model, data = HolzingerSwineford1939, group = "school")
+```
+`summary()`输出相当长，此处未显示。基本上，它显示了巴斯德群的一组参数估计值，然后是格兰特怀特群的另一组参数估计值。如果我们希望跨组对模型参数施加相等约束，可以使用组。相等争论。例如，`group.equal = c(“loading”, “intercepts”)`将约束系数荷载和观测变量截距在各组之间相等。可以包含在组。相等参数在拟合函数的帮助页中进行了描述。作为一个简单的例子，我们将拟合两个学派的H&S模型，但约束因子载荷和截距相等。方差分析函数可以用来比较两种模型的拟合:
+```r
+fit.metric <- cfa(HS.model, data = HolzingerSwineford1939,
++ group = "school", group.equal = c("loadings", "intercepts"))
+anova(fit, fit.metric)
+```
+如果group.equal参数用于约束组之间的因子加载，所有因子加载都会受到影响。如果需要一些异常，可以使用`group.partial`参数，它接受一个参数标签向量，指定哪些参数将在组之间重新自由使用。因此，结合`group.equal`以及`group.partial`参数为用户提供了一种灵活的机制来指定跨组相等约束。
+### 其他功能
+#### 渐进无分布估计（ADF）
+在lavaan中，可以通过在一个拟合函数中使用估计器自变量来设置估计器。默认为最大似然估计，或`estimator=“ML”`。要切换到ADF estimator，可以设置`estimator=“WLS”`。
+
+#### Satorra-Bentler标度检验统计量与稳健标准差
+另一种策略是使用最大似然（ML）来估计模型参数，即使已知数据是非正态的。在这种情况下，参数估计仍然是一致的（如果模型被识别并正确指定），但是标准误差往往太小（高达25–50%），这意味着我们可能会过多地拒绝零假设（参数为零）。另外，模型（$χ^2$）检验统计量往往过大，这意味着我们可能会经常拒绝模型。
+在SEM文献中，一些作者扩展了ML方法来产生标准误差，这些标准误差对于任意分布（具有有限的四阶矩）是渐近正确的，并且其中重新缩放的检验统计量用于整体模型评估。
+在lavaan中，test参数可用于在不同的测试统计之间切换。设置`test=“Satorra-Bentler"`用标度版补充标准$χ^2$模型试验。在`summary()`方法生成的输出中，缩放和未缩放的模型测试（以及相应的拟合指数）都显示在相邻的列中。因为人们通常需要稳健的标准误差和标度检验统计量，所以指定`estimator=“MLM”`可以使用标准最大似然来估计模型参数，但要使用稳健的标准误差和Satorra-Bentler标度检验统计量来拟合模型。
+```r
+fit <- cfa(HS.model, data = HolzingerSwineford1939, missing = "listwise", + estimator = "MLM", mimic = "Mplus")
+summary(fit, estimates = FALSE, fit.measures = TRUE)
+```
+在这个例子中，`simic=“Mplus”`参数被用来模拟Mplus程序计算Satorra Bentler标度测试统计的方式。默认情况下（即，当省略模拟参数时），Lavan将使用EQS程序使用的方法。为了模拟由EQS程序报告的Satorra-Bentler标度检验统计量的准确值，可以使用:
+```r
+fit <- cfa(HS.model, data = HolzingerSwineford1939, estimator = "MLM", mimic = "EQS")
+fit
+```
+#### Bootstrapping：naıve Bootstrap和Bollen-Stine Bootstrap
+在lavaan中，通过设置`se=“bootstrap”`可以获得引导标准误差。在这种情况下，`parameterEstimates()`方法生成的置信区间将是基于引导的置信区间。如果`test=“bootstrap”`或`test=“bollen.stine"`，首先转换数据以执行基于模型的“Bollen-Stine”引导。bootstrap标准误差也基于这些基于模型的bootstrap绘图，并用bootstrap概率值来补充χ2检验统计量的标准p值，该值是通过计算引导样本中的检验统计量超过原始（父）样本的检验统计量值的比例得到的。
+默认情况下，lavaan生成$R=1000$的引导绘制，但是这个数字可以通过设置bootstrap参数来更改。设置`verbose=TRUE`以监视引导过程可能会提供信息。
+#### 缺失值
+如果数据包含缺失值，lavan中的默认行为是列表删除。如果缺失机制是MCAR（随机完全缺失）或MAR（随机缺失），则Lavan软件包提供了case-wise（或“full info”）最大似然（FIML）估计。在调用fitting函数时，可以通过指定参数`missing=“ml”`（或其别名`missing=“FIML”`）来启用FIML估计。一个非限制（h1）模型将被自动估计，以便所有常用拟合指数都可用。稳健的标准误差也可用，如果数据是不完整的和非正态的，则是标度检验统计量。
+#### 线性和非线性等式和不等式约束
+在许多应用中，需要对一些模型参数施加约束。例如，可以强制要求方差参数严格为正。对于某些模型，重要的是指定一个参数等于其他参数的某个（线性或非线性）函数。lavaan包的目的是使用lavaan模型语法使这些约束易于指定。一个简短的例子将说明lavaan中的约束语法。考虑以下回归：
+```r
+y ~ b1*x1 + b2*x2 + b3*x3
+```
+其中我们明确地将回归系数标记为$b_1$、$b_2$和$b_3$。我们创建一个包含这四个变量的演示数据集，并拟合回归模型：
+```r
+set.seed(1234)
+Data <- data.frame(y = rnorm(100), x1 = rnorm(100), x2 = rnorm(100), + x3 = rnorm(100))
+model <- 'y ~ b1*x1 + b2*x2 + b3*x3'
+fit <- sem(model, data = Data)
+coef(fit)
+```
+假设我们希望对b1施加两个（非线性）约束：$b_1=(b_2+b_3)^2$和$b_1≥exp(b_2+b_3)$。第一个约束是等式约束，而第二个约束是不等式约束。这两个约束都是非线性的。在lavaan，这是通过以下方式实现的：
+```r
+model.constr <- '# model with labeled parameters
+                   y ~ b1*x1 + b2*x2 + b3*x3
+                 # constraints
+                  b1 == (b2 + b3)^2
+                  b1 > exp(b2 + b3)' 
+fit <- sem(model.constr, data = Data) 
+summary(fit)
+```
+#### 间接效应与中介分析
+一旦对模型参数进行了拟合，我们就可以对模型的原始函数值进行估计。一个例子是两个（或更多）回归系数的乘积的间接效应。考虑一个具有三个变量的经典中介设置：Y是因变量，X是预测因子，M是中介变量。为了说明这一点，我们再次创建一个包含这三个变量的演示数据集，并拟合一个包含X对Y的直接作用和X通过M对Y的间接作用:
+```r
+set.seed(1234)
+X <- rnorm(100)
+M <- 0.5 * X + rnorm(100)
+Y <- 0.7 * M + rnorm(100)
+Data <- data.frame(X = X, Y = Y, M = M) R> model <- '# direct effect
+            Y ~ c*X
+          # mediator
+            M ~ a*X
+            Y ~ b*M
+          # indirect effect (a*b)
+            ab := a*b
+          # total effect
+            total := c + (a*b)' 
+fit <- sem(model, data = Data) 
+summary(fit)
+```
+该示例说明了lavaan模型语法中`:=`运算符的用法。此运算符“定义”新参数，这些参数采用原始模型参数的任意函数。但是，必须根据模型语法中明确提到的参数标签来指定函数。默认情况下，这些定义参数的标准误是使用delta方法计算的。与其他模型一样，只需在fitting函数中指定`se = “bootstrap”`，就可以请求引导标准误。
