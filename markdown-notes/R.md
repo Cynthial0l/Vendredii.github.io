@@ -143,6 +143,97 @@ p + stat_compare_means(method = "anova",label.y = 1) +
   stat_compare_means(label = "p.signif", method = "t.test", ref.group = ".all.")
 ```
 ![anova图](R/Rplot15.jpeg)
+## 相关分析
+### cor函数
+在R语言中，通常使用cor函数进行相关系数分析，可以分别指定向量，也可以指定给cor函数一个数据框。
+```r
+cor(x,y=NULL,use="everything",method= c("pearson","kendall","spearman"))
+```
+其中`use`用来处理缺失值，有`everything`，`all.obs`，`complete.obs`，`pairwise.complete.obs`和`na.or.complete`5种
+`method`默认是pearson相关系数，适用于连续变量，kandall适用于分类变量，spearman适用于分类定序变量（如大中小三类等等）。
+#### 秩相关检验
+```r
+cor.test(x, y, alternative = c("two.sided", "less", "greater"), method = "spearman", conf.level = 0.95, ...)
+```
+### corrplot包
+基本语法如下：
+```r
+corrplot(#需要可视化的相关系数矩阵
+        corr,
+        #method为可视化的方法
+	method = c("circle", "square", "ellipse", "number", "shade", "color", "pie"),
+        #展示方式
+	type = c("full", "lower", "upper"), add = FALSE,
+        #col指定展示的颜色，bg为背景的颜色，is.corr为为相关系数绘图
+	col = NULL, bg = "white", title = "",  is.corr = TRUE,		
+        #diag为是否显示对角线上的结果，outline为是否绘制轮廓，mar为图形的四边间距
+	diag = TRUE, outline = FALSE, mar = c(0,0,0,0),
+        #addgrid.col当选择的显示方法为颜色或阴影时默认的网格线为白色，否则为灰色
+        #addCoef.col为相关系数添加颜色，默认不添加相关系数，只有方法为number时，该参数才有作用
+        #addCoefasPercent为节省空间将相关系数转为百分比格式
+	addgrid.col = NULL, addCoef.col = NULL, addCoefasPercent = FALSE, 
+        #指定相关系数排序的方法，可以是原始顺序(original)、特征向量角序(AOE)、第一主成分顺序(FPC)、层次聚类顺序(hclust)和字母顺序，一般”AOE”排序结果都比”FPC”要好
+	order = c("original", "AOE", "FPC", "hclust", "alphabet"),
+        #当order为hclust时，该参数可以是层次聚类中ward法、最大距离法等7种之一
+	hclust.method = c("complete", "ward", "single", "average",
+                      "mcquitty", "median", "centroid"),
+        #当order为hclust时，可以为添加相关系数图添加矩形框，默认不添加，想添加的话=随便一个数，rect.col与lwd指定矩形框的颜色与线框
+	addrect = NULL, rect.col = "black", rect.lwd = 2,
+        #指定文本标签的位置（lower为左边和对角线，upper为顶与对角线，full为左边和顶部）与大小
+	tl.pos = NULL, tl.cex = 1,
+        #文本颜色等等
+	tl.col = "red", tl.offset = 0.4, tl.srt = 90,
+        #图例位置与颜色等等
+	cl.pos = NULL, cl.lim = NULL,
+	cl.length = NULL, cl.cex = 0.8, cl.ratio = 0.15, 
+	cl.align.text = "c",cl.offset = 0.5,
+	addshade = c("negative", "positive", "all"),
+        #只有当method=shade时，该参数才有用，参数值可以是negtive/positive和all，分表表示对负相关系数、正相关系数和所有相关系数添加阴影。注意：正相关系数的阴影是45度，负相关系数的阴影是135度
+	shade.lwd = 1, shade.col = "white",
+	p.mat = NULL, sig.level = 0.05,
+	insig = c("pch","p-value","blank", "n"),
+	pch = 4, pch.col = "black", pch.cex = 3,
+	plotCI = c("n","square", "circle", "rect"),
+	lowCI.mat = NULL, uppCI.mat = NULL, ...)
+```
+加载相关程序包，数据为非公开数据
+```r
+library(corrplot)
+```
+可以准备一个数据集：
+```r
+cor <- read.csv("cor.csv", header = T)
+```
+计算样本间的相关系数：
+```r
+matrix <- cor(cor)
+```
+绘图：
+```r
+#不设置参数
+corrplot(corr=matrix)
+```
+![基础cor图](R/Rplot83.jpeg)
+控制单元格形状和内容：
+```r
+# 换用不同method，分别显示数字和颜色（method can be "circle", "square", "ellipse", "number", "shade", "color", "pie"）
+# method 默认为“circle”
+corrplot(matrix, method = "number")
+#只展示上三角的一半，并且内容改为方块
+corrplot(matrix, type = "upper", method = "color")  
+```
+![进阶cor图](R/Rplot84.jpeg)
+设置可以混合显示：
+```r
+corrplot.mixed(matrix, lower = "number", upper = "ellipse",lower.col = "black", number.cex = 1)  
+#tl.col 修改对角线的颜色,lower.col 修改下三角的颜色，number.cex修改下三角字体大小
+```
+![进阶cor图2](R/Rplot85.jpeg)
+对变量进行聚类等：
+```r
+corrplot(corr=matrix,method = "color",order = "hclust",tl.col="black",addrect=4,addCoef.col = "grey")
+```
+![进阶cor图3](R/Rplot86.jpeg)
 ## 聚类分析
 ### 系统聚类
 将分类的对象按照数据本身的特征的不同进行分类的方法称为聚类分析法。其中对样品进行聚类称为Q型聚类，而对变量进行聚类称为R型聚类。
@@ -264,6 +355,124 @@ biplot(PCA, family = "STKaiti")
 ```
 就很nb。
 ![主成分分析3](R/Rplot25.jpeg)
+## 统计检验
+假设检验的目的是看看数据是否有差异，数据、因子、结果等等的不同究竟是真的不同，还是其实就是随机的一些变化呢？如果检验成立，那就说明这些数据之间确实是有显著不同的，不是随便凑数的。
+首先是[关于各种分布的解释](https://blog.csdn.net/anshuai_aw1/article/details/82735201)
+### 关于分布的检验
+#### W检验（Shapiro–Wilk test）
+```r
+shapiro.test()
+```
+当p值小于某个显著性水平α(比如0.05)时，则认为样本不是来自正态分布的总体，否则则承认样本来自正态分布的总体。
+#### K检验（Kolmogorov-Smirnov test）
+```r
+ks.test()
+```
+如果P值很小，说明拒绝原假设，表明数据不符合F(n,m)分布。
+
+### 参数检验
+参数假设检验，是指对参数平均值、方差进行的统计检验，条件是总体分布已知（比如已知是正态分布等等）。
+#### 学生检验t-test
+做t-test的目的是为了检验在符合正态分布的样本中两个平均数是否有显著的差异，且该样本的总体方差也是未知的，否则可以用u检验。适用用样本总数较少的情况，但有研究说样本总数小于20时也尽量避免t检验。
+```r
+t.test(x, y = NULL,
+       alternative = c("two.sided", "less", "greater"),
+       mu = 0, paired = FALSE, var.equal = FALSE,
+       conf.level = 0.95, ...)
+```
+其中x（和y）为进行检验的数据，`alternative`为设定的备择假设，默认为双尾，`mu`单样本检验时设定的均值（检验是否超过均值为准）,`var.equal`双样本检验时方差是否相等。
+
+当双样本时：
+要比较的两个样本的总体方差未知，但相等时（判断方差是否相等可以借助方差同质性检验**F-test**），可以使用t-test。
+
+#### 方差同质性检验f-test
+这是检验两个正态随机变量的总体方差是否相等的一种假设检验方法。
+```r
+var.test(x, y, ratio = 1,
+         alternative = c("two.sided", "less", "greater"),
+         conf.level = 0.95, ...)
+```
+`var.test()`的零假设是x和y的方差比值（ratio）为1（默认），即是x与y的方差相等。
+
+**成组数据**（pooled data）是两个样本的各个变量从各自总体中抽取，也就是说两个样本间的变量没有任何关联，两个抽样样本彼此独立。成组数据的两个样本的容量未必相同，但是**方差需要相等**才能进行t-test。
+```r
+t.test(x, y, var.equal = T)
+```
+**配对样本**（paired data）的比较要求两个样本间配偶成对，每一对样本除随机地给予不同处理外，其他实验条件应尽量一致。即为配对，两样本的容量必定相等。
+```r
+t.test(x, y, var.equal = T, paired = T)
+```
+#### 二项分布的总体假设检验
+```r
+#例：某蔬菜种子的发芽率为p=0.85. 现随机抽取500粒种子，
+#用药水处理一下，然后测的发芽的种子数为445粒。
+#请问药水有没有提高发芽率的作用。
+#p值很小，接受对立假说，有好的作用
+#95%的置信区间不包括0.85
+binom.test(445,500,p=0.85,
+           alternative="greater")
+```
+`alternative`参数中的双边还是单边（大于和小于）就是接受的假设是要双边呢（离假设很远），或者好于假设或者差于假设。
+### 非参数检验
+#### 皮尔森卡方检验
+皮尔森建立了一个准则，以判定一组相关变量与其或然值的偏差，可否被合理地解释为是由于随机抽样所致。
+检查两个数据集中的类别分量是否不同，在统计中会碰到离散型数据与计数数据，比如性别分男、女，某个问题的态度分为赞成、反对，成绩可分优良差，能力可分高中低。对这类数据的统计处理的假设检验一般用计数数据的统计方法进行非参数检验。
+卡方检验主要用于两个方面，一是对总体分布进行拟合性检验，检验观查次数是否与某种理论次数相一致。
+二是独立性检验，用于检验两组或者多组资料相互关联还是彼此独立。
+下面就是皮尔逊卡方独立性检验：
+```r
+chisq.test()
+```
+p<0.05即为显著差异。有时候会提示不够精确那么就可能需要`fisher.test()`进行费舍尔精确检验了。
+#### Kruskal-Wallis检验
+秩和检验是一种非参数检验法, 它是一种用样本秩来代替样本值的检验法；秩和检验可以用于样本容量不相等的两个或多个样本。
+用于两两检验，看看a（离散？）是否与b有关
+例如：
+先进行总体的：
+```r
+library(spdep)
+library(pgirmess)
+A=c(3.5,4.0,6.7,5.6,8.9,7.8)
+B=c(4.5,3.0,8.0,5.4,6.9,2.8,7.7,3.9)
+C=c(2.1,4.8,3.3,8.8)
+jianyan=list(A,B,C)
+kruskal.test(jianyan)
+```
+再进行两两的：
+```r
+resp<-c(3.5,4.0,6.7,5.6,8.9,7.8,4.5,3.0,8.0,5.4,6.9,2.8,7.7,3.9,2.1,4.8,3.3,8.8) #将A，B，C三组数据依次放在一个向量里
+categ<-factor(rep(1:3,c(6,8,4))) #6,8,4依次为A,B,C对应的样本容量
+kruskalmc(resp, categ, probs=0.05)  #②再使用kruskalmc函数做两两样本的比较
+```
+Kruskal–Wallis秩和检验有时得不到精确的p值，对于Kruskal–Wallis秩和检验差异显著的多个样本，想知道具体差异在哪些样本之间同时又想获得精确的p值，可以采用Nemenyi进行两两样本检验，方法如下：
+```r
+install.packages("PMCMRplus")
+library(PMCMRplus)
+library(PMCMR)
+posthoc.kruskal.nemenyi.test(jianyan)  #未校正
+posthoc.kruskal.nemenyi.test(jianyan,dist="Chisq") #校正
+```
+对csv数据：
+```r
+kruskal.test(data, a ~ b)
+```
+```r
+library(pgirmess)
+library(coin)
+library(multcomp)
+kruskalmc(zhi~group, data = cd, probs=0.05)
+```
+Nemenyi进行两两样本检验
+```r
+library(PMCMR)
+posthoc.kruskal.nemenyi.test(zhi~group,data=cd) #未校正
+posthoc.kruskal.nemenyi.test(zhi~group,data=cd,dist="Chisq")
+```
+#### Wilcoxon秩检验
+```r
+wilcox.test(x, y = NULL, alternative = c("two.sided", "less", "greater"), mu = 0, paired = FALSE, exact = NULL, correct = TRUE, conf.int = FALSE, conf.level = 0.95, ...)
+原假设：中位数大于，小于，不等于mu, p < 0.05 时拒绝原假设
+```
 ## 各种各样的回归
 ### 从lm()开始进行简单一元线性回归
 首先需要从gapminder上获得一些练习数据，gapminder是一个有着全球各种数据的公益网站，我们可以通过R包“gapminder”去下载(http://github.com/jennybc/gapminder)。
