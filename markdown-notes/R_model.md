@@ -698,3 +698,123 @@ fit <- sem(model, data = Data)
 summary(fit)
 ```
 该示例说明了lavaan模型语法中`:=`运算符的用法。此运算符“定义”新参数，这些参数采用原始模型参数的任意函数。但是，必须根据模型语法中明确提到的参数标签来指定函数。默认情况下，这些定义参数的标准误是使用delta方法计算的。与其他模型一样，只需在fitting函数中指定`se = “bootstrap”`，就可以请求引导标准误。
+## 词云分析
+也就是关键词分析（TF-IDF），需要下面这两个包：
+```r
+#加载包
+library(jiebaR)
+library(wordcloud2)
+```
+### jiebaR包
+其主体为worker函数：
+```r
+worker(type = "mix", #type就是选择模型，其中mix是混合模型，mp是最大概率法，hmm是隐式马尔科夫模型，query是索引模型，tag是标记模型，simhash是simhash模型，keywords是关键词模型，根据IDF搞
+       dict = DICTPATH, #系统词典
+       hmm = HMMPATH, 
+       user = USERPATH, #用户词典
+       idf = IDFPATH, #IDF词典
+       stop_word = STOPPATH, #关键词用停止词库
+       write = T, #是否将文件分词结果写入文件，默认FALSE
+       qmax = 20, 
+       topn = 5, #关键词数,默认5个
+       encoding = "UTF-8", detect = T, symbol = F, lines = 1e+05,
+       output = NULL, bylines = F, user_weight = "max" #用户权重
+       )
+```
+使用方法：
+```r
+wk = worker()
+#wk["这里放文字，或者txt"]
+segment("这里放文字，或者txt",wk)
+```
+该函数可以自动****计算频数：
+```r
+wk = worker()
+words = "数模竞赛不会真出这么难的题目吧，不会吧不会吧"
+freq(segment(words,wk))
+```
+处理文件的词频需要加行代码：
+```r
+out=file("like_segment.txt")
+freq <- freq(strsplit(readLines(out,encoding="UTF-8")," ")[[1]])
+```
+也可以**提取关键词**：
+```r
+wk = worker(type = "keywords", topn = 2)
+wk <= words
+```
+### wordcloud2包
+这个包可以绘制词云分析的结果：
+```r
+#去除数字
+freq <- freq[!grepl('[0-9]+',names(freq))]
+#去除字母
+freq <- freq[!grepl('a-zA-Z',names(freq))]
+#查看处理完后剩余的词数
+length(freq)
+#降序排序，并提取出现次数最多的前100个词语
+freq <- sort(freq, decreasing = TRUE)[1:100]
+#查看100个词频最高的
+freq
+#提取前150个结果
+freq <- f[1:150,]
+#形状设置为一颗五角星等等
+wordcloud2(f2, size = 0.8, shape = "star") #或者"cardioid"或"diamond"
+```
+可以基于JavaScript定义词云的颜色：
+```r
+js_color_fun = "function (word, weight) {
+  return (weight > 2000) ? '#f02222' : '#c09292';
+}"
+wordcloud2(demoFreqC, color = htmlwidgets::JS(js_color_fun), 
+           backgroundColor = 'black')
+#也可以这样：
+wordcloud2(demoFreqC, color = ifelse(demoFreqC[, 2] > 2000, '#f02222', '#c09292')
+```
+一个小小的实现：基于淘宝搜索的词云分析
+关于tf-idf：
+```
+TF-IDF = TF(词频) * 逆文档频率(IDF)
+```
+```r
+library(jiebaR)
+readChineseWords <- function (path) {
+  # 读取网页或文件 去除标点和英文
+  rawstring = readLines(path)
+  rawstring = paste0(rawstring, collapse = ' ')
+  s = gsub('\\w', '', rawstring, perl=TRUE)
+  s = gsub('[[:punct:]]', ' ', s)
+  return(s)
+}
+ 
+# 淘宝首页搜索'男'和'女'对应的网页链接
+male_link = 'https://s.taobao.com/search?q=%E7%94%B7&search_type=item&sourceId=tb.index'
+female_link = 'https://s.taobao.com/search?q=%E5%A5%B3&search_type=item&sourceId=tb.index'
+
+male_str = readChineseWords(male_link)
+female_str = readChineseWords(female_link)
+# 分词
+cc = worker()
+new_user_word(cc,'打底裤','ddk')
+male_words = cc[male_str]
+female_words = cc[female_str]
+# 计算tf-idf 
+idf = get_idf(list(male_words, female_words))
+get_tf_idf <- function(words){
+  words_freq = table(words)
+  df = data.frame(name=names(words_freq), freq=as.numeric(words_freq))
+  df = merge(df, idf, all.x = TRUE)
+  wc_df = data.frame(words=df$name, freq=ceiling(df$count * df$freq * 10))
+  # 缺失和0值替换成1 
+  wc_df$freq[wc_df$freq == 0 | is.na(wc_df$freq)] = 1
+  return(wc_df)
+}
+
+# 绘制词云
+male_df = get_tf_idf(male_words)
+female_df = get_tf_idf(female_words)
+wordcloud2(male_df,
+           backgroundColor = 'black', color = 'random-light')
+wordcloud2(female_df, 
+           backgroundColor = 'black', color = 'random-light')
+```
