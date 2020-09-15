@@ -8,8 +8,8 @@
 3. 学会成为调包奇侠
 ### 目录
 [预测未来？原理与实践（绝赞更新完了）](markdown-notes/forecast.html)
-[Python学习笔记（咕了）](markdown-notes/Python.html)
-[R语言与物种分布模型](markdown-notes/sdm.html)
+[Python与其他（指pandas？](markdown-notes/Python.html)
+[R语言与物种分布模型（施工中）](markdown-notes/sdm.html)
 [R语言与深度学习](markdown-notes/deeplearning.html)
 [R语言与复杂数学分析（随机森林、结构方程）](markdown-notes/R_model.html)
 [R语言入门与简单数学分析（回归、聚类、方差）](markdown-notes/R.html)

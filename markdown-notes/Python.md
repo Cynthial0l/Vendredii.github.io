@@ -1,4 +1,4 @@
-# Python学习
+# Python与其他
 
 **写在前面**
 
@@ -6,21 +6,22 @@ Python好啊
 本博写作希望实现的目标有二：
 1. 实现Python能力的从无到有
 2. 通过Python学习DeepLearning和MachineLearning
+3. 靠python吃饭?
 
 先从python的学习开始
 
 [TOC]
 
-## 关于编译与语言——一些杂谈
-### 选择一个编译工具
+# 关于编译与语言——一些杂谈
+## 选择一个编译工具
 最早是用Atom，但是说实话不是很适合萌新，虽然这种东西也没什么适合不适合的，毕竟我的第一个脚本就是用写字板加Terminal，但是一个好的编译器能让事情变得更加简单，对于Python的学习，使用Rstudio是可以的，使用PyCharm是多数人推荐的，使用Xcode是...令人厌恶的，而使用VScode，则会让人意外的舒服，可能这是巨硬的魔力吧，VScode可以装一个Python插件这样就能直接在右上角一键运行程序了，而不用点开来调出控制台，还挺适合我这种从来记不住快捷键的人的。
 在VScode中，使用Command+/可以给代码快速添加注释（#）符号
-### 在Mac（OSX）上使用Github
-#### 关于git 
+## 在Mac（OSX）上使用Github
+### 关于git 
 git是一个开源的分布式的版本控制（Revision Control）系统，通过git我们可以实现跨区域的多人协同开发。而github就是一个基于git的面向开源软件项目的托管平台。  
 在git中，**仓库**（Repository）是一个重要的概念，它是一个受版本控制的有所有文件修订历史的共享数据库，一般而言一个Repository对应一个Project。而**工作空间**（Workspace）则是用户在本地编辑的副本，工作空间中仓库的各个文件则称**工作树**（Working Tree）。而**暂存区**（Staging Area）则是用于暂存工作区的变化以便向版本库（Repository）提交**更改**（commit）的区域。  
 简单来说就是用户在本地的工作区对项目进行改变，通过git add进入暂存区，然后提交（git commit）进入版本库，使得在线的版本库获得更新。  
-#### 名词介绍
+### 名词介绍
 *索引*（Index），是暂存区的另一种说法；  
 *签入*（Check in），将新版本从工作空间复制回仓库；  
 *签出*（checkout），将新版本从仓库复制到工作空间；  
@@ -28,7 +29,7 @@ git是一个开源的分布式的版本控制（Revision Control）系统，通�
 *分支*（Branch），从主线上分离开的副本，默认分支为master；  
 *合并*（Merge），将某分支上的更改联接到主干或另一分支；  
 *标记*（Tags），某个分支某个特定时间点的状态，通过标记可以将仓库切换到标记时的状态。
-#### git安装与更新  
+### git安装与更新  
 在Terminal输入git可以查看是否安装了git，如果没有，可以通过Xcode->Preference->Downloads->Command Line Tools进行安装，也可以去git官网下载安装。  
 通过  
 ```
@@ -61,14 +62,14 @@ ssh -T git@github.com
 ```  
 如果输出“You’ve successfully…”那么说明已经链接成功。
 
-#### 安装GitHub Desktop
+### 安装GitHub Desktop
 首先使用搜索引擎搜索并安装
 我们可以通过在github上你个人的仓库界面的右上角绿色的clone or download->clone in desktop打开，然后浏览器会自动转到github desktop，贴心的帮你创建一个本地的工作空间。当然你也可以通过在本地创建然后同步到你的仓库中来创建一个新的项目。
 接着我们可以通过Atom或VScode等极为先进的编辑器去修改你的项目（VScode太好用了
 更新完以后暂时无法将其更新到我们的在线库中，我们应当通过新建一个Branch去安放我们的更新，如果想要回滚，我们只需要去原来的Branch中在history里revert就行了。通过新建Branch，并在左下角完善Summary和Description，就可以Commit to提交了，接着点击右上角的Publish branch就可以把你的更改同步到在线库中了！
 
-### 记录你的学习：使用markdown完善你的博客
-#### markdown语言
+## 记录你的学习：使用markdown完善你的博客
+### markdown语言
 markdown是一种轻量级标记语言，它可以使你的文本拥有各自格式，同时markdown支持插入Latex公式，去完成你的投稿论文与毕业论文，如我们插入
 ```
 $$ c = \sqrt{a^{2}+b_{xy}^{2}+e^{x}}$$
@@ -76,7 +77,7 @@ $$ c = \sqrt{a^{2}+b_{xy}^{2}+e^{x}}$$
 可以得到
 $$ c = \sqrt{a^{2}+b_{xy}^{2}+e^{x}}$$
 关于markdown的**极其简单**的语法，建议使用搜索引擎进行学习
-#### 创建博客
+### 创建博客
 github pages是GitHub提供的一个个人静态主页网站托管服务，**开源**高效免费实时，而且可用空间高达1G，无敌。我们可以在github上创建一个域名为“你的名字.github.io”并选择相应的Jekyll主题就可以去美滋滋的拥有了一个个人博客了。
 我原本打算照搬CSDN用HEXO＋Node.js通过nvm（Node Version Manager）去搭建我的博客，后来嫌烦就咕咕咕了。原生的就足够好了。
 我们可以提交一个index.html作为博客的主页，也作为每个人开始github的第一段代码：
@@ -141,8 +142,8 @@ output_file = codecs.open("name.html", mode="w", encoding="utf-8")
 output_file.write(html)
 ```
 当然，我们使用极为先进的VScode的Markdown All in One和Markdown Preview Enhanced等极为先进的extensions来预览我们的markdown文档，通过f1(OSX里是反人类的command+shift+P）打开命令窗口并输入“mark”，我们可以将其转为html，也可以直接在预览界面右键选择html，并进而转为喜闻乐见的**pdf**！
-## Python
-### 工作环境
+# Python
+## 工作环境
 Python不多介绍，牛逼
 为了更好地利用python，我们需要利用虚拟空间来运行我们的python项目，以免各个项目与程序包之间发生干扰。
 我们通过在Terminal里创建虚拟环境来完成这些工作：
@@ -160,8 +161,45 @@ source bin/activate
 ```
 pip install 库名
 ```
-### 数据处理
-#### 绘制折线图
+## 运行与储存你的代码
+我们可以使用基于网页的jupyter notebook来储存、调试、运行你所有的代码，可以理解为网页版的VScode？
+安装并运行jupyter
+```
+#更新pip
+pip install --upgrade pip
+#安装jupyer
+pip3 install jupyter
+#运行
+jupyter notebook
+#关闭
+control+C
+```
+关于其他相关指南，可以看[简书](jianshu.com/p/91365f343585)
+## 数据处理
+### 数据预处理:pandas_profiling
+这个是神器，可以快速预览数据。输出与数据有关的相关性分析和各类描述统计等等，还可以指出数据有哪些确实等：
+安装pandas等依赖的库
+```
+pip3 install pandas
+pip install pandas-profiling
+```
+运行：
+```py
+#导入程序包
+import pandas as pd
+import pandas_profiling
+#导入数据
+# df = pd.read_excel("data.xlsx")
+df = pd.read_csv("data.csv", header = 0)
+df
+#启动pandas_profiling
+profile = pandas_profiling.ProfileReport(df)
+profile
+#导出为网页
+with open("report.html", "w") as f:
+    f.write(profile.to_html())
+```
+### 绘制折线图
 ```py
 import matplotlib.pyplot as plt 
 y2 = [2,6,11,20,40]
@@ -182,7 +220,7 @@ plt.annotate('local max',xy=(3,11),xytext=(3.5,26),\
     xycoords='data',arrowprops=dict(facecolor='c',width=1))
 plt.show()
 ```
-#### 绘制饼图
+### 绘制饼图
 ```py
 import matplotlib.pyplot as plt
 labels = 'frogs','hogs','dogs','logs'
@@ -192,7 +230,7 @@ explode = 0,0.1,0,0
 plt.pie(size,explode=explode,labels=labels,colors=colors,shadow=True)
 plt.show()
 ```
-#### 绘制箱型图
+### 绘制箱型图
 ```py
 import matplotlib.pyplot as plt
 x = [1,2,3,4,5]
@@ -202,7 +240,7 @@ for x,y in zip(x,y):
     plt.text(x,y,'{f}'.format(f=y),ha='center',va='bottom')
 plt.show()
 ```
-#### 生成随机数等
+### 生成随机数等
 ```py
 import numpy as np
 value = np.random.randint(1,100,10)
@@ -227,7 +265,7 @@ while i <=8:
     i = i+1
 plt.show()
 ```
-#### 数据筛选
+### 数据筛选
 数据处理
 数据源是csv格式，
 ```py
@@ -281,8 +319,8 @@ print(df)
 #删除列
 df = df.drop(['subdate'],axis = 1)
 ```
-### 机器学习
-#### 回归模型
+## 机器学习
+### 回归模型
 线性回归模型
 ```py
 import pandas as pd
@@ -314,7 +352,7 @@ y2 = np.polyval(model,x2)
 print(y2)
 plt.plot(x,y,'o',x2,y2,'*')
 ```
-#### KNN（k-近邻）算法
+### KNN（k-近邻）算法
 监督学习中的分类算法
 1-语文高-文科
 2-综合
@@ -341,7 +379,7 @@ print(test_y)
 p = model.score(test_x,test_y)
 print(p)
 ```
-#### 聚类算法（k-means）
+### 聚类算法（k-means）
 无监督学习-聚类算法k-means
 ```py
 df = pd.read_csv('H:/python/fenlei.csv')
@@ -378,7 +416,7 @@ def showCluster(dataSet, k, centroids, clusterAssment):
 train_x_array = np.array(train_x[['yuwen','shuxue']])
 showCluster(train_x_array,3,model.cluster_centers_,model.lebels_.reshape(-1,1))
 ```
-#### 决策树
+### 决策树
 监督模型：决策树
 ```py
 df = pd.read_csv('H:/python/fenlei.csv')
@@ -392,8 +430,8 @@ test_x = df.iloc[80:100,2:4]
 test_p = model.predict(test_x)
 print(test_p)
 ```
-### 图像处理
-#### 基于OpenCV的图像拼接
+## 图像处理
+### 基于OpenCV的图像拼接
 原理是基于OpenCV提供的SIFT算法去寻找两张图片的相似点并对一张图片进行矩阵变换后进行拼接：
 ```python {class=line-numbers}
 import numpy as np
