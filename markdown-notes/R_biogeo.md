@@ -806,4 +806,412 @@ descript_all_individuals[[10]]
 SR_achillea = spec_as_df[, "845"]/spec_as_df[, "665"]
 SR_achillea
 ```
-[返回目录](#%e7%94%9f%e7%89%a9%e5%9c%b0%e7%90%86%e5%ad%a6)
+
+## 物种分布模型包:biomod2
+一个很厉害的包...不单单可以拟合环境数据等连续性变量，还可以拟合基因标记等二项分布的变量。
+物种分布模型本质上就是一个概率模型，建立每个栅格（地理位置）对于的环境变量与其存在概率之间的函数关系来估计物种分布的可能性。
+### 准备biomod2
+```r
+#设置工作环境
+setwd('workdir')
+#安装biomod2
+devtools::install_github('biomodhub/biomod2')
+#加载
+library(biomod2)
+library(ggplot2)
+library(gridExtra)
+library(raster)
+library(rasterVis)
+#加载数据
+ProLau_occ <- read.csv('../data/ProLau_occ.csv')
+summary(ProLau_occ)
+#加载各种数据...
+bioclim_ZA_sub <- 
+  raster::stack(
+    c(
+      bio_5  = '../data/worldclim_ZA/worldclim_ZA_bio_5.asc',
+      bio_7  = '../data/worldclim_ZA/worldclim_ZA_bio_7.asc',
+      bio_11 = '../data/worldclim_ZA/worldclim_ZA_bio_11.asc',
+      bio_19 = '../data/worldclim_ZA/worldclim_ZA_bio_19.asc'
+    )
+  )
+
+bioclim_ZA_sub
+
+#整理数据
+ProLau_data <- 
+  BIOMOD_FormatingData(
+    resp.var = ProLau_occ['Protea.laurifolia'],
+    resp.xy = ProLau_occ[, c('long', 'lat')],
+    expl.var = bioclim_ZA_sub,
+    resp.name = "Protea.laurifolia",
+    PA.nb.rep = 2,
+    PA.nb.absences = 500,
+    PA.strategy = 'random'
+  )
+```
+运行物种分布模型
+```r
+ProLau_data
+#绘制伪缺席图
+plot(ProLau_data)
+```
+![数据分布图](R/Rplot87.jpeg)
+```r
+#定义单个模型的选项
+ProLau_opt <- 
+  BIOMOD_ModelingOptions(
+    GLM = list(type = 'quadratic', interaction.level = 1),
+    GBM = list(n.trees = 1000),
+    GAM = list(algo = 'GAM_mgcv')
+  )
+#跑模型
+ProLau_models <- 
+  BIOMOD_Modeling(
+    data = ProLau_data,
+    models = c("GLM", "GBM", "RF", "GAM"),
+    models.options = ProLau_opt,
+    NbRunEval = 2,
+    DataSplit = 80,
+    VarImport = 3,
+    modeling.id = "demo1"
+  )
+
+#评估单个模型的质量
+
+#获取模型评估分数
+ProLau_models_scores <- get_evaluations(ProLau_models)
+
+## ProLau_models_scores是一个包含模型分数的5维数组
+dim(ProLau_models_scores)
+dimnames(ProLau_models_scores)
+
+# 绘出模型评估分数
+models_scores_graph(
+  ProLau_models, 
+  by = "models", 
+  metrics = c("ROC","TSS"), 
+  xlim = c(0.5,1), 
+  ylim = c(0.5,1)
+)
+
+models_scores_graph(
+  ProLau_models, 
+  by = "cv_run" , 
+  metrics = c("ROC","TSS"), 
+  xlim = c(0.5,1), 
+  ylim = c(0.5,1)
+)
+
+models_scores_graph(
+  ProLau_models, 
+  by = "data_set", 
+  metrics = c("ROC","TSS"), 
+  xlim = c(0.5,1), 
+  ylim = c(0.5,1)
+)
+
+#检查各个变量的重要值
+(ProLau_models_var_import <- get_variables_importance(ProLau_models))
+
+#求变量重要性的平均值
+apply(ProLau_models_var_import, c(1,2), mean)
+
+#绘制模型的响应图
+ProLau_glm <- BIOMOD_LoadModels(ProLau_models, models='GLM')
+ProLau_gbm <- BIOMOD_LoadModels(ProLau_models, models='GBM')
+ProLau_rf <- BIOMOD_LoadModels(ProLau_models, models='RF')
+ProLau_gam <- BIOMOD_LoadModels(ProLau_models, models='GAM')
+
+glm_eval_strip <- 
+  biomod2::response.plot2(
+    models  = ProLau_glm,
+    Data = get_formal_data(ProLau_models,'expl.var'), 
+    show.variables= get_formal_data(ProLau_models,'expl.var.names'),
+    do.bivariate = FALSE,
+    fixed.var.metric = 'median',
+    legend = FALSE,
+    display_title = FALSE,
+    data_species = get_formal_data(ProLau_models,'resp.var')
+  )
+
+gbm_eval_strip <- 
+  biomod2::response.plot2(
+    models  = ProLau_gbm,
+    Data = get_formal_data(ProLau_models,'expl.var'), 
+    show.variables= get_formal_data(ProLau_models,'expl.var.names'),
+    do.bivariate = FALSE,
+    fixed.var.metric = 'median',
+    legend = FALSE,
+    display_title = FALSE,
+    data_species = get_formal_data(ProLau_models,'resp.var')
+  )
+
+rf_eval_strip <- 
+  biomod2::response.plot2(
+    models  = ProLau_rf,
+    Data = get_formal_data(ProLau_models,'expl.var'), 
+    show.variables= get_formal_data(ProLau_models,'expl.var.names'),
+    do.bivariate = FALSE,
+    fixed.var.metric = 'median',
+    legend = FALSE,
+    display_title = FALSE,
+    data_species = get_formal_data(ProLau_models,'resp.var')
+  )
+
+gam_eval_strip <- 
+  biomod2::response.plot2(
+  models  = ProLau_gam,
+  Data = get_formal_data(ProLau_models,'expl.var'), 
+  show.variables= get_formal_data(ProLau_models,'expl.var.names'),
+  do.bivariate = FALSE,
+  fixed.var.metric = 'median',
+  legend = FALSE,
+  display_title = FALSE,
+  data_species = get_formal_data(ProLau_models,'resp.var')
+)
+```
+如随机森林的变量响应模型：
+![rf_eval_strip](R/Rplot88.jpeg)
+```r
+#运行集成模型
+ProLau_ensemble_models <- 
+  BIOMOD_EnsembleModeling(
+    modeling.output = ProLau_models,
+    em.by = 'all',
+    eval.metric = 'TSS',
+    eval.metric.quality.threshold = 0.8,
+    models.eval.meth = c('TSS','ROC'),
+    prob.mean = FALSE,
+    prob.cv = TRUE, 
+    committee.averaging = TRUE,
+    prob.mean.weight = TRUE,
+    VarImport = 0
+  )
+
+#评估集成模型质量
+(ProLau_ensemble_models_scores <- get_evaluations(ProLau_ensemble_models))
+```
+### 进行模型拟合与预测
+```r
+#当前适宜区？
+ProLau_models_proj_current <- 
+  BIOMOD_Projection(
+    modeling.output = ProLau_models,
+    new.env = bioclim_ZA_sub,
+    proj.name = "current",
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+
+ProLau_ensemble_models_proj_current <- 
+  BIOMOD_EnsembleForecasting(
+    EM.output = ProLau_ensemble_models,
+    projection.output = ProLau_models_proj_current,
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+
+#预测未来
+#加载2050气候
+bioclim_ZA_2050_BC45 <-
+  stack(
+    c(
+      bio_5  = '../data/worldclim_ZA/worldclim_ZA_2050_BC45_bio_5.asc',
+      bio_7  = '../data/worldclim_ZA/worldclim_ZA_2050_BC45_bio_7.asc',
+      bio_11 = '../data/worldclim_ZA/worldclim_ZA_2050_BC45_bio_11.asc',
+      bio_19 = '../data/worldclim_ZA/worldclim_ZA_2050_BC45_bio_19.asc'
+    )
+  )
+
+ProLau_models_proj_2050_BC45 <- 
+  BIOMOD_Projection(
+    modeling.output = ProLau_models,
+    new.env = bioclim_ZA_2050_BC45,
+    proj.name = "2050_BC45",
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+
+ProLau_ensemble_models_proj_2050_BC45 <- 
+  BIOMOD_EnsembleForecasting(
+    EM.output = ProLau_ensemble_models,
+    projection.output = ProLau_models_proj_2050_BC45,
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+
+#加载2079气候
+bioclim_ZA_2070_BC45 <-
+  stack(
+    c(
+      bio_5  = '../data/worldclim_ZA/worldclim_ZA_2070_BC45_bio_5.asc',
+      bio_7  = '../data/worldclim_ZA/worldclim_ZA_2070_BC45_bio_7.asc',
+      bio_11 = '../data/worldclim_ZA/worldclim_ZA_2070_BC45_bio_11.asc',
+      bio_19 = '../data/worldclim_ZA/worldclim_ZA_2070_BC45_bio_19.asc'
+    )
+  )
+
+ProLau_models_proj_2070_BC45 <- 
+  BIOMOD_Projection(
+    modeling.output = ProLau_models,
+    new.env = bioclim_ZA_2070_BC45,
+    proj.name = "2070_BC45",
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+
+ProLau_ensemble_models_proj_2070_BC45 <- 
+  BIOMOD_EnsembleForecasting(
+    EM.output = ProLau_ensemble_models,
+    projection.output = ProLau_models_proj_2070_BC45,
+    binary.meth = "TSS",
+    output.format = ".img",
+    do.stack = FALSE
+  )
+#绘制预测图像
+plot(ProLau_ensemble_models_proj_2070_BC45, str.grep = "EMca|EMwmean")
+```
+![SRC](R/Rplot89.jpeg)
+```r
+#完成物种变化范围图（Species Range Change (SRC) ）
+# 加载投影坐标系
+ProLau_bin_proj_current <- 
+  stack( 
+    c(
+      ca = "Protea.laurifolia/proj_current/individual_projections/Protea.laurifolia_EMcaByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img",
+      wm = "Protea.laurifolia/proj_current/individual_projections/Protea.laurifolia_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img"
+    )
+  )
+
+ProLau_bin_proj_2050_BC45 <- 
+  stack( 
+    c(
+      ca = "Protea.laurifolia/proj_2050_BC45/individual_projections/Protea.laurifolia_EMcaByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img",
+      wm = "Protea.laurifolia/proj_2050_BC45/individual_projections/Protea.laurifolia_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img"
+    )
+  )
+
+ProLau_bin_proj_2070_BC45 <- 
+  stack( 
+    c(
+      ca = "Protea.laurifolia/proj_2070_BC45/individual_projections/Protea.laurifolia_EMcaByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img",
+      wm = "Protea.laurifolia/proj_2070_BC45/individual_projections/Protea.laurifolia_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img"
+    )
+  )
+#当前至2050的SRC变化
+SRC_current_2050_BC45 <- 
+  BIOMOD_RangeSize(
+    ProLau_bin_proj_current,
+    ProLau_bin_proj_2050_BC45
+  )
+
+SRC_current_2050_BC45$Compt.By.Models
+
+#当前至2070的SRC变化
+SRC_current_2070_BC45 <- 
+  BIOMOD_RangeSize(
+    ProLau_bin_proj_current,
+    ProLau_bin_proj_2070_BC45
+  )
+
+SRC_current_2070_BC45$Compt.By.Models
+
+ProLau_src_map <- 
+  stack(
+    SRC_current_2050_BC45$Diff.By.Pixel, 
+    SRC_current_2070_BC45$Diff.By.Pixel
+  )
+names(ProLau_src_map) <- c("ca cur-2050", "wm cur-2050", "ca cur-2070", "wm cur-2070")
+
+my.at <- seq(-2.5, 1.5, 1)
+myColorkey <- 
+  list(
+    at = my.at, #观察颜色变化的区域
+    labels = 
+      list(
+        labels = c("lost", "pres", "abs","gain"), #符号与备注
+        at = my.at[-1] - 0.5 #备注的位置
+      )
+  )
+
+rasterVis::levelplot( 
+  ProLau_src_map, 
+  main = "Protea laurifolia range change",
+  colorkey = myColorkey,
+  col.regions=c('#f03b20', '#99d8c9', '#f0f0f0', '#2ca25f'),
+  layout = c(2,2)
+)
+```
+![cSRC](R/Rplot90.jpeg)
+```r
+#计算SRC分布概率的分层密度
+#参考项目
+ref <- subset(ProLau_bin_proj_current, "ca")
+
+#选择研究内容
+mods <- c("GLM", "GBM", "RF", "GAM")
+data_set <- c("PA1", "PA2")
+cv_run <- c("RUN1", "RUN2", "Full")
+
+#构建（模型/对象）组合
+groups <- 
+  as.matrix(
+    expand.grid(
+      models = mods, 
+      data_set = data_set, 
+      cv_run = cv_run,
+      stringsAsFactors = FALSE)
+  )
+
+#加载我们计算出的投影
+all_bin_proj_files <- 
+  list.files( 
+    path = "Protea.laurifolia",  
+    pattern = "_TSSbin.img$",
+    full.names = TRUE, 
+    recursive = TRUE
+  )
+
+#当前与2070年对比（删除了当前和2050年的预测）
+current_and_2070_proj_files <- grep(all_bin_proj_files, pattern="2070", value=T)
+
+#只保留与我们选择的镶嵌面组匹配的投影
+selected_bin_proj_files <- 
+  apply(
+  groups, 1, 
+    function(x){
+      proj_file <- NA
+      match_tab <- sapply(x, grepl, current_and_2070_proj_files)
+      match_id <- which(apply(match_tab, 1, all))
+      if(length(match_id)) proj_file <- current_and_2070_proj_files[match_id]
+      proj_file
+    }
+  )
+
+#删除不匹配的组
+to_remove <- which(is.na(selected_bin_proj_files))
+if(length(to_remove)){
+  groups <- groups[-to_remove,]
+  selected_bin_proj_files <- selected_bin_proj_files[-to_remove]
+}
+
+#生成选定投影的堆栈图
+proj_groups <- stack(selected_bin_proj_files)
+
+ProbDensFunc(
+  initial = as.vector(ref),
+  projections = raster::as.matrix(proj_groups),
+  groups = t(groups),
+  plothist = TRUE,
+  resolution = 10,
+  cvsn = FALSE
+)
+```
+![dis](R/Rplot91.png)
+![modelcom](R/Rplot92.png)
