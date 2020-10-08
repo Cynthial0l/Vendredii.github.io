@@ -311,7 +311,8 @@ pre[data-line] .line-highlight[data-end]:after {
 <li><a href="#%E7%89%A9%E7%A7%8D%E5%88%86%E5%B8%83%E6%A8%A1%E5%9E%8B%E5%8C%85biomod2">&#x7269;&#x79CD;&#x5206;&#x5E03;&#x6A21;&#x578B;&#x5305;:biomod2</a>
 <ul>
 <li><a href="#%E5%87%86%E5%A4%87biomod2">&#x51C6;&#x5907;biomod2</a></li>
-<li><a href="#%E8%BF%9B%E8%A1%8C%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x8FDB;&#x884C;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</a></li>
+<li><a href="#%E5%8D%95%E5%8F%98%E9%87%8F%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x5355;&#x53D8;&#x91CF;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</a></li>
+<li><a href="#%E5%A4%9A%E5%8F%98%E9%87%8F%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x591A;&#x53D8;&#x91CF;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</a></li>
 </ul>
 </li>
 </ul>
@@ -1213,7 +1214,7 @@ ProLau_ensemble_models <span class="token operator">&lt;-</span>
 
 <span class="token comment">#&#x8BC4;&#x4F30;&#x96C6;&#x6210;&#x6A21;&#x578B;&#x8D28;&#x91CF;</span>
 <span class="token punctuation">(</span>ProLau_ensemble_models_scores <span class="token operator">&lt;-</span> get_evaluations<span class="token punctuation">(</span>ProLau_ensemble_models<span class="token punctuation">)</span><span class="token punctuation">)</span>
-</pre><h3 class="mume-header" id="%E8%BF%9B%E8%A1%8C%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x8FDB;&#x884C;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</h3>
+</pre><h3 class="mume-header" id="%E5%8D%95%E5%8F%98%E9%87%8F%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x5355;&#x53D8;&#x91CF;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</h3>
 
 <pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment">#&#x5F53;&#x524D;&#x9002;&#x5B9C;&#x533A;&#xFF1F;</span>
 ProLau_models_proj_current <span class="token operator">&lt;-</span> 
@@ -1431,7 +1432,252 @@ ProbDensFunc<span class="token punctuation">(</span>
 <span class="token punctuation">)</span>
 </pre><p><img src="R/Rplot91.png" alt="dis"><br>
 <img src="R/Rplot92.png" alt="modelcom"></p>
+<h3 class="mume-header" id="%E5%A4%9A%E5%8F%98%E9%87%8F%E6%A8%A1%E5%9E%8B%E6%8B%9F%E5%90%88%E4%B8%8E%E9%A2%84%E6%B5%8B">&#x591A;&#x53D8;&#x91CF;&#x6A21;&#x578B;&#x62DF;&#x5408;&#x4E0E;&#x9884;&#x6D4B;</h3>
 
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment">## setup environment ----</span>
+setwd<span class="token punctuation">(</span><span class="token string">&apos;workdir&apos;</span><span class="token punctuation">)</span>
+
+<span class="token comment">## load the required packages</span>
+library<span class="token punctuation">(</span>biomod2<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>raster<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>rasterVis<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>gridExtra<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>reshape2<span class="token punctuation">)</span>
+
+<span class="token comment">## read data ----</span>
+<span class="token comment">## species occurences data</span>
+data <span class="token operator">&lt;-</span> read.csv<span class="token punctuation">(</span><span class="token string">&apos;../data/Larus_occ.csv&apos;</span><span class="token punctuation">,</span> stringsAsFactors <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span>
+head<span class="token punctuation">(</span>data<span class="token punctuation">)</span>
+table<span class="token punctuation">(</span>data<span class="token operator">$</span>species<span class="token punctuation">)</span>
+spp_to_model <span class="token operator">&lt;-</span> unique<span class="token punctuation">(</span>data<span class="token operator">$</span>species<span class="token punctuation">)</span>
+
+<span class="token comment">## curent climatic variables</span>
+stk_current <span class="token operator">&lt;-</span> 
+  raster<span class="token operator">::</span>stack<span class="token punctuation">(</span>
+    c<span class="token punctuation">(</span>
+      bio_1 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_bio_1.tif&quot;</span><span class="token punctuation">,</span>
+      bio_12 <span class="token operator">=</span> <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_bio_12.tif&quot;</span><span class="token punctuation">,</span>
+      bio_8 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_bio_8.tif&quot;</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    RAT <span class="token operator">=</span> <span class="token boolean">FALSE</span>
+  <span class="token punctuation">)</span>
+
+<span class="token comment">## 2050 climatic variables</span>
+stk_2050_BC_45 <span class="token operator">&lt;-</span> 
+  raster<span class="token operator">::</span>stack<span class="token punctuation">(</span>
+    c<span class="token punctuation">(</span>
+      bio_1 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2050_BC45_bio_1.tif&quot;</span><span class="token punctuation">,</span>
+      bio_12 <span class="token operator">=</span> <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2050_BC45_bio_12.tif&quot;</span><span class="token punctuation">,</span>
+      bio_8 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2050_BC45_bio_8.tif&quot;</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    RAT <span class="token operator">=</span> <span class="token boolean">FALSE</span>
+  <span class="token punctuation">)</span>
+
+<span class="token comment">## 2070 climatic variables</span>
+stk_2070_BC_45 <span class="token operator">&lt;-</span> 
+  raster<span class="token operator">::</span>stack<span class="token punctuation">(</span>
+    c<span class="token punctuation">(</span>
+      bio_1 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2070_BC45_bio_1.tif&quot;</span><span class="token punctuation">,</span>
+      bio_12 <span class="token operator">=</span> <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2070_BC45_bio_12.tif&quot;</span><span class="token punctuation">,</span>
+      bio_8 <span class="token operator">=</span>  <span class="token string">&quot;../data/worldclim_EU/worldclim_EU_2070_BC45_bio_8.tif&quot;</span>
+    <span class="token punctuation">)</span><span class="token punctuation">,</span>
+    RAT <span class="token operator">=</span> <span class="token boolean">FALSE</span>
+  <span class="token punctuation">)</span>
+
+
+<span class="token comment">## build species modelling wrapper ----</span>
+biomod2_wrapper <span class="token operator">&lt;-</span> <span class="token keyword">function</span><span class="token punctuation">(</span>sp<span class="token punctuation">)</span><span class="token punctuation">{</span>
+  cat<span class="token punctuation">(</span><span class="token string">&quot;\n&gt; species : &quot;</span><span class="token punctuation">,</span> sp<span class="token punctuation">)</span>
+  
+  <span class="token comment">## get occurrences points</span>
+  sp_dat <span class="token operator">&lt;-</span> data<span class="token punctuation">[</span>data<span class="token operator">$</span>species <span class="token operator">==</span> sp<span class="token punctuation">,</span> <span class="token punctuation">]</span>
+  
+  <span class="token comment">## formating the data</span>
+  sp_format <span class="token operator">&lt;-</span> 
+    BIOMOD_FormatingData<span class="token punctuation">(</span>
+      resp.var <span class="token operator">=</span> rep<span class="token punctuation">(</span><span class="token number">1</span><span class="token punctuation">,</span> nrow<span class="token punctuation">(</span>sp_dat<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> 
+      expl.var <span class="token operator">=</span> stk_current<span class="token punctuation">,</span>
+      resp.xy <span class="token operator">=</span> sp_dat<span class="token punctuation">[</span><span class="token punctuation">,</span> c<span class="token punctuation">(</span><span class="token string">&quot;long&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;lat&quot;</span><span class="token punctuation">)</span><span class="token punctuation">]</span><span class="token punctuation">,</span>
+      resp.name <span class="token operator">=</span> sp<span class="token punctuation">,</span>
+      PA.strategy <span class="token operator">=</span> <span class="token string">&quot;random&quot;</span><span class="token punctuation">,</span> 
+      PA.nb.rep <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">,</span> 
+      PA.nb.absences <span class="token operator">=</span> <span class="token number">1000</span>
+    <span class="token punctuation">)</span>
+  
+  <span class="token comment">## print formatting summary</span>
+  sp_format
+  
+  <span class="token comment">## save image of input data summary</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span><span class="token operator">!</span>exists<span class="token punctuation">(</span>sp<span class="token punctuation">)</span><span class="token punctuation">)</span> dir.create<span class="token punctuation">(</span>sp<span class="token punctuation">)</span>
+  pdf<span class="token punctuation">(</span>paste<span class="token punctuation">(</span>sp<span class="token punctuation">,</span> <span class="token string">&quot;/&quot;</span><span class="token punctuation">,</span> sp <span class="token punctuation">,</span><span class="token string">&quot;_data_formated.pdf&quot;</span><span class="token punctuation">,</span> sep<span class="token operator">=</span><span class="token string">&quot;&quot;</span> <span class="token punctuation">)</span><span class="token punctuation">)</span>
+  try<span class="token punctuation">(</span>plot<span class="token punctuation">(</span>sp_format<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  dev.off<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  
+  <span class="token comment">## define models options</span>
+  sp_opt <span class="token operator">&lt;-</span> BIOMOD_ModelingOptions<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  
+  <span class="token comment">## model species</span>
+  sp_model <span class="token operator">&lt;-</span> BIOMOD_Modeling<span class="token punctuation">(</span> 
+    sp_format<span class="token punctuation">,</span> 
+    models <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&apos;GLM&apos;</span><span class="token punctuation">,</span> <span class="token string">&apos;FDA&apos;</span><span class="token punctuation">,</span> <span class="token string">&apos;RF&apos;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> 
+    models.options <span class="token operator">=</span> sp_opt<span class="token punctuation">,</span> 
+    NbRunEval <span class="token operator">=</span> <span class="token number">2</span><span class="token punctuation">,</span> 
+    DataSplit <span class="token operator">=</span> <span class="token number">70</span><span class="token punctuation">,</span> 
+    Yweights <span class="token operator">=</span> <span class="token keyword">NULL</span><span class="token punctuation">,</span> 
+    VarImport <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">,</span> 
+    models.eval.meth <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&apos;TSS&apos;</span><span class="token punctuation">,</span> <span class="token string">&apos;ROC&apos;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+    SaveObj <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span>
+    rescal.all.models <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+    do.full.models <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+    modeling.id <span class="token operator">=</span> <span class="token string">&quot;demo2&quot;</span>
+  <span class="token punctuation">)</span>
+  
+  <span class="token comment">## save some graphical outputs</span>
+  <span class="token comment">#### models scores</span>
+  pdf<span class="token punctuation">(</span>paste0<span class="token punctuation">(</span>sp<span class="token punctuation">,</span> <span class="token string">&quot;/&quot;</span><span class="token punctuation">,</span> sp <span class="token punctuation">,</span> <span class="token string">&quot;_models_scores.pdf&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  try<span class="token punctuation">(</span>gg1 <span class="token operator">&lt;-</span> models_scores_graph<span class="token punctuation">(</span>sp_model<span class="token punctuation">,</span> metrics <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&quot;TSS&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;ROC&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> by <span class="token operator">=</span> <span class="token string">&apos;models&apos;</span><span class="token punctuation">,</span> plot <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  try<span class="token punctuation">(</span>gg2 <span class="token operator">&lt;-</span> models_scores_graph<span class="token punctuation">(</span>sp_model<span class="token punctuation">,</span> metrics <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&quot;TSS&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;ROC&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> by <span class="token operator">=</span> <span class="token string">&apos;data_set&apos;</span><span class="token punctuation">,</span> plot <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  try<span class="token punctuation">(</span>gg3 <span class="token operator">&lt;-</span> models_scores_graph<span class="token punctuation">(</span>sp_model<span class="token punctuation">,</span> metrics <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&quot;TSS&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;ROC&quot;</span><span class="token punctuation">)</span><span class="token punctuation">,</span> by <span class="token operator">=</span> <span class="token string">&apos;cv_run&apos;</span><span class="token punctuation">,</span> plot <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+  try<span class="token punctuation">(</span>grid.arrange<span class="token punctuation">(</span>gg1<span class="token punctuation">,</span> gg2<span class="token punctuation">,</span> gg3<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  dev.off<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  
+  <span class="token comment">## build ensemble models</span>
+  sp_ens_model <span class="token operator">&lt;-</span> 
+    BIOMOD_EnsembleModeling<span class="token punctuation">(</span>
+      modeling.output <span class="token operator">=</span> sp_model<span class="token punctuation">,</span>
+      em.by <span class="token operator">=</span> <span class="token string">&apos;all&apos;</span><span class="token punctuation">,</span>
+      eval.metric <span class="token operator">=</span> <span class="token string">&apos;TSS&apos;</span><span class="token punctuation">,</span>
+      eval.metric.quality.threshold <span class="token operator">=</span> <span class="token number">0.4</span><span class="token punctuation">,</span>
+      models.eval.meth <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&apos;TSS&apos;</span><span class="token punctuation">,</span><span class="token string">&apos;ROC&apos;</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+      prob.mean <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+      prob.mean.weight <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span>
+      VarImport <span class="token operator">=</span> <span class="token number">0</span>
+    <span class="token punctuation">)</span>
+  
+  <span class="token comment">## do projections</span>
+  proj_scen <span class="token operator">&lt;-</span> c<span class="token punctuation">(</span><span class="token string">&quot;current&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;2050_BC_45&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;2070_BC_45&quot;</span><span class="token punctuation">)</span>
+  
+  <span class="token keyword">for</span><span class="token punctuation">(</span>scen <span class="token keyword">in</span> proj_scen<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    cat<span class="token punctuation">(</span><span class="token string">&quot;\n&gt; projections of &quot;</span><span class="token punctuation">,</span> scen<span class="token punctuation">)</span>
+    
+    <span class="token comment">## single model projections</span>
+    sp_proj <span class="token operator">&lt;-</span> 
+      BIOMOD_Projection<span class="token punctuation">(</span>
+        modeling.output <span class="token operator">=</span> sp_model<span class="token punctuation">,</span>
+        new.env <span class="token operator">=</span> get<span class="token punctuation">(</span>paste0<span class="token punctuation">(</span><span class="token string">&quot;stk_&quot;</span><span class="token punctuation">,</span> scen<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+        proj.name <span class="token operator">=</span> scen<span class="token punctuation">,</span>
+        selected.models <span class="token operator">=</span> <span class="token string">&apos;all&apos;</span><span class="token punctuation">,</span>
+        binary.meth <span class="token operator">=</span> <span class="token string">&quot;TSS&quot;</span><span class="token punctuation">,</span>
+        filtered.meth <span class="token operator">=</span> <span class="token keyword">NULL</span><span class="token punctuation">,</span>
+        compress <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span>
+        build.clamping.mask <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+        do.stack <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+        output.format <span class="token operator">=</span> <span class="token string">&quot;.img&quot;</span>
+      <span class="token punctuation">)</span>
+    
+    <span class="token comment">## ensemble model projections</span>
+    sp_ens_proj <span class="token operator">&lt;-</span> 
+      BIOMOD_EnsembleForecasting<span class="token punctuation">(</span>
+        EM.output <span class="token operator">=</span> sp_ens_model<span class="token punctuation">,</span>
+        projection.output <span class="token operator">=</span> sp_proj<span class="token punctuation">,</span>
+        binary.meth <span class="token operator">=</span> <span class="token string">&quot;TSS&quot;</span><span class="token punctuation">,</span>
+        compress <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span>
+        do.stack <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">,</span>
+        output.format <span class="token operator">=</span> <span class="token string">&quot;.img&quot;</span>
+      <span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  
+  return<span class="token punctuation">(</span>paste0<span class="token punctuation">(</span>sp<span class="token punctuation">,</span><span class="token string">&quot; modelling completed !&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+
+
+<span class="token comment">## launch the spiecies modelling wrapper over species list ----</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>require<span class="token punctuation">(</span>snowfall<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">{</span> <span class="token comment">## parallel computation</span>
+  <span class="token comment">## start the cluster</span>
+  sfInit<span class="token punctuation">(</span>parallel <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">,</span> cpus <span class="token operator">=</span> <span class="token number">5</span><span class="token punctuation">)</span> <span class="token comment">## here we only require 4 cpus</span>
+  sfExportAll<span class="token punctuation">(</span><span class="token punctuation">)</span>
+  sfLibrary<span class="token punctuation">(</span>biomod2<span class="token punctuation">)</span>
+  <span class="token comment">## launch our wrapper in parallel</span>
+  sf_out <span class="token operator">&lt;-</span> sfLapply<span class="token punctuation">(</span>spp_to_model<span class="token punctuation">,</span> biomod2_wrapper<span class="token punctuation">)</span>
+  <span class="token comment">## stop the cluster</span>
+  sfStop<span class="token punctuation">(</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span> <span class="token keyword">else</span> <span class="token punctuation">{</span> <span class="token comment">## sequencial computation</span>
+  <span class="token keyword">for</span> <span class="token punctuation">(</span>sp <span class="token keyword">in</span> spp_to_model<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    biomod2_wrapper<span class="token punctuation">(</span>sp<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">## or with a lapply function in sequential model</span>
+  <span class="token comment">## all_species_bm &lt;- lapply(spp_to_model, biomod2_wrapper)</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">## produce alpha-diversity maps ----</span>
+
+<span class="token comment">## current conditons</span>
+<span class="token comment">### load binary projections</span>
+f_em_wmean_bin_current <span class="token operator">&lt;-</span> 
+  paste0<span class="token punctuation">(</span>
+    spp_to_model<span class="token punctuation">,</span>
+    <span class="token string">&quot;/proj_current/individual_projections/&quot;</span><span class="token punctuation">,</span> 
+    spp_to_model<span class="token punctuation">,</span> <span class="token string">&quot;_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img&quot;</span>
+  <span class="token punctuation">)</span>
+
+<span class="token comment">### sum all projections</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>length<span class="token punctuation">(</span>f_em_wmean_bin_current<span class="token punctuation">)</span> <span class="token operator">&gt;=</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+  <span class="token comment">## initialisation</span>
+  taxo_alpha_div_current <span class="token operator">&lt;-</span> raster<span class="token punctuation">(</span>f_em_wmean_bin_current<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> 
+  <span class="token keyword">for</span><span class="token punctuation">(</span>f <span class="token keyword">in</span> f_em_wmean_bin_current<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    taxo_alpha_div_current <span class="token operator">&lt;-</span> taxo_alpha_div_current <span class="token operator">+</span> raster<span class="token punctuation">(</span>f<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">## 2050 conditons</span>
+<span class="token comment">### load binaries projections</span>
+f_em_wmean_bin_2050 <span class="token operator">&lt;-</span> 
+  paste0<span class="token punctuation">(</span>
+    spp_to_model<span class="token punctuation">,</span>
+    <span class="token string">&quot;/proj_2050_BC_45/individual_projections/&quot;</span><span class="token punctuation">,</span> 
+    spp_to_model<span class="token punctuation">,</span> <span class="token string">&quot;_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img&quot;</span>
+  <span class="token punctuation">)</span>
+
+<span class="token comment">### sum all projections</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>length<span class="token punctuation">(</span>f_em_wmean_bin_2050<span class="token punctuation">)</span> <span class="token operator">&gt;=</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+  <span class="token comment">## initialisation</span>
+  taxo_alpha_div_2050 <span class="token operator">&lt;-</span> raster<span class="token punctuation">(</span>f_em_wmean_bin_2050<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> 
+  <span class="token keyword">for</span><span class="token punctuation">(</span>f <span class="token keyword">in</span> f_em_wmean_bin_2050<span class="token punctuation">[</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+    taxo_alpha_div_2050 <span class="token operator">&lt;-</span> taxo_alpha_div_2050 <span class="token operator">+</span> raster<span class="token punctuation">(</span>f<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">## 2070 conditons</span>
+<span class="token comment">### load binaries projections</span>
+f_em_wmean_bin_2070 <span class="token operator">&lt;-</span> 
+  paste0<span class="token punctuation">(</span>
+    spp_to_model<span class="token punctuation">,</span>
+    <span class="token string">&quot;/proj_2070_BC_45//individual_projections/&quot;</span><span class="token punctuation">,</span> 
+    spp_to_model<span class="token punctuation">,</span> <span class="token string">&quot;_EMwmeanByTSS_mergedAlgo_mergedRun_mergedData_TSSbin.img&quot;</span>
+  <span class="token punctuation">)</span>
+
+<span class="token comment">### sum all projections</span>
+<span class="token keyword">if</span><span class="token punctuation">(</span>length<span class="token punctuation">(</span>f_em_wmean_bin_2070<span class="token punctuation">)</span> <span class="token operator">&gt;=</span> <span class="token number">2</span><span class="token punctuation">)</span><span class="token punctuation">{</span>
+  <span class="token comment">## initialisation</span>
+  taxo_alpha_div_2070 <span class="token operator">&lt;-</span> raster<span class="token punctuation">(</span>f_em_wmean_bin_2070<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span><span class="token punctuation">)</span> 
+  <span class="token keyword">for</span><span class="token punctuation">(</span>f <span class="token keyword">in</span> f_em_wmean_bin_2070<span class="token punctuation">)</span><span class="token punctuation">{</span>
+    taxo_alpha_div_2070 <span class="token operator">&lt;-</span> taxo_alpha_div_2070 <span class="token operator">+</span> raster<span class="token punctuation">(</span>f<span class="token punctuation">)</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span>
+
+<span class="token comment">## plot the alpha-div maps</span>
+levelplot<span class="token punctuation">(</span>
+  stack<span class="token punctuation">(</span>
+    c<span class="token punctuation">(</span>
+      current <span class="token operator">=</span> taxo_alpha_div_current<span class="token punctuation">,</span> 
+      in_2050 <span class="token operator">=</span> taxo_alpha_div_2050<span class="token punctuation">,</span> 
+      in_2070 <span class="token operator">=</span> taxo_alpha_div_2070 
+    <span class="token punctuation">)</span>
+  <span class="token punctuation">)</span><span class="token punctuation">,</span>
+  main <span class="token operator">=</span> expression<span class="token punctuation">(</span>paste<span class="token punctuation">(</span><span class="token string">&quot;Larus &quot;</span><span class="token punctuation">,</span> alpha<span class="token punctuation">,</span> <span class="token string">&quot;-diversity&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  par.settings <span class="token operator">=</span> BuRdTheme
+<span class="token punctuation">)</span>
+</pre>
       </div>
       
       
