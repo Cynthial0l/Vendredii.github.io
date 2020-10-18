@@ -1461,3 +1461,179 @@ levelplot(
   par.settings = BuRdTheme
 )
 ```
+## 物种迁徙模型:KissMig
+### KissMig功能与组成
+KissMig意思就是“Keep it simple species migration model”，这是一个简单的基于栅格图像的物种迁移模型，它可以非常简单快速地模拟物种的迁移。
+
+#### kissmig()
+kissmig运行一个简单的、基于栅格的随机迁移模型来模拟物种迁移和范围转移。它使用地理区域的起源和适宜性地图迭代运行一个简单的3x3单元算法。特别是，它允许生成可访问性地图，以便在物种分布模型中轻松整合有限的迁移。
+
+```r
+kissmig(O, S = NULL, it, type = 'FOC', signed = FALSE, pext = 1.0, pcor = 0.2, seed = NULL)
+```
+
+其中：
+`O`为地理起源的单一栅格图像；
+`S`为适宜性图像，可以是单一的栅格，也可以是堆栈的栅格图像，或者是别的什么；
+`it`为迭代的次数；
+`type`为输出结果的类型，`‘DIS’`为最终的分布图，`'FOC'`是迭代至第一次出现的情景，`'LOC'`是迭代至最后一次出现时的情景，`'NOC'`是出现的迭代次数；
+`signed`如果为`TRUE`，则符号指示单元在最后的迭代步骤后是定植(+)还是非定植(-)；
+`pext`在0与1之间，一个定殖细胞在迭代步骤之间变为非定殖，则物种局部灭绝；
+`pcor`在0与1之间，在3x3单元邻域中考虑对角的单元；
+`seed`用于设置随机数生成器种子的整数。
+
+从最初的`O`开始，kissmig在由适合性层特征的异类环境中模拟`it`迭代步骤的迁移`S`。原点`O`的定植单元值为1，未定植细胞值为0。如果“S”包含几个适合性层以覆盖环境变化，则`it`应用于每一层。适宜性在0(不合适)和1(适宜性最大)之间。kissmig使用3x3算法进行物种传播/迁移。所有的细胞在以`pext`为概率的迭代步骤前都得到扩增，对于一个再克隆或新的定植事件，3x3邻域内的对角单元以`pcor`为概率考虑(`pcor=0.2`产生更真实的循环扩散模式——参见Nobis & Normand 2014)。对于运行时优化，`signed=TRUE`会生成带符号的结果，也就是说，在结果类型“FOC”、“LCO”或“NOC”的基础上，符号表示最终的分布(`'DIS'`)，其中正的值是已定植的，负的值是已定植但在最后一步迭代后未殖民化的。为了得到可重复的结果，可以使用“seed”参数设置R随机数生成器的种子。
+
+#### kissmigAccess()
+从kissmig中获取可访问的地图，kissmigAccess从第一次出现的kissmig输出计算可访问性映射(type = 'FOC')。这些地图允许在物种分布模型和宏观生态分析中整合有限的迁移。
+
+```r
+kissmigAccess(grd, rel=FALSE)
+```
+
+`grd`是由kissmig成的第一次出现的单个光栅层
+`rel`如果为`TRUE`，kissmigAccess返回最大值为1的相对值，否则返回绝对积分值。
+
+第一次出现的kissmig映射显示栅格单元的第一个迭代步骤的值。早期定殖细胞值低，晚期定殖细胞值高。这些值与可及性正好相反，可及性在早期定植的单元中较高，在晚期定植的单元中较低。`kissmigAccess`只是将每个单元格的可访问性计算为单元格值与max(grd)+1之间的差值。从未被定植的单元保持不变(值为0)。
+
+### KissMig的使用
+```r
+#  Michael Nobis/WSL (michael.nobis@wsl.ch), December 2014
+  library(kissmig)  # loads also raster package as dependency
+# 生成/下载一些地图以供以后使用
+  ## 得到有着年平均正态分布的适宜性图
+  ## 基于worldclim的气温图
+  s <- kissmigDummyS(mean=12,sd=3, download=TRUE)
+  ## 并绘制出来
+  plot(s, asp=1.0, main='simple climate suitability map')
+
+  ## 定义一个起源
+  o <- kissmigOrigin(s, 8, 44.5, 0.5)
+  plot(o  , asp=1.0, main='origin')
+  plot(s+o, asp=1.0, main='suitability + origin')
+
+  ## 定义土地掩膜
+  landMask <- s>=0
+  plot(landMask, asp=1.0, main='land mask')
+```
+![kissmig1](R/Rplot93.jpeg)
+```r
+# 运行kissmig并输出各种东西
+
+  k <- kissmig(o, s, it=150, type='DIS')
+  plot(k*landMask, asp=1.0, main='final distribution')
+
+  k <- kissmig(o, s, it=150, type='FOC')
+  plot(k*landMask, asp=1.0, main='first iteration step of occurrence')
+
+  a <- kissmigAccess(k)
+  plot(a*landMask, asp=1.0, main='accessibility based on "FOC", absolute values')
+
+  a <- kissmigAccess(k, rel=TRUE)
+  plot(a*landMask, asp=1.0, main='accessibility based on "FOC", relative values')
+
+  k <- kissmig(o, s, it=150, type='LOC')
+  plot(k*landMask, asp=1.0, main='last iteration step of occurrence')
+  
+  k <- kissmig(o, s, it=150, type='NOC')
+  plot(k*landMask, asp=1.0, main='number of iteration steps with occurrences')
+
+# 通过设置随机数生成器的种子来控制随机性
+
+  ## 带有随机差异的两次运行
+  k1 <- kissmig(o, s, it=150, type='DIS') # two final distributions with
+  k2 <- kissmig(o, s, it=150, type='DIS') # same origin and suitability map
+  plot(k1*landMask, asp=1.0, main='final distribution - no seed set - run1')
+  plot(k2*landMask, asp=1.0, main='final distribution - no seed set - run2')
+  plot(abs(k1-k2)*landMask, asp=1.0, main='differences between run1 and run2')
+
+  ## 无随机差异的两次运行
+  k1 <- kissmig(o, s, it=150, type='DIS', seed=123)
+  k2 <- kissmig(o, s, it=150, type='DIS', seed=123)
+  plot(k1*landMask, asp=1.0, main='final distribution - seed set - run1')
+  plot(k2*landMask, asp=1.0, main='final distribution - same seed set - run2')
+  plot(abs(k1-k2)*landMask, asp=1.0, main='stochastic differences between run1 and run2')
+
+# 创建一个“签名”结果;符号返回最终的分布'DIS'
+# creating a "signed" result; the sign returns the final distribution 'DIS' 
+# 如果与“FOC”、“LOC”或“NOC”组合;用于运行时优化
+# if combined with 'FOC', 'LOC', or 'NOC'; useful for runtime optimization
+
+  k <- kissmig(o, s, it=200, type='FOC', signed=TRUE)
+  plot(    k   *landMask, asp=1.0, main='signed "FOC" call, raw output')
+
+  ## abs(k): same as type='FOC' and signed=FALSE
+  plot(abs(k  )*landMask, asp=1.0, main='signed "FOC" call, absolute values')
+
+  ## extract information of final distribution 'DIS'
+  plot(abs(k>0)*landMask, asp=1.0, main='signed "FOC" call, values > 0')
+
+  ## extract cells with 'FOC' information but no final occurrences
+  plot(abs(k<0)*landMask, asp=1.0, main='signed "FOC" call, values < 0')
+
+# --------------------------------------------------------------------------
+# 使用kissmig对许多适宜性地图进行运算; 对观察变化很有用 
+# 物种传播或繁殖期间的环境
+
+  ## 单一适宜性地图显示气候变暖
+  s1 <- kissmigDummyS(mean=12,sd=3) # 
+  s2 <- kissmigDummyS(mean=11,sd=3) # 模拟一种气候变暖的适宜性s1
+  s3 <- kissmigDummyS(mean=10,sd=3) # 模拟一种气候变暖的适宜性s2
+
+  ## 构建具有或不具有适应性变化的堆栈数据
+  s111 <- stack(s1,s1,s1) # or brick(s1,s1,s1)
+  s123 <- stack(s1,s2,s3) # or brick(s1,s2,s3)
+
+  ## 运行kissmig，无论环境是否改变
+  k111 <- kissmig(o, s111, it=50, type='NOC', seed=123) # 3层=150次迭代
+  k123 <- kissmig(o, s123, it=50, type='NOC', seed=123) #总步骤
+
+  ## kissmig results
+  plot(k111*landMask, asp=1.0, main='3 suitability layers, 50 it./layer, no env. changes')
+  plot(k123*landMask, asp=1.0, main='3 suitability layers, 50 it./layer, climate warming')
+
+  ## 在传播过程中随着气候变暖而变化
+  gain <- (k123 >0) * (k111==0)
+  same <- (k123 >0) * (k111 >0)
+  loss <- (k123==0) * (k111 >0)
+  plot((loss+(2*same)+(3*gain))*landMask, 
+    col=colorRampPalette(c(grey(0.9),"red",grey(0.6),"green"))(4), asp=1.0, 
+    main='differences between spread patterns under climate warming', legend=FALSE)
+  legend("topleft", legend=c('gain', 'no change', 'loss'), pch=15, col=c('green', grey(0.6), 'red') )
+```
+![kissmig2](R/Rplot94.jpeg)
+```r
+# 探索地理空间
+# example: 传播模式的大小=100:来自不同起源
+# remark: 运行得慢主要是因为绘制地图较慢
+
+  # 适宜性图和结果图
+  par(mfrow=c(1,1))
+  s <- kissmigDummyS(mean=14,sd=3)
+  plot(s, asp=1.0, main='simple climate suitability map')
+  res <- s>9999 # a map to store results
+
+  # 探索空间
+  par(mfrow=c(2,1))
+  for (y in (15:17)*2.5) {
+    for (x in (-4:11)*2.5) {
+      
+      # 定义起源并运行kissmig
+      o <- kissmigOrigin(s, x, y, 2.5)
+      k <- kissmig(o, s, type='FOC', it=100)
+      
+      # 保存扩散模式的大小(定植细胞的数量)  
+      # 在单元格或结果映射(res)的原始数据(origin)中
+      values(res)[values(o)==1] <- sum(values(k)>0)
+
+      # 除了面积，这里可以添加任何评估过程，例如SDM框架中的可访问性性能
+      
+      # 传播模式与结果图
+      plot(k*landMask, asp=1.0, main='spread pattern from single region')
+      plot(res*landMask, asp=1.0, main='size of spread pattern (number of colonized cells)')
+      
+    }
+  }
+
+# EOF - end of file
+```
