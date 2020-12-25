@@ -748,4 +748,29 @@ m8 <- lm(NBE ~ FDis, data = df)
 summary(m8)
 #Adjusted R-squared:  0.1768
 ```
-[返回目录](#%e7%94%9f%e7%89%a9%e4%bf%a1%e6%81%af%e5%ad%a6)
+## 系统发育背景下的比较研究
+当比较不同生物的多种性状之间的关系时，我们往往使用遗传距离和系统发育比较法（PCMs）：密切相关的生物由于从一个共同的祖先遗传而来，通常具有相似的特征，而跨生物体的性状的依赖性则可以通过性状-性状与性状-环境的关系来测试。在执行回归时，广义最小二乘法（GLS）可以控制观测值之间的相关性，GLS中残差（预测值和观测值之间的差值）是协变的，而协方差矩阵用于修改最小二乘计算：随机进化产生了近亲，由于他们在共同祖先中获得的共同变异，他们观察到的特征将是协变的。
+
+PCMs的第一步是根据无系统发育信号的零模型来估计和测试系统发育信号。Pagel的$\lambda$或Blomberg的$K$是系统发育信号的常用检验统计量。默认时，性状从进化树的祖先到树梢的分支是随机的，而加入进化后，两个物种性状值残差之间的协方差与共享进化史的数量成正比。
+
+## 系统发育回归
+基于phylolm包的系统发育回归，它提供拟合系统发育线性模型和系统发育广义线性模型的功能。计算使用了一种算法，该算法在树中的提示数上是线性的。该软件包还提供了模拟系统发育树上连续或二元性状的函数。
+```r
+#该函数将一个（单变量）性状拟合到系统发育树上
+OUshifts(y, phy, method = c("mbic", "aic", "bic", "saic", "sbic"))
+#进行系统发育广义线性回归
+phyloglm(formula, data, phy, method = c("logistic_MPLE", "logistic_IG10", "poisson_GEE"), btol = 10, log.alpha.bound = 4, boot = 0)
+#btol：（仅限逻辑回归）在线性预测值上绑定搜索范围
+#boot：进行bootstrap找范围
+phyloglmstep(formula,starting.formula = NULL, data = list(), phy, method = c("logistic_MPLE", "logistic_IG10"), direction = c("both", "backward", "forward"), trace = 2, btol = 10, boot = 0)
+#btol：在线性预测器上绑定搜索空间。
+#此函数使用树中提示数为线性的算法来计算可能性。误差项的可能系统发育模型有布朗运动模型（BM）、根的祖先状态估计的Ornstein-Uhlenbeck模型（OUfixedRoot）、根的祖先状态具有平稳分布的Ornstein-Uhlenbeck模型（OUrandomRoot）、Pagel的λ模型（lambda），Pagelκ模型（kappa）、Pagelδ模型（delta）、早期突发模型（EB）和具有趋势的布朗运动模型（trend）。
+phylolm(formula, data = list(), phy, model = c("BM", "OUrandomRoot", "OUfixedRoot", "lambda", "kappa", "delta", "EB", "trend"),lower.bound = NULL, upper.bound = NULL,starting.value = NULL, measurement_error = FALSE, boot=0,full.matrix = TRUE, ...)
+#它的模型选择为
+phylostep(formula, starting.formula = NULL, data = list(), phy, model = c("BM", "OUrandomRoot","OUfixedRoot", "lambda", "kappa", "delta", "EB", "trend"), direction = c("both", "backward", "forward"), trace = 2,lower.bound = NULL, upper.bound = NULL,starting.value = NULL, k=2, ...)
+#计算超度量树中所有内部节点的分支时间或年龄，这些节点的内部表示是按“修剪”顺序进行的。
+pruningwise.branching.times(phy)
+#计算从根到所有节点的距离，在一个内部表示为“修剪”顺序的树中。
+pruningwise.distFromRoot(phy)
+
+```
