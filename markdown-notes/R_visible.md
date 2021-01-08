@@ -309,3 +309,99 @@ graph2tif(x=x, file = filen, dpi = 400, height = 5)
 ## MuMIn包
 对回归模型进行模型比较必不可少的包
 [MuMIn包教程翻译](./MuMIn.html)
+### 绘制系统发育树
+设置路径、包、数据
+```r
+setwd('/Users/calice/desktop/pictree')
+library(picante)
+library(ape)
+library(vegan)
+library(permute)
+library(geiger)
+library(nlme)
+library(phytools)
+library(caper)
+library(rgl)
+#install.packages("plotrix")
+tree <- read.tree("Sampletree_1.tre")
+dat<- read.csv("Species with geographical range size and height for figure1_ordered.csv",head=T)
+head(dat)
+```
+准备一个来自张剑老师的函数
+```r
+tiplabels.New <- function (text, dist=1,tip, adj = c(0.5, 0.5), frame = "rect", pch = NULL, 
+    thermo = NULL, pie = NULL, piecol = NULL, col = "black", 
+    bg = "yellow", horiz = FALSE, width = NULL, height = NULL, 
+    ...){
+    lastPP <- get("last_plot.phylo", envir = .PlotPhyloEnv)
+    if (missing(tip)) 
+        tip <- 1:lastPP$Ntip
+    XX <- lastPP$xx[tip]/(sqrt(lastPP$xx[tip]^2 + lastPP$yy[tip]^2)) * dist + lastPP$xx[tip]
+    YY <- lastPP$yy[tip]/(sqrt(lastPP$xx[tip]^2 + lastPP$yy[tip]^2)) * dist + lastPP$yy[tip]
+    BOTHlabels(text, tip, XX, YY, adj, frame, pch, thermo, pie, 
+        piecol, col, bg, horiz, width, height, ...)
+}
+```
+绘制...线条？
+```r
+fami <- tree$tip.label
+pch.fami <- data.frame(fami = fami, cols1st=NA)
+for (i in 1:length(fami)){
+pch.fami$cols1st[which(pch.fami$fami==fami[i])] <- dat$ORDER_classification[which(dat$tip.lab==fami[i])]
+}
+
+pch.fami$cols1st[which(pch.fami$cols1st=="A")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="B")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="C")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="D")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="E")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="F")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="G")] <- "black"
+pch.fami$cols1st[which(pch.fami$cols1st=="H")] <- "black"
+
+pch.fami$cols1st[which(pch.fami$cols1st=="NoPIC")] <- "white"
+# 清空变量
+rm(i,fami)
+```
+绘制...边缘？
+```r
+edge.fami<- tree$edge[,2]
+   fami <- tree$tip.label 
+   edge.fami[which(edge.fami> length(fami))]= NA
+     for(i in 1:length(fami)){
+	 
+	 edge.fami[which(edge.fami==i)]<- dat$height_classification[which(dat$tip.lab==fami[i])]
+	 
+	 }
+	 
+edge.fami[which(is.na(edge.fami))]<- "black"
+
+edge.fami[which(edge.fami=="A")]<- colors()[29]
+edge.fami[which(edge.fami=="B")]<- colors()[564]
+edge.fami[which(edge.fami=="C")]<- colors()[590]
+edge.fami[which(edge.fami=="D")]<- colors()[410]
+edge.fami[which(edge.fami=="E")]<- colors()[622]
+edge.fami[which(edge.fami=="F")]<- colors()[632]
+edge.fami[which(edge.fami=="G")]<- colors()[504]
+edge.fami[which(edge.fami=="H")]<- colors()[555]
+edge.fami[which(edge.fami=="NoDATA")]<- "black"
+```
+
+绘制系统系统发育树
+```r
+#设置一个tiff图
+tiff(file="Tree_plant height.tif",width=200,height=200,units='mm',res=800,compression='lzw',pointsize=4)
+#绘制树并确定规格
+plot(tree,type="fan",show.tip.label=FALSE,edge.width=0.2, show.node.label=FALSE,edge.col=edge.fami)
+#tiplabels(cex=0.005,col=edge.fami)
+lastPP<- get("last_plot.phylo",envir=.PlotPhyloEnv)
+	
+add.scale.bar(x=min(lastPP$x.lim)+230,y=min(lastPP$y.lim)+180,cex=2.4,font=2.4,col="black",lwd=1.5,length=40,pos=4,offset=0.5)##offset is the distance betweeen legend and text
+legend(x=min(lastPP$x.lim)+390,y=min(lastPP$y.lim)+88,legend=c("< 0.2","0.2 - 0.5","0.5 - 1","1 - 2","2 - 5","5 - 10","10 - 20","20 - 40 ", "No data"),bty="n",lty=1,col=c("blue3","royalblue2","skyblue1","lightgoldenrod","tan2","tomato2","orangered1","red3","black"),cex=2.4,lwd=1.5)
+ 
+tiplabels.New(pch=22, dist=8,bg=pch.fami$cols1st, col=rgb(0,0,0,alpha=0) ,frame="none",cex = 1, adj=c(0,0)) # Use circles for the first (inner) la
+###设置透明度alpha非常重要
+
+dev.off()
+```
+![系统发育树](R/Rplot95.jpg)

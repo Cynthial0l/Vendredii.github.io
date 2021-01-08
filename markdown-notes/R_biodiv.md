@@ -772,5 +772,4 @@ phylostep(formula, starting.formula = NULL, data = list(), phy, model = c("BM", 
 pruningwise.branching.times(phy)
 #计算从根到所有节点的距离，在一个内部表示为“修剪”顺序的树中。
 pruningwise.distFromRoot(phy)
-
 ```
