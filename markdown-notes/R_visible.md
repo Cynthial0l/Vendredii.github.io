@@ -309,7 +309,7 @@ graph2tif(x=x, file = filen, dpi = 400, height = 5)
 ## MuMIn包
 对回归模型进行模型比较必不可少的包
 [MuMIn包教程翻译](./MuMIn.html)
-### 绘制系统发育树
+## 绘制系统发育树
 设置路径、包、数据
 ```r
 setwd('/Users/calice/desktop/pictree')
@@ -405,3 +405,103 @@ tiplabels.New(pch=22, dist=8,bg=pch.fami$cols1st, col=rgb(0,0,0,alpha=0) ,frame=
 dev.off()
 ```
 ![系统发育树](R/Rplot95.jpg)
+```r
+#对iucn进行chi卡方检验
+tableR <- matrix(c(1179, 651, 654, 672, 448, 454, 181, 215, 10,11), nrow = 2, ncol = 5)
+tableR
+#     [,1] [,2] [,3] [,4] [,5]
+#[1,] 1179  654  448  181   10
+#[2,]  651  672  454  215   11
+chisq.test(tableR)
+#
+#	Pearson's Chi-squared test
+#
+#data:  tableR
+#X-squared = 107.62, df = 4, p-value < 2.2e-16
+
+library(latex2exp)
+plot1 <- ggplot(growth, aes(x = iucn, y = ratio, fill = growth)) +
+#绘制箱型图
+geom_bar(stat='identity', position = position_dodge(), width = 0.6) +
+#在柱条上添加文字
+geom_text(aes(label = numbers, vjust = -0.5, hjust = 0.5), position = position_dodge(0.6), show.legend = TRUE) +
+#设置主题，移除背景色
+theme_classic() +
+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"), legend.position="none") +
+#设置y轴范围与名称
+scale_y_continuous(name = "Percentage of species", limits=c(0, 0.3)) +
+#设置x轴，\n为自动换行
+scale_x_discrete(name = "IUCN level", limits = c("Near-threated", "Vulnerable", "Endangered", "Extremely \n endangered", "Wild or regional \n extinction")) +
+#修改坐标轴字体大小
+theme(axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), axis.text=element_text(size=10)) +
+#把卡方检验的数值以TeX格式标注在表上
+annotate("text", x = 4, y = 0.25, label = TeX("$\\chi^2 = 107.62$, $\\mathit{p}$ $<$ $0.001$"), size = 4.5)
+```
+
+绘制箱型图1:
+```r
+leafratio <- read.csv("leafratio.csv", header = T)
+kruskal.test(data = leafratio, growth ~ leafratio)
+#
+#	Kruskal-Wallis rank sum test
+#
+#data:  growth by leafratio
+#Kruskal-Wallis chi-squared = 1540.4, df = 775, p-value < 2.2e-16
+plot2 <- ggplot(leafratio, aes(x = growth, y = leafratio)) +
+#绘制箱型图
+geom_boxplot(aes(fill = growth), width = 0.4) +
+#设置主题，移除背景色
+theme_classic() +
+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"), legend.position="none") +
+#设置y轴范围与名称
+scale_y_continuous(name = "Leaf ratio", limits=c(0, 20)) +
+#设置x轴，\n为自动换行
+scale_x_discrete(name = "Growth type", labels = c("Herb", "Woody")) +
+#修改坐标轴字体大小
+theme(axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), axis.text=element_text(size=10)) +
+#把卡方检验的数值以TeX格式标注在表上
+annotate("text", x = 1.5, y = 20, label = TeX("$\\chi^2 = 1540.4$"), size = 4.5) +
+annotate("text", x = 1.5, y = 17.8, label = TeX("$\\mathit{p}$ $<$ $0.000$"), size = 4.5)
+```
+绘制箱型图2:
+```r
+hfp <- read.csv("hfp.csv", header = T)
+kruskal.test(data = hfp, growth ~ hfp)
+#
+#	Kruskal-Wallis rank sum test
+#
+#data:  growth by hfp
+#Kruskal-Wallis chi-squared = 3638, df = 3459, p-value = 0.01681
+plot3 <- ggplot(hfp, aes(x = growth, y = hfp)) +
+#绘制箱型图
+#outlier.colour="red"修改离群点颜色, outlier.shape=8修改离群点形状, outlier.size=4修改离群点大小
+geom_boxplot(aes(fill = growth), width = 0.4) +
+#设置主题，移除背景色，关掉图例
+theme_classic() +
+theme(panel.border = element_blank(),panel.grid.major = element_blank(),panel.grid.minor = element_blank(),axis.line = element_line(colour = "black"), legend.position="none") +
+#设置y轴范围与名称
+scale_y_continuous(name = "Human footprint index", limits=c(0, 33)) +
+#设置x轴，\n为自动换行
+scale_x_discrete(name = "Growth type", labels = c("Herb", "Woody")) +
+#修改坐标轴字体大小
+theme(axis.title.x = element_text(size = 12), axis.title.y = element_text(size = 12), axis.text=element_text(size=10)) +
+#把卡方检验的数值以TeX格式标注在表上
+annotate("text", x = 1.5, y = 33, label = TeX("$\\chi^2 = 3638$"), size = 4.5) +
+annotate("text", x = 1.5, y = 29.5, label = TeX("\\mathit{p}$ $=$ $0.0168$"), size = 4.5)
+```
+将图片组合到一起:
+```r
+library(cowplot)
+#先把底下两张图做出来合成一张新图
+plot_grid(plot2,
+plot3,
+labels = c( 'b', 'c'),
+label_x = 0.2,
+ncol = 2) -> new_p1
+#然后把大图和新图上下拼接
+plot_grid(plot1,
+new_p1,
+labels = c('a'),
+label_x = 0.1,
+nrow = 2.5)
+```
