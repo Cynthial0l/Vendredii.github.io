@@ -220,6 +220,7 @@ dbmems
 平均海面叶绿素浓度(SSC):当前(mg/m3)
 平均海面钙含量(SSCa):当前(mol/m3)
 数据来源：http://www.bio-oracle.org
+具体asc数据也可以发邮件找我要
 加载环境
 ```r
 library(raster)
