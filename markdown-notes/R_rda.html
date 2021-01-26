@@ -265,7 +265,9 @@ pre[data-line] .line-highlight[data-end]:after {
 
 <p>&#x672C;&#x6559;&#x7A0B;&#x4F7F;&#x7528;&#x4E86;&#x5728;Evolutionary Applications<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/eva.12849">(Jenkins et al.&#xFF0C;2019)</a>&#x4E0A;&#x53D1;&#x8868;&#x7684;&#x6B27;&#x6D32;&#x9F99;&#x867E;&#xFF08;Homarus gammarus&#xFF09;&#x79CD;&#x7FA4;&#x9057;&#x4F20;&#x5B66;&#x7814;&#x7A76;&#x4E2D;&#x7684;&#x53CC;&#x7B49;&#x4F4D;&#x57FA;&#x56E0;SNP&#x57FA;&#x56E0;&#x578B;&#x6570;&#x636E;&#xFF0C;&#x6570;&#x636E;&#x53EF;&#x901A;&#x8FC7;&#x4EE5;&#x4E0B;&#x94FE;&#x63A5;<a href="https://doi.org/10.5061/dryad.2v1kr38">&#x4E0B;&#x8F7D;</a><br>
 &#x539F;&#x7248;&#x6559;&#x7A0B;&#x6765;&#x81EA;<a href="https://github.com/Tom-Jenkins/seascape_rda_tutorial">Tom-Jenkins</a><br>
-&#x672C;&#x6559;&#x7A0B;&#x4F7F;&#x7528;&#x7684;&#x76F8;&#x5173;R&#x73AF;&#x5883;&#x7684;&#x4E0B;&#x8F7D;&#x53EF;&#x4EE5;&#x524D;&#x5F80;<a href="https://github.com/Vendredii/Rstats/rda">&#x6211;&#x7684;github</a></p>
+&#x672C;&#x6559;&#x7A0B;&#x4F7F;&#x7528;&#x7684;&#x76F8;&#x5173;R&#x73AF;&#x5883;&#x7684;&#x4E0B;&#x8F7D;&#x53EF;&#x4EE5;&#x524D;&#x5F80;<a href="https://github.com/Vendredii/Rstats/rda">&#x6211;&#x7684;github</a><br>
+&#x5728;&#x4F7F;&#x7528;&#x672C;&#x6559;&#x6750;&#x8FDB;&#x884C;RDA&#x5B9E;&#x8DF5;&#x64CD;&#x4F5C;&#x53CA;&#x57FA;&#x4E8E;&#x6B64;&#x5229;&#x7528;RDA&#x65B9;&#x6CD5;&#x64B0;&#x5199;&#x8BBA;&#x6587;&#x65F6;&#xFF0C;&#x8BF7;&#x6309;&#x5982;&#x4E0B;&#x683C;&#x5F0F;&#x5F15;&#x7528;<a href="https://onlinelibrary.wiley.com/doi/full/10.1111/eva.12849">&#x8BE5;&#x6587;&#x732E;</a><br>
+Jenkins, T. L., Ellis, C. D., &amp; Stevens, J. R. (2019). SNP discovery in European lobster (Homarus gammarus) using RAD sequencing. <em>Conservation Genetics Resources</em>, 11, 253&#x2013; 257.</p>
 <ul>
 <li><a href="#%E5%9F%BA%E4%BA%8Er%E8%AF%AD%E8%A8%80%E7%9A%84%E5%86%97%E4%BD%99%E5%88%86%E6%9E%90rda">&#x57FA;&#x4E8E;R&#x8BED;&#x8A00;&#x7684;&#x5197;&#x4F59;&#x5206;&#x6790;&#xFF08;RDA&#xFF09;</a>
 <ul>
@@ -274,6 +276,13 @@ pre[data-line] .line-highlight[data-end]:after {
 <li><a href="#%E5%87%86%E5%A4%87%E9%81%97%E4%BC%A0%E5%AD%A6%E6%95%B0%E6%8D%AE">&#x51C6;&#x5907;&#x9057;&#x4F20;&#x5B66;&#x6570;&#x636E;</a></li>
 <li><a href="#%E5%87%86%E5%A4%87%E7%A9%BA%E9%97%B4%E6%95%B0%E6%8D%AE">&#x51C6;&#x5907;&#x7A7A;&#x95F4;&#x6570;&#x636E;</a></li>
 <li><a href="#%E5%87%86%E5%A4%87%E7%8E%AF%E5%A2%83%E6%95%B0%E6%8D%AE">&#x51C6;&#x5907;&#x73AF;&#x5883;&#x6570;&#x636E;</a></li>
+</ul>
+</li>
+<li><a href="#%E8%BF%9B%E8%A1%8C%E5%86%97%E4%BD%99%E5%88%86%E6%9E%90">&#x8FDB;&#x884C;&#x5197;&#x4F59;&#x5206;&#x6790;</a>
+<ul>
+<li><a href="#model-summaries">Model summaries</a></li>
+<li><a href="#rda%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96">RDA&#x7684;&#x53EF;&#x89C6;&#x5316;</a></li>
+<li><a href="#%E9%83%A8%E5%88%86%E5%86%97%E4%BD%99%E5%88%86%E6%9E%90">&#x90E8;&#x5206;&#x5197;&#x4F59;&#x5206;&#x6790;</a></li>
 </ul>
 </li>
 </ul>
@@ -639,7 +648,214 @@ fig <span class="token operator">=</span> ggarrange<span class="token punctuatio
 ggsave<span class="token punctuation">(</span><span class="token string">&quot;7.temp_sal_heatmap.png&quot;</span><span class="token punctuation">,</span> width <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">,</span> height <span class="token operator">=</span> <span class="token number">10</span><span class="token punctuation">,</span> dpi <span class="token operator">=</span> <span class="token number">600</span><span class="token punctuation">)</span>
 <span class="token comment"># ggsave(&quot;7.temp_sal_heatmap.pdf&quot;, width = 10, height = 10)</span>
 </pre><p><img src="Rmodel/Rplot21.png" alt="COM"></p>
+<h2 class="mume-header" id="%E8%BF%9B%E8%A1%8C%E5%86%97%E4%BD%99%E5%88%86%E6%9E%90">&#x8FDB;&#x884C;&#x5197;&#x4F59;&#x5206;&#x6790;</h2>
 
+<p>&#x52A0;&#x8F7D;&#x73AF;&#x5883;&#x4E0E;&#x6570;&#x636E;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">library<span class="token punctuation">(</span>tidyverse<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>psych<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>adespatial<span class="token punctuation">)</span>
+library<span class="token punctuation">(</span>vegan<span class="token punctuation">)</span>
+<span class="token comment"># &#x52A0;&#x8F7D;&#x57FA;&#x56E0;&#x6570;&#x636E;</span>
+allele_freqs <span class="token operator">=</span> read.csv<span class="token punctuation">(</span><span class="token string">&quot;allele_freqs.csv&quot;</span><span class="token punctuation">,</span> row.names <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> check.names <span class="token operator">=</span> <span class="token boolean">FALSE</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x52A0;&#x8F7D;&#x7A7A;&#x95F4;&#x6570;&#x636E;</span>
+dbmem.raw <span class="token operator">=</span> read.csv<span class="token punctuation">(</span><span class="token string">&quot;dbmems.csv&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x52A0;&#x8F7D;&#x73AF;&#x5883;&#x6570;&#x636E;</span>
+env.raw <span class="token operator">=</span> read.csv<span class="token punctuation">(</span><span class="token string">&quot;environmental_data.csv&quot;</span><span class="token punctuation">,</span> row.names <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x52A0;&#x8F7D;&#x968F;&#x673A;&#x79CD;&#x5B50;</span>
+set.seed<span class="token punctuation">(</span><span class="token number">123</span><span class="token punctuation">)</span>
+</pre><p>&#x591A;&#x91CD;&#x5171;&#x7EBF;&#x6027;&#x68C0;&#x9A8C;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># &#x5BF9;&#x73AF;&#x5883;&#x53D8;&#x91CF;&#x8FDB;&#x884C;&#x76F8;&#x5173;&#x68C0;&#x9A8C;</span>
+pairs.panels<span class="token punctuation">(</span>env.raw<span class="token punctuation">,</span> scale <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x79FB;&#x9664;&#x76F8;&#x5173;&#x6027;&#x5F3A;&#x7684;&#x53D8;&#x91CF;</span>
+env.data <span class="token operator">=</span> subset<span class="token punctuation">(</span>env.raw<span class="token punctuation">,</span> select <span class="token operator">=</span> <span class="token operator">-</span>c<span class="token punctuation">(</span>sst_mean<span class="token punctuation">,</span> sbs_mean<span class="token punctuation">)</span><span class="token punctuation">)</span>
+pairs.panels<span class="token punctuation">(</span>env.data<span class="token punctuation">,</span> scale <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+</pre><p><img src="Rmodel/Rplot22.jpeg" alt="cor"><br>
+&#x8BC6;&#x522B;&#x91CD;&#x8981;&#x53D8;&#x91CF;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># &#x4F7F;&#x7528;&#x524D;&#x5411;&#x9009;&#x62E9;&#x6765;&#x786E;&#x5B9A;&#x91CD;&#x8981;&#x7684;&#x73AF;&#x5883;&#x53D8;&#x91CF;</span>
+env.<span class="token keyword">for</span> <span class="token operator">=</span> forward.sel<span class="token punctuation">(</span>Y <span class="token operator">=</span> allele_freqs<span class="token punctuation">,</span> X <span class="token operator">=</span> env.data<span class="token punctuation">,</span> alpha <span class="token operator">=</span> <span class="token number">0.01</span><span class="token punctuation">)</span>
+env.<span class="token keyword">for</span>
+<span class="token comment">#  variables order         R2     R2Cum  AdjR2Cum         F pvalue</span>
+<span class="token comment"># 1  sbt_mean     1 0.31150411 0.3115041 0.2918328 15.835453  0.001</span>
+<span class="token comment"># 2  sss_mean     2 0.09469125 0.4061954 0.3712657  5.421821  0.001</span>
+<span class="token comment"># 3 ssca_mean     4 0.07470387 0.4808992 0.4337083  4.749035  0.005</span>
+<span class="token comment"># &#x4F7F;&#x7528;&#x524D;&#x5411;&#x9009;&#x62E9;&#x6765;&#x786E;&#x5B9A;&#x91CD;&#x8981;&#x7684;dbmems</span>
+dbmem.<span class="token keyword">for</span> <span class="token operator">=</span> forward.sel<span class="token punctuation">(</span>Y <span class="token operator">=</span> allele_freqs<span class="token punctuation">,</span> X <span class="token operator">=</span> dbmem.raw<span class="token punctuation">,</span> alpha <span class="token operator">=</span> <span class="token number">0.01</span><span class="token punctuation">)</span>
+dbmem.<span class="token keyword">for</span>
+<span class="token comment">#   variables order         R2     R2Cum  AdjR2Cum         F pvalue</span>
+<span class="token comment"># 1      MEM1     1 0.51661196 0.5166120 0.5028009 37.405598  0.001</span>
+<span class="token comment"># 2      MEM2     2 0.08518943 0.6018014 0.5783780  7.273860  0.001</span>
+<span class="token comment"># 3      MEM5     5 0.08000465 0.6818060 0.6528793  8.297309  0.001</span>
+<span class="token comment"># 4      MEM3     3 0.04720013 0.7290062 0.6951319  5.573574  0.001</span>
+<span class="token comment"># 5      MEM6     6 0.02189658 0.7509028 0.7107258  2.725016  0.010</span>
+</pre><p>&#x6211;&#x4EEC;&#x53EA;&#x5C06;&#x91CD;&#x8981;&#x7684;&#x81EA;&#x53D8;&#x91CF;&#x5B50;&#x96C6;&#x5305;&#x542B;&#x5728;RDA&#x4E2D;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">env.sig <span class="token operator">=</span> subset<span class="token punctuation">(</span>env.data<span class="token punctuation">,</span> select <span class="token operator">=</span> env.<span class="token keyword">for</span><span class="token operator">$</span>variables<span class="token punctuation">)</span>
+str<span class="token punctuation">(</span>env.sig<span class="token punctuation">)</span>
+dbmem.sig <span class="token operator">=</span> subset<span class="token punctuation">(</span>dbmem.raw<span class="token punctuation">,</span> select <span class="token operator">=</span> dbmem.<span class="token keyword">for</span><span class="token operator">$</span>variables<span class="token punctuation">)</span>
+str<span class="token punctuation">(</span>dbmem.sig<span class="token punctuation">)</span>
+<span class="token comment"># &#x7EC4;&#x5408;&#x8FD9;&#x4E9B;&#x53D8;&#x91CF;</span>
+env.dbmems <span class="token operator">=</span> cbind<span class="token punctuation">(</span>env.sig<span class="token punctuation">,</span> dbmem.sig<span class="token punctuation">)</span>
+str<span class="token punctuation">(</span>env.dbmems<span class="token punctuation">)</span>
+</pre><p>&#x8FDB;&#x884C;&#x5197;&#x4F59;&#x5206;&#x6790;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># &#x4E3A;&#x6240;&#x6709;&#x53D8;&#x91CF;&#x8FDB;&#x884C;&#x5197;&#x4F59;&#x5206;&#x6790;</span>
+rda1 <span class="token operator">=</span> rda<span class="token punctuation">(</span>allele_freqs <span class="token operator">~</span> .<span class="token punctuation">,</span> data <span class="token operator">=</span> env.dbmems<span class="token punctuation">,</span> scale <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+rda1
+<span class="token comment"># Call: rda(formula = allele_freqs ~ sbt_mean + sss_mean +</span>
+<span class="token comment"># ssca_mean + MEM1 + MEM2 + MEM5 + MEM3 + MEM6, data = env.dbmems,</span>
+<span class="token comment"># scale = TRUE)</span>
+
+<span class="token comment">#               Inertia Proportion Rank</span>
+<span class="token comment"># Total         79.0000     1.0000     </span>
+<span class="token comment"># Constrained   44.9918     0.5695    8</span>
+<span class="token comment"># Unconstrained 34.0082     0.4305   28</span>
+<span class="token comment"># Inertia is correlations </span>
+
+<span class="token comment"># Eigenvalues for constrained axes:</span>
+<span class="token comment">#   RDA1   RDA2   RDA3   RDA4   RDA5   RDA6   RDA7   RDA8 </span>
+<span class="token comment"># 22.319 10.537  3.837  2.995  2.540  1.194  0.966  0.604 </span>
+
+<span class="token comment"># Eigenvalues for unconstrained axes:</span>
+<span class="token comment">#   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8 </span>
+<span class="token comment"># 4.940 3.197 2.488 2.400 2.121 1.732 1.655 1.617 </span>
+<span class="token comment"># (Showing 8 of 28 unconstrained eigenvalues)</span>
+</pre><h3 class="mume-header" id="model-summaries">Model summaries</h3>
+
+<p>adjusted Rsquared</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">RsquareAdj<span class="token punctuation">(</span>rda1<span class="token punctuation">)</span>
+<span class="token comment"># $r.squared</span>
+<span class="token comment"># [1] 0.5695167</span>
+<span class="token comment"># $adj.r.squared</span>
+<span class="token comment"># [1] 0.4465215</span>
+</pre><p>&#x65B9;&#x5DEE;&#x81A8;&#x80C0;&#x56E0;&#x5B50;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># variance inflation factor (&lt;10 OK)</span>
+vif.cca<span class="token punctuation">(</span>rda1<span class="token punctuation">)</span>
+</pre><p>&#x5168;&#x6A21;&#x578B;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">anova.cca<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> permutations <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">)</span>
+<span class="token comment"># sbt_mean  sss_mean ssca_mean      MEM1      MEM2      MEM5      MEM3 </span>
+<span class="token comment">#  8.590561  1.791776  1.979065  7.012236  2.107733  1.105811  2.055020 </span>
+<span class="token comment">#      MEM6 </span>
+<span class="token comment">#  1.078194 </span>
+</pre><p>&#x6BCF;&#x4E2A;&#x53D8;&#x91CF;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">anova.cca<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> permutations <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">,</span> by<span class="token operator">=</span><span class="token string">&quot;margin&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># Permutation test for rda under reduced model</span>
+<span class="token comment"># Marginal effects of terms</span>
+<span class="token comment"># Permutation: free</span>
+<span class="token comment"># Number of permutations: 1000</span>
+
+<span class="token comment"># Model: rda(formula = allele_freqs ~ sbt_mean + sss_mean + ssca_mean + MEM1 + MEM2 + MEM5 + MEM3 + MEM6, data = env.dbmems, scale = TRUE)</span>
+<span class="token comment">#           Df Variance      F   Pr(&gt;F)    </span>
+<span class="token comment"># sbt_mean   1    0.913 0.7513 0.662338    </span>
+<span class="token comment"># sss_mean   1    1.868 1.5381 0.125874    </span>
+<span class="token comment"># ssca_mean  1    1.948 1.6040 0.082917 .  </span>
+<span class="token comment"># MEM1       1    4.059 3.3418 0.001998 ** </span>
+<span class="token comment"># MEM2       1    1.771 1.4579 0.182817    </span>
+<span class="token comment"># MEM5       1    7.091 5.8379 0.000999 ***</span>
+<span class="token comment"># MEM3       1    1.814 1.4934 0.102897    </span>
+<span class="token comment"># MEM6       1    2.973 2.4479 0.038961 *  </span>
+<span class="token comment"># Residual  28   34.008                    </span>
+<span class="token comment"># ---</span>
+<span class="token comment"># Signif. codes:  0 &#x2018;***&#x2019; 0.001 &#x2018;**&#x2019; 0.01 &#x2018;*&#x2019; 0.05 &#x2018;.&#x2019; 0.1 &#x2018; &#x2019; 1</span>
+</pre><p>&#x6BCF;&#x4E2A;&#x6807;&#x51C6;&#x8F74;&#x7684;&#x89E3;&#x91CA;&#x65B9;&#x5DEE;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">summary<span class="token punctuation">(</span>eigenvals<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> model <span class="token operator">=</span> <span class="token string">&quot;constrained&quot;</span><span class="token punctuation">)</span><span class="token punctuation">)</span>
+screeplot<span class="token punctuation">(</span>rda1<span class="token punctuation">)</span>
+</pre><p><img src="Rmodel/Rplot23.jpeg" alt="rda1"></p>
+<h3 class="mume-header" id="rda%E7%9A%84%E5%8F%AF%E8%A7%86%E5%8C%96">RDA&#x7684;&#x53EF;&#x89C6;&#x5316;</h3>
+
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># &#x521B;&#x5EFA;&#x4E00;&#x4E2A;&#x6570;&#x636E;&#x6846;&#x6765;&#x6B63;&#x786E;&#x5730;&#x4E3A;&#x533A;&#x57DF;&#x7740;&#x8272;</span>
+col_dframe <span class="token operator">=</span> data.frame<span class="token punctuation">(</span><span class="token string">&quot;site&quot;</span> <span class="token operator">=</span> rownames<span class="token punctuation">(</span>allele_freqs<span class="token punctuation">)</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x4E00;&#x4E2A;&#x51FD;&#x6570;&#x5C06;&#x533A;&#x57DF;&#x6807;&#x7B7E;&#x6DFB;&#x52A0;&#x5230;&#x6570;&#x636E;&#x5E27;</span>
+addregion <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>x<span class="token punctuation">)</span><span class="token punctuation">{</span>
+  <span class="token comment"># If pop label is present function will output the region</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">==</span><span class="token string">&quot;Ale&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;The&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Tor&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Sky&quot;</span><span class="token punctuation">)</span> y <span class="token operator">=</span> <span class="token string">&quot;Aegean Sea&quot;</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">==</span><span class="token string">&quot;Sar&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Laz&quot;</span><span class="token punctuation">)</span> y <span class="token operator">=</span> <span class="token string">&quot;Central Mediterranean&quot;</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">==</span><span class="token string">&quot;Vig&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Brd&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Cro&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Eye&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Heb&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Iom&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Ios&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Loo&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Lyn&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Ork&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Pad&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Pem&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;She&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Sbs&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Sul&quot;</span><span class="token punctuation">)</span> y <span class="token operator">=</span> <span class="token string">&quot;Atlantic&quot;</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">==</span><span class="token string">&quot;Jer&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Idr&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Cor&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Hoo&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Kil&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Mul&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Ven&quot;</span><span class="token punctuation">)</span> y <span class="token operator">=</span> <span class="token string">&quot;Atlantic&quot;</span>
+  <span class="token keyword">if</span><span class="token punctuation">(</span>x<span class="token operator">==</span><span class="token string">&quot;Hel&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Oos&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Tro&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Ber&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Flo&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Sin&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Gul&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Kav&quot;</span><span class="token operator">|</span>x<span class="token operator">==</span><span class="token string">&quot;Lys&quot;</span><span class="token punctuation">)</span> y <span class="token operator">=</span> <span class="token string">&quot;Scandinavia&quot;</span>
+  return<span class="token punctuation">(</span>y<span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+<span class="token comment"># &#x589E;&#x52A0;&#x533A;&#x57DF;&#x6807;&#x8BB0;</span>
+col_dframe<span class="token operator">$</span>region <span class="token operator">=</span> sapply<span class="token punctuation">(</span>col_dframe<span class="token operator">$</span>site<span class="token punctuation">,</span> addregion<span class="token punctuation">)</span>
+<span class="token comment"># &#x589E;&#x52A0;&#x56E0;&#x5B50;&#x6C34;&#x5E73;</span>
+region_order <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&quot;Scandinavia&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;Atlantic&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;Central Mediterranean&quot;</span><span class="token punctuation">,</span> <span class="token string">&quot;Aegean Sea&quot;</span><span class="token punctuation">)</span>
+col_dframe<span class="token operator">$</span>region <span class="token operator">=</span> factor<span class="token punctuation">(</span>col_dframe<span class="token operator">$</span>region<span class="token punctuation">,</span> levels <span class="token operator">=</span> region_order<span class="token punctuation">)</span>
+<span class="token comment"># &#x521B;&#x5EFA;&#x8C03;&#x8272;&#x677F;</span>
+<span class="token comment"># blue=#377EB8, green=#7FC97F, orange=#FDB462, red=#E31A1C</span>
+cols <span class="token operator">=</span> c<span class="token punctuation">(</span><span class="token string">&quot;#7FC97F&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;#377EB8&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;#FDB462&quot;</span><span class="token punctuation">,</span><span class="token string">&quot;#E31A1C&quot;</span><span class="token punctuation">)</span>
+</pre><p>RDA&#x7684;&#x53EF;&#x89C6;&#x5316;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">png<span class="token punctuation">(</span><span class="token string">&quot;rda.png&quot;</span><span class="token punctuation">,</span> width <span class="token operator">=</span> <span class="token number">8</span><span class="token punctuation">,</span> height <span class="token operator">=</span> <span class="token number">7</span><span class="token punctuation">,</span> units <span class="token operator">=</span> <span class="token string">&quot;in&quot;</span><span class="token punctuation">,</span> res <span class="token operator">=</span> <span class="token number">600</span><span class="token punctuation">)</span>
+plot<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> type<span class="token operator">=</span><span class="token string">&quot;n&quot;</span><span class="token punctuation">,</span> scaling <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">)</span>
+title<span class="token punctuation">(</span><span class="token string">&quot;Seascape redundancy analysis&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># SITES</span>
+points<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> display<span class="token operator">=</span><span class="token string">&quot;sites&quot;</span><span class="token punctuation">,</span> pch<span class="token operator">=</span><span class="token number">21</span><span class="token punctuation">,</span> scaling<span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1.5</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span>
+       bg<span class="token operator">=</span>cols<span class="token punctuation">[</span>col_dframe<span class="token operator">$</span>region<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># sites</span>
+<span class="token comment"># text(rda1, display=&quot;sites&quot;, scaling = 3, col=&quot;black&quot;, font=2, pos=4)</span>
+<span class="token comment"># PREDICTORS</span>
+text<span class="token punctuation">(</span>rda1<span class="token punctuation">,</span> display<span class="token operator">=</span><span class="token string">&quot;bp&quot;</span><span class="token punctuation">,</span> scaling<span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;red1&quot;</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> lwd<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token comment"># SNPS</span>
+<span class="token comment"># text(rda1, display=&quot;species&quot;, scaling = 3, col=&quot;blue&quot;, cex=0.7, pos=4) # SNPs</span>
+<span class="token comment"># LEGEND</span>
+legend<span class="token punctuation">(</span><span class="token string">&quot;bottomleft&quot;</span><span class="token punctuation">,</span> legend<span class="token operator">=</span>levels<span class="token punctuation">(</span>col_dframe<span class="token operator">$</span>region<span class="token punctuation">)</span><span class="token punctuation">,</span> bty<span class="token operator">=</span><span class="token string">&quot;n&quot;</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span>
+       pch<span class="token operator">=</span><span class="token number">21</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1.2</span><span class="token punctuation">,</span> pt.bg<span class="token operator">=</span>cols<span class="token punctuation">)</span>
+<span class="token comment"># OTHER LABELS</span>
+adj.R2 <span class="token operator">=</span> round<span class="token punctuation">(</span>RsquareAdj<span class="token punctuation">(</span>rda1<span class="token punctuation">)</span><span class="token operator">$</span>adj.r.squared<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+mtext<span class="token punctuation">(</span>bquote<span class="token punctuation">(</span>italic<span class="token punctuation">(</span><span class="token string">&quot;R&quot;</span><span class="token punctuation">)</span><span class="token operator">^</span><span class="token string">&quot;2&quot;</span><span class="token operator">~</span><span class="token string">&quot;= &quot;</span><span class="token operator">~</span>.<span class="token punctuation">(</span>adj.R2<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> side <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">,</span> adj <span class="token operator">=</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+dev.off<span class="token punctuation">(</span><span class="token punctuation">)</span>
+</pre><p><img src="Rmodel/Rplot24.png" alt="rda2"></p>
+<h3 class="mume-header" id="%E9%83%A8%E5%88%86%E5%86%97%E4%BD%99%E5%88%86%E6%9E%90">&#x90E8;&#x5206;&#x5197;&#x4F59;&#x5206;&#x6790;</h3>
+
+<p>Partial redundancy analysis<br>
+&#x5728;&#x63A7;&#x5236;&#x5730;&#x7406;&#x4F4D;&#x7F6E;&#x7684;&#x540C;&#x65F6;&#x6267;&#x884C;RDA</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">pRDA <span class="token operator">=</span> rda<span class="token punctuation">(</span>allele_freqs <span class="token operator">~</span> sbt_mean <span class="token operator">+</span> sss_mean <span class="token operator">+</span> ssca_mean <span class="token operator">+</span> Condition<span class="token punctuation">(</span>MEM1<span class="token operator">+</span>MEM2<span class="token operator">+</span>MEM3<span class="token operator">+</span>MEM5<span class="token punctuation">)</span><span class="token punctuation">,</span>
+           data <span class="token operator">=</span> env.dbmems<span class="token punctuation">,</span> scale <span class="token operator">=</span> <span class="token boolean">TRUE</span><span class="token punctuation">)</span>
+pRDA
+RsquareAdj<span class="token punctuation">(</span>pRDA<span class="token punctuation">)</span> <span class="token comment"># adjusted Rsquared </span>
+vif.cca<span class="token punctuation">(</span>pRDA<span class="token punctuation">)</span> <span class="token comment"># variance inflation factor (&lt;10 OK)</span>
+anova.cca<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> permutations <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">)</span> <span class="token comment"># full model</span>
+anova.cca<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> permutations <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">,</span> by <span class="token operator">=</span> <span class="token string">&quot;margin&quot;</span><span class="token punctuation">)</span> <span class="token comment"># per variable</span>
+</pre><p>&#x53EF;&#x89C6;&#x5316;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r">png<span class="token punctuation">(</span><span class="token string">&quot;partial_rda.png&quot;</span><span class="token punctuation">,</span> width <span class="token operator">=</span> <span class="token number">9</span><span class="token punctuation">,</span> height <span class="token operator">=</span> <span class="token number">7</span><span class="token punctuation">,</span> units <span class="token operator">=</span> <span class="token string">&quot;in&quot;</span><span class="token punctuation">,</span> res <span class="token operator">=</span> <span class="token number">600</span><span class="token punctuation">)</span>
+plot<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> type<span class="token operator">=</span><span class="token string">&quot;n&quot;</span><span class="token punctuation">,</span> scaling <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">)</span>
+title<span class="token punctuation">(</span><span class="token string">&quot;Seascape partial redundancy analysis&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># SITES</span>
+points<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> display<span class="token operator">=</span><span class="token string">&quot;sites&quot;</span><span class="token punctuation">,</span> pch<span class="token operator">=</span><span class="token number">21</span><span class="token punctuation">,</span> scaling<span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1.5</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span>
+       bg<span class="token operator">=</span>cols<span class="token punctuation">[</span>col_dframe<span class="token operator">$</span>region<span class="token punctuation">]</span><span class="token punctuation">)</span> <span class="token comment"># sites</span>
+text<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> display<span class="token operator">=</span><span class="token string">&quot;sites&quot;</span><span class="token punctuation">,</span> scaling <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span> font<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">,</span> pos<span class="token operator">=</span><span class="token number">4</span><span class="token punctuation">)</span>
+<span class="token comment"># PREDICTORS</span>
+text<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> display<span class="token operator">=</span><span class="token string">&quot;bp&quot;</span><span class="token punctuation">,</span> scaling<span class="token operator">=</span><span class="token number">3</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;red1&quot;</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1</span><span class="token punctuation">,</span> lwd<span class="token operator">=</span><span class="token number">2</span><span class="token punctuation">)</span>
+<span class="token comment"># SNPS</span>
+<span class="token comment"># text(pRDA, display=&quot;species&quot;, scaling = 3, col=&quot;blue&quot;, cex=0.7, pos=4) # SNPs</span>
+<span class="token comment"># LEGEND</span>
+legend<span class="token punctuation">(</span><span class="token string">&quot;topleft&quot;</span><span class="token punctuation">,</span> legend<span class="token operator">=</span>levels<span class="token punctuation">(</span>col_dframe<span class="token operator">$</span>region<span class="token punctuation">)</span><span class="token punctuation">,</span> bty<span class="token operator">=</span><span class="token string">&quot;n&quot;</span><span class="token punctuation">,</span> col<span class="token operator">=</span><span class="token string">&quot;black&quot;</span><span class="token punctuation">,</span>
+       pch<span class="token operator">=</span><span class="token number">21</span><span class="token punctuation">,</span> cex<span class="token operator">=</span><span class="token number">1.2</span><span class="token punctuation">,</span> pt.bg<span class="token operator">=</span>cols<span class="token punctuation">)</span>
+<span class="token comment"># OTHER LABELS</span>
+adj.R2 <span class="token operator">=</span> round<span class="token punctuation">(</span>RsquareAdj<span class="token punctuation">(</span>pRDA<span class="token punctuation">)</span><span class="token operator">$</span>adj.r.squared<span class="token punctuation">,</span> <span class="token number">3</span><span class="token punctuation">)</span>
+mtext<span class="token punctuation">(</span>bquote<span class="token punctuation">(</span>italic<span class="token punctuation">(</span><span class="token string">&quot;R&quot;</span><span class="token punctuation">)</span><span class="token operator">^</span><span class="token string">&quot;2&quot;</span><span class="token operator">~</span><span class="token string">&quot;= &quot;</span><span class="token operator">~</span>.<span class="token punctuation">(</span>adj.R2<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">,</span> side <span class="token operator">=</span> <span class="token number">3</span><span class="token punctuation">,</span> adj <span class="token operator">=</span> <span class="token number">0.5</span><span class="token punctuation">)</span>
+dev.off<span class="token punctuation">(</span><span class="token punctuation">)</span>
+</pre><p><img src="Rmodel/Rplot25.png" alt="rda3"><br>
+Candidate SNPs for local adaptation&#xFF1F;<br>
+&#x8003;&#x5BDF;&#x5019;&#x9009;&#x6838;&#x82F7;&#x9178;&#x591A;&#x6001;&#x6027;&#x548C;&#x5F53;&#x5730;&#x9002;&#x5B9C;&#x6027;&#x7684;&#x5173;&#x7CFB;</p>
+<pre data-role="codeBlock" data-info="r" class="language-r"><span class="token comment"># &#x5728;&#x56FE;&#x4E2D;&#xFF0C;&#x54EA;&#x4E2A;&#x8F74;&#x6BD4;&#x8F83;&#x91CD;&#x8981;&#x5462;&#xFF1F;</span>
+anova.cca<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> permutations <span class="token operator">=</span> <span class="token number">1000</span><span class="token punctuation">,</span> by <span class="token operator">=</span> <span class="token string">&quot;axis&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x63D0;&#x53D6;&#x5E26;&#x663E;&#x8457;&#x6027;&#x7684;SNP&#x7684;&#x8F7D;&#x8377;&#x8F74;</span>
+snp.load <span class="token operator">=</span> scores<span class="token punctuation">(</span>pRDA<span class="token punctuation">,</span> choices <span class="token operator">=</span> <span class="token number">1</span><span class="token punctuation">,</span> display <span class="token operator">=</span> <span class="token string">&quot;species&quot;</span><span class="token punctuation">)</span>
+<span class="token comment"># &#x7ED8;&#x5236;SNP&#x8F7D;&#x8377;&#x76F4;&#x65B9;&#x56FE;</span>
+hist<span class="token punctuation">(</span>snp.load<span class="token punctuation">,</span> main <span class="token operator">=</span> <span class="token string">&quot;SNP loadings on RDA1&quot;</span><span class="token punctuation">)</span>
+</pre><p><img src="Rmodel/Rplot26.jpeg" alt="rda4"><br>
+&#x786E;&#x5B9A;&#x5206;&#x5E03;&#x5C3E;&#x90E8;&#x7684;SNP<br>
+Function from <a href="https://popgen.nescent.org/2018-03-27_RDA_GEA.html">https://popgen.nescent.org/2018-03-27_RDA_GEA.html</a></p>
+<pre data-role="codeBlock" data-info="r" class="language-r">outliers <span class="token operator">=</span> <span class="token keyword">function</span><span class="token punctuation">(</span>x<span class="token punctuation">,</span>z<span class="token punctuation">)</span><span class="token punctuation">{</span>
+  lims <span class="token operator">=</span> mean<span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token operator">+</span> c<span class="token punctuation">(</span><span class="token operator">-</span><span class="token number">1</span><span class="token punctuation">,</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token operator">*</span> z <span class="token operator">*</span> sd<span class="token punctuation">(</span>x<span class="token punctuation">)</span> <span class="token comment"># find loadings +/-z sd from mean loading     </span>
+  x<span class="token punctuation">[</span>x <span class="token operator">&lt;</span> lims<span class="token punctuation">[</span><span class="token number">1</span><span class="token punctuation">]</span> <span class="token operator">|</span> x <span class="token operator">&gt;</span> lims<span class="token punctuation">[</span><span class="token number">2</span><span class="token punctuation">]</span><span class="token punctuation">]</span>          <span class="token comment"># locus names in these tails</span>
+<span class="token punctuation">}</span>
+<span class="token comment"># x = loadings vector, z = number of standard deviations to use</span>
+candidates <span class="token operator">=</span> outliers<span class="token punctuation">(</span>x <span class="token operator">=</span> snp.load<span class="token punctuation">,</span> z <span class="token operator">=</span> <span class="token number">2.5</span><span class="token punctuation">)</span>
+ Convert matric to dataframe
+snp.load.df <span class="token operator">=</span> snp.load <span class="token percent-operator operator">%&gt;%</span> as.data.frame
+snp.load.df<span class="token operator">$</span>SNP_ID <span class="token operator">=</span> rownames<span class="token punctuation">(</span>snp.load.df<span class="token punctuation">)</span>
+str<span class="token punctuation">(</span>snp.load.df<span class="token punctuation">)</span>
+
+<span class="token comment"># Extract locus ID</span>
+snp.load.df <span class="token percent-operator operator">%&gt;%</span> dplyr<span class="token operator">::</span>filter<span class="token punctuation">(</span>RDA1 <span class="token percent-operator operator">%in%</span> candidates<span class="token punctuation">)</span>
+</pre>
       </div>
       
       

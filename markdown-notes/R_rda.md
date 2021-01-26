@@ -2,6 +2,8 @@
 本教程使用了在Evolutionary Applications[(Jenkins et al.，2019)](https://onlinelibrary.wiley.com/doi/full/10.1111/eva.12849)上发表的欧洲龙虾（Homarus gammarus）种群遗传学研究中的双等位基因SNP基因型数据，数据可通过以下链接[下载](https://doi.org/10.5061/dryad.2v1kr38)
 原版教程来自[Tom-Jenkins](https://github.com/Tom-Jenkins/seascape_rda_tutorial)
 本教程使用的相关R环境的下载可以前往[我的github](https://github.com/Vendredii/Rstats/rda)
+在使用本教材进行RDA实践操作及基于此利用RDA方法撰写论文时，请按如下格式引用[该文献](https://onlinelibrary.wiley.com/doi/full/10.1111/eva.12849)
+Jenkins, T. L., Ellis, C. D., & Stevens, J. R. (2019). SNP discovery in European lobster (Homarus gammarus) using RAD sequencing. *Conservation Genetics Resources*, 11, 253– 257.
 [TOC]
 ## 数据准备
 ### 准备遗传学数据
@@ -406,7 +408,240 @@ ggsave("7.temp_sal_heatmap.png", width = 10, height = 10, dpi = 600)
 # ggsave("7.temp_sal_heatmap.pdf", width = 10, height = 10)
 ```
 ![COM](Rmodel/Rplot21.png)
+## 进行冗余分析
+加载环境与数据
+```r
+library(tidyverse)
+library(psych)
+library(adespatial)
+library(vegan)
+# 加载基因数据
+allele_freqs = read.csv("allele_freqs.csv", row.names = 1, check.names = FALSE)
+# 加载空间数据
+dbmem.raw = read.csv("dbmems.csv")
+# 加载环境数据
+env.raw = read.csv("environmental_data.csv", row.names = 1)
+# 加载随机种子
+set.seed(123)
+```
+多重共线性检验
+```r
+# 对环境变量进行相关检验
+pairs.panels(env.raw, scale = TRUE)
+# 移除相关性强的变量
+env.data = subset(env.raw, select = -c(sst_mean, sbs_mean))
+pairs.panels(env.data, scale = TRUE)
+```
+![cor](Rmodel/Rplot22.jpeg)
+识别重要变量
+```r
+# 使用前向选择来确定重要的环境变量
+env.for = forward.sel(Y = allele_freqs, X = env.data, alpha = 0.01)
+env.for
+#  variables order         R2     R2Cum  AdjR2Cum         F pvalue
+# 1  sbt_mean     1 0.31150411 0.3115041 0.2918328 15.835453  0.001
+# 2  sss_mean     2 0.09469125 0.4061954 0.3712657  5.421821  0.001
+# 3 ssca_mean     4 0.07470387 0.4808992 0.4337083  4.749035  0.005
+# 使用前向选择来确定重要的dbmems
+dbmem.for = forward.sel(Y = allele_freqs, X = dbmem.raw, alpha = 0.01)
+dbmem.for
+#   variables order         R2     R2Cum  AdjR2Cum         F pvalue
+# 1      MEM1     1 0.51661196 0.5166120 0.5028009 37.405598  0.001
+# 2      MEM2     2 0.08518943 0.6018014 0.5783780  7.273860  0.001
+# 3      MEM5     5 0.08000465 0.6818060 0.6528793  8.297309  0.001
+# 4      MEM3     3 0.04720013 0.7290062 0.6951319  5.573574  0.001
+# 5      MEM6     6 0.02189658 0.7509028 0.7107258  2.725016  0.010
+```
+我们只将重要的自变量子集包含在RDA中
+```r
+env.sig = subset(env.data, select = env.for$variables)
+str(env.sig)
+dbmem.sig = subset(dbmem.raw, select = dbmem.for$variables)
+str(dbmem.sig)
+# 组合这些变量
+env.dbmems = cbind(env.sig, dbmem.sig)
+str(env.dbmems)
+```
+进行冗余分析
+```r
+# 为所有变量进行冗余分析
+rda1 = rda(allele_freqs ~ ., data = env.dbmems, scale = TRUE)
+rda1
+# Call: rda(formula = allele_freqs ~ sbt_mean + sss_mean +
+# ssca_mean + MEM1 + MEM2 + MEM5 + MEM3 + MEM6, data = env.dbmems,
+# scale = TRUE)
 
+#               Inertia Proportion Rank
+# Total         79.0000     1.0000     
+# Constrained   44.9918     0.5695    8
+# Unconstrained 34.0082     0.4305   28
+# Inertia is correlations 
 
+# Eigenvalues for constrained axes:
+#   RDA1   RDA2   RDA3   RDA4   RDA5   RDA6   RDA7   RDA8 
+# 22.319 10.537  3.837  2.995  2.540  1.194  0.966  0.604 
+
+# Eigenvalues for unconstrained axes:
+#   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8 
+# 4.940 3.197 2.488 2.400 2.121 1.732 1.655 1.617 
+# (Showing 8 of 28 unconstrained eigenvalues)
+```
+### Model summaries
+adjusted Rsquared 
+```r
+RsquareAdj(rda1)
+# $r.squared
+# [1] 0.5695167
+# $adj.r.squared
+# [1] 0.4465215
+```
+方差膨胀因子
+```r
+# variance inflation factor (<10 OK)
+vif.cca(rda1)
+```
+全模型
+```r
+anova.cca(rda1, permutations = 1000)
+# sbt_mean  sss_mean ssca_mean      MEM1      MEM2      MEM5      MEM3 
+#  8.590561  1.791776  1.979065  7.012236  2.107733  1.105811  2.055020 
+#      MEM6 
+#  1.078194 
+```
+每个变量
+```r
+anova.cca(rda1, permutations = 1000, by="margin")
+# Permutation test for rda under reduced model
+# Marginal effects of terms
+# Permutation: free
+# Number of permutations: 1000
+
+# Model: rda(formula = allele_freqs ~ sbt_mean + sss_mean + ssca_mean + MEM1 + MEM2 + MEM5 + MEM3 + MEM6, data = env.dbmems, scale = TRUE)
+#           Df Variance      F   Pr(>F)    
+# sbt_mean   1    0.913 0.7513 0.662338    
+# sss_mean   1    1.868 1.5381 0.125874    
+# ssca_mean  1    1.948 1.6040 0.082917 .  
+# MEM1       1    4.059 3.3418 0.001998 ** 
+# MEM2       1    1.771 1.4579 0.182817    
+# MEM5       1    7.091 5.8379 0.000999 ***
+# MEM3       1    1.814 1.4934 0.102897    
+# MEM6       1    2.973 2.4479 0.038961 *  
+# Residual  28   34.008                    
+# ---
+# Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+每个标准轴的解释方差
+```r
+summary(eigenvals(rda1, model = "constrained"))
+screeplot(rda1)
+```
+![rda1](Rmodel/Rplot23.jpeg)
+### RDA的可视化
+```r
+# 创建一个数据框来正确地为区域着色
+col_dframe = data.frame("site" = rownames(allele_freqs))
+# 一个函数将区域标签添加到数据帧
+addregion = function(x){
+  # If pop label is present function will output the region
+  if(x=="Ale"|x=="The"|x=="Tor"|x=="Sky") y = "Aegean Sea"
+  if(x=="Sar"|x=="Laz") y = "Central Mediterranean"
+  if(x=="Vig"|x=="Brd"|x=="Cro"|x=="Eye"|x=="Heb"|x=="Iom"|x=="Ios"|x=="Loo"|x=="Lyn"|x=="Ork"|x=="Pad"|x=="Pem"|x=="She"|x=="Sbs"|x=="Sul") y = "Atlantic"
+  if(x=="Jer"|x=="Idr"|x=="Cor"|x=="Hoo"|x=="Kil"|x=="Mul"|x=="Ven") y = "Atlantic"
+  if(x=="Hel"|x=="Oos"|x=="Tro"|x=="Ber"|x=="Flo"|x=="Sin"|x=="Gul"|x=="Kav"|x=="Lys") y = "Scandinavia"
+  return(y)
+}
+# 增加区域标记
+col_dframe$region = sapply(col_dframe$site, addregion)
+# 增加因子水平
+region_order = c("Scandinavia","Atlantic","Central Mediterranean", "Aegean Sea")
+col_dframe$region = factor(col_dframe$region, levels = region_order)
+# 创建调色板
+# blue=#377EB8, green=#7FC97F, orange=#FDB462, red=#E31A1C
+cols = c("#7FC97F","#377EB8","#FDB462","#E31A1C")
+```
+RDA的可视化
+```r
+png("rda.png", width = 8, height = 7, units = "in", res = 600)
+plot(rda1, type="n", scaling = 3)
+title("Seascape redundancy analysis")
+# SITES
+points(rda1, display="sites", pch=21, scaling=3, cex=1.5, col="black",
+       bg=cols[col_dframe$region]) # sites
+# text(rda1, display="sites", scaling = 3, col="black", font=2, pos=4)
+# PREDICTORS
+text(rda1, display="bp", scaling=3, col="red1", cex=1, lwd=2)
+# SNPS
+# text(rda1, display="species", scaling = 3, col="blue", cex=0.7, pos=4) # SNPs
+# LEGEND
+legend("bottomleft", legend=levels(col_dframe$region), bty="n", col="black",
+       pch=21, cex=1.2, pt.bg=cols)
+# OTHER LABELS
+adj.R2 = round(RsquareAdj(rda1)$adj.r.squared, 3)
+mtext(bquote(italic("R")^"2"~"= "~.(adj.R2)), side = 3, adj = 0.5)
+dev.off()
+```
+![rda2](Rmodel/Rplot24.png)
+### 部分冗余分析
+Partial redundancy analysis
+在控制地理位置的同时执行RDA
+```r
+pRDA = rda(allele_freqs ~ sbt_mean + sss_mean + ssca_mean + Condition(MEM1+MEM2+MEM3+MEM5),
+           data = env.dbmems, scale = TRUE)
+pRDA
+RsquareAdj(pRDA) # adjusted Rsquared 
+vif.cca(pRDA) # variance inflation factor (<10 OK)
+anova.cca(pRDA, permutations = 1000) # full model
+anova.cca(pRDA, permutations = 1000, by = "margin") # per variable
+```
+可视化
+```r
+png("partial_rda.png", width = 9, height = 7, units = "in", res = 600)
+plot(pRDA, type="n", scaling = 3)
+title("Seascape partial redundancy analysis")
+# SITES
+points(pRDA, display="sites", pch=21, scaling=3, cex=1.5, col="black",
+       bg=cols[col_dframe$region]) # sites
+text(pRDA, display="sites", scaling = 3, col="black", font=2, pos=4)
+# PREDICTORS
+text(pRDA, display="bp", scaling=3, col="red1", cex=1, lwd=2)
+# SNPS
+# text(pRDA, display="species", scaling = 3, col="blue", cex=0.7, pos=4) # SNPs
+# LEGEND
+legend("topleft", legend=levels(col_dframe$region), bty="n", col="black",
+       pch=21, cex=1.2, pt.bg=cols)
+# OTHER LABELS
+adj.R2 = round(RsquareAdj(pRDA)$adj.r.squared, 3)
+mtext(bquote(italic("R")^"2"~"= "~.(adj.R2)), side = 3, adj = 0.5)
+dev.off()
+```
+![rda3](Rmodel/Rplot25.png)
+Candidate SNPs for local adaptation？
+考察候选核苷酸多态性和当地适宜性的关系
+```r
+# 在图中，哪个轴比较重要呢？
+anova.cca(pRDA, permutations = 1000, by = "axis")
+# 提取带显著性的SNP的载荷轴
+snp.load = scores(pRDA, choices = 1, display = "species")
+# 绘制SNP载荷直方图
+hist(snp.load, main = "SNP loadings on RDA1")
+```
+![rda4](Rmodel/Rplot26.jpeg)
+确定分布尾部的SNP
+Function from https://popgen.nescent.org/2018-03-27_RDA_GEA.html
+```r
+outliers = function(x,z){
+  lims = mean(x) + c(-1, 1) * z * sd(x) # find loadings +/-z sd from mean loading     
+  x[x < lims[1] | x > lims[2]]          # locus names in these tails
+}
+# x = loadings vector, z = number of standard deviations to use
+candidates = outliers(x = snp.load, z = 2.5)
+ Convert matric to dataframe
+snp.load.df = snp.load %>% as.data.frame
+snp.load.df$SNP_ID = rownames(snp.load.df)
+str(snp.load.df)
+
+# Extract locus ID
+snp.load.df %>% dplyr::filter(RDA1 %in% candidates)
+```
 
 
